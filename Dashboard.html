@@ -530,9 +530,9 @@
                 <span class="icon">📊</span>
                 <span>Dashboard</span>
             </button>
-            <button class="nav-btn" onclick="window.location.href='edificios.html'">
+            <button class="nav-btn" onclick="window.location.href='conjunto.html'">
                 <span class="icon">🏢</span>
-                <span>Edificios</span>
+                <span>Conjunto</span>
             </button>
             <button class="nav-btn" onclick="window.location.href='cuentas-por-pagar.html'">
                 <span class="icon">💰</span>
@@ -562,8 +562,8 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="icon">🏢</div>
-                    <h3>Edificios</h3>
-                    <div class="value" id="totalEdificios">-</div>
+                    <h3>Conjunto</h3>
+                    <div class="value" id="totalConjunto">-</div>
                 </div>
                 <div class="stat-card">
                     <div class="icon">💰</div>
@@ -638,11 +638,11 @@
 
         
         const NOMBRES_EDIFICIOS = {
-            'nepal-2': 'Nepal 2',
-            'convivienda-1': 'Convivienda I',
-            'pinos-del-country': 'Pinos del Country',
-            'avalon': 'Avalon',
-            'torre-amin-2': 'Torres de Amin II',
+            
+            
+            
+            
+            
         };
 
         // CARGAR CONTADORES DINÁMICOS
@@ -651,7 +651,7 @@
             const edificiosRef = ref(db, 'edificios');
             onValue(edificiosRef, (snapshot) => {
                 const total = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-                document.getElementById('totalEdificios').textContent = total;
+                document.getElementById('totalConjunto').textContent = total;
             });
 
 

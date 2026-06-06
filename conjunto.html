@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edificios - MCG Residencial 360</title>
+    <title>Conjunto - MCG Residencial 360</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -153,7 +153,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🏢 Edificios - MCG Residencial 360</h1>
+        <h1>🏢 Conjunto - MCG Residencial 360</h1>
         <div class="header-btns">
             <button class="btn-nuevo" onclick="abrirModalNuevo()">➕ Nuevo Edificio</button>
             <button class="btn-nav" onclick="window.location.href='Dashboard.html'">🏠 Dashboard</button>
@@ -165,7 +165,7 @@
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-label">Total Edificios</div>
-                <div class="stat-number" id="totalEdificios">0</div>
+                <div class="stat-number" id="totalConjunto">0</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Proveedores</div>
@@ -457,7 +457,7 @@
     function escucharEdificios() {
         onValue(ref(db, 'edificios'), (snap) => {
             const grid = document.getElementById('edificiosGrid');
-            document.getElementById('totalEdificios').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+            document.getElementById('totalConjunto').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
 
             if (!snap.exists()) {
                 grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;"><div style="font-size:3em;margin-bottom:15px;">🏢</div><h3>No hay edificios registrados</h3><p>Haz clic en "➕ Nuevo Edificio" para agregar uno.</p></div>`;
