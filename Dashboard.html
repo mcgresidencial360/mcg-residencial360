@@ -1,0 +1,796 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MCG Residencial 360</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo-box {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .logo-text {
+            font-size: 2.2em;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        
+        .logo-blue { color: #8B6914; }
+        .logo-green { color: #C9A227; }
+        
+        .logo-subtitle {
+            font-size: 0.35em;
+            font-weight: 400;
+            letter-spacing: 3px;
+            color: #666;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .welcome-text h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-text p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: white;
+            color: #8B6914;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* MENÚ DE NAVEGACIÓN */
+        .nav-menu {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 105, 20, 0.3);
+        }
+        
+        .nav-btn.active {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+        
+        .nav-btn .icon {
+            font-size: 1.3em;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #8B6914;
+        }
+        
+        .edificios-asambleas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .edificio-asamblea-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-top: 5px solid #8B6914;
+        }
+        
+        .edificio-asamblea-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .edificio-asamblea-card.proxima {
+            border-top-color: #C9A227;
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.05) 0%, white 100%);
+        }
+        
+        .edificio-asamblea-card.urgente {
+            border-top-color: #FF6B6B;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, white 100%);
+        }
+        
+        .edificio-asamblea-card h3 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .badge {
+            font-size: 0.5em;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .badge.proxima {
+            background: #C9A227;
+            color: white;
+        }
+        
+        .badge.pendiente {
+            background: #FFA500;
+            color: white;
+        }
+        
+        .fecha-asamblea {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .fecha-asamblea .icon {
+            font-size: 2em;
+        }
+        
+        .fecha-asamblea .info h4 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .fecha-asamblea .info p {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #8B6914;
+        }
+        
+        .documentos-list {
+            margin: 20px 0;
+        }
+        
+        .documentos-list h4 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .doc-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .doc-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .doc-item .doc-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-download {
+            background: #8B6914;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        
+        .btn-download:hover {
+            background: #C9A227;
+        }
+        
+        .acciones-asamblea {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-action {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-votar {
+            background: linear-gradient(135deg, #4CAF50 0%, #C9A227 100%);
+            color: white;
+        }
+        
+        .btn-actas {
+            background: linear-gradient(135deg, #2196F3 0%, #8B6914 100%);
+            color: white;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            margin-top: 50px;
+        }
+
+        
+        /* MODAL EDITAR ASAMBLEA */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #8B6914;
+        }
+        
+        .modal-header h2 {
+            color: #8B6914;
+            font-size: 1.5em;
+        }
+        
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        
+        .btn-close-modal:hover {
+            color: #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #8B6914;
+        }
+        
+        .form-group input[readonly] {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .btn-modal-primary {
+            flex: 1;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-modal-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 105, 20, 0.3);
+        }
+        
+        .btn-modal-secondary {
+            flex: 1;
+            padding: 14px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-modal-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-editar-asamblea {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .btn-editar-asamblea:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-box">
+                    <div class="logo-text">
+                        <img src="logo.png" alt="MCG Residencial 360" style="height:50px;width:auto;object-fit:contain;">
+                        <span class="logo-subtitle">ADMINISTRACIÓN DE PROPIEDAD HORIZONTAL</span>
+                    </div>
+                </div>
+                <div class="welcome-text">
+                    <h1>¡Bienvenida!</h1>
+                    <p id="nombreUsuario">Cargando...</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- MENÚ DE NAVEGACIÓN -->
+        <div class="nav-menu">
+            <button class="nav-btn active" onclick="mostrarSeccion('dashboard')">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='edificios.html'">
+                <span class="icon">🏢</span>
+                <span>Edificios</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='cuentas-por-pagar.html'">
+                <span class="icon">💰</span>
+                <span>Cuentas por Pagar</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='cuentas-por-cobrar.html'" style="background: linear-gradient(135deg, #e53935 0%, #c62828 100%);">
+                <span class="icon">📊</span>
+                <span>Cuentas por Cobrar</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='Residentes_y_Propietarios_-_MCG_Residencial_360.html'">
+                <span class="icon">👥</span>
+                <span>Residentes y Propietarios</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='caja-menor.html'" style="background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);">
+                <span class="icon">💼</span>
+                <span>Caja Menor</span>
+            </button>
+            <button class="nav-btn" onclick="window.location.href='proveedores.html'" style="background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);">
+                <span class="icon">🤝</span>
+                <span>Proveedores</span>
+            </button>
+        </div>
+
+        <!-- DASHBOARD PRINCIPAL -->
+        </div>
+        <div id="dashboard-section" class="dashboard-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon">🏢</div>
+                    <h3>Edificios</h3>
+                    <div class="value" id="totalEdificios">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">💰</div>
+                    <h3>Facturas Pendientes</h3>
+                    <div class="value" id="facturasPendientes">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">💵</div>
+                    <h3>Saldo por Pagar</h3>
+                    <div class="value" id="saldoPorPagar">$0</div>
+                </div>
+            </div>
+
+            <!-- FACTURAS PENDIENTES POR EDIFICIO -->
+            <div id="facturas-por-edificio" style="margin-top:28px;">
+                <h3 style="font-size:1.3em;font-weight:700;color:#333;margin-bottom:14px;">💰 Cuentas por Pagar por Edificio</h3>
+                <div id="edificios-facturas-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+                    <p style="color:#888;font-style:italic;">Cargando...</p>
+                </div>
+            </div>
+
+            <!-- ALERTAS DE VENCIMIENTOS -->
+            <div id="alertas-vencimientos" style="margin-top:28px;">
+                <h3 style="font-size:1.3em;font-weight:700;color:#333;margin-bottom:14px;">⚠️ Alertas de Vencimientos</h3>
+                <div id="alertas-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;">
+                    <p id="alertas-cargando" style="color:#888;font-style:italic;">Cargando alertas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="footer">
+        © 2026 MCG Residencial 360 - Sistema Administrativo Integral
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getDatabase, ref, onValue, get, push, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Verificar autenticación
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                const userInfo = JSON.parse(localStorage.getItem('mcgUser'));
+                document.getElementById('nombreUsuario').textContent = userInfo?.nombre || user.email;
+
+                // Cargar contadores dinámicos
+                cargarContadores();
+                cargarAlertasVencimientos();
+            }
+        });
+        
+
+        
+        const NOMBRES_EDIFICIOS = {
+            'nepal-2': 'Nepal 2',
+            'convivienda-1': 'Convivienda I',
+            'pinos-del-country': 'Pinos del Country',
+            'avalon': 'Avalon',
+            'torre-amin-2': 'Torres de Amin II',
+        };
+
+        // CARGAR CONTADORES DINÁMICOS
+        function cargarContadores() {
+            // Contar edificios
+            const edificiosRef = ref(db, 'edificios');
+            onValue(edificiosRef, (snapshot) => {
+                const total = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+                document.getElementById('totalEdificios').textContent = total;
+            });
+
+
+                        // Contar facturas pendientes y calcular saldo por pagar
+            const cuentasRef = ref(db, 'cuentas_por_pagar');
+            onValue(cuentasRef, (snapshot) => {
+                let facturasPendientes = 0;
+                let saldoTotal = 0;
+
+                if (snapshot.exists()) {
+                    // Nivel 1: edificios
+                    snapshot.forEach((edificioSnap) => {
+                        // Nivel 2: facturas individuales
+                        edificioSnap.forEach((facturaSnap) => {
+                            const cuenta = facturaSnap.val();
+                            if (cuenta.estado !== 'pagada' && cuenta.estado !== 'Pagada') {
+                                facturasPendientes++;
+                                saldoTotal += parseFloat(cuenta.valorNeto || cuenta.restoAPagar || 0);
+                            }
+                        });
+                    });
+                }
+
+                document.getElementById('facturasPendientes').textContent = facturasPendientes;
+                document.getElementById('saldoPorPagar').textContent =
+                    '$' + saldoTotal.toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+                // Desglose por edificio
+                const resumenEdificios = {};
+                if (snapshot.exists()) {
+                    snapshot.forEach((edificioSnap) => {
+                        const eId = edificioSnap.key;
+                        let pendientes = 0, saldo = 0, vencidas = 0;
+                        const hoy = new Date(); hoy.setHours(0,0,0,0);
+                        edificioSnap.forEach((facturaSnap) => {
+                            const c = facturaSnap.val();
+                            if (c.estado !== 'pagada' && c.estado !== 'Pagada') {
+                                pendientes++;
+                                saldo += parseFloat(c.valorNeto || c.restoAPagar || 0);
+                                if (c.fechaVencimiento && new Date(c.fechaVencimiento + 'T00:00:00') < hoy) vencidas++;
+                            }
+                        });
+                        if (pendientes > 0) resumenEdificios[eId] = { pendientes, saldo, vencidas };
+                    });
+                }
+                const lista = document.getElementById('edificios-facturas-lista');
+                if (Object.keys(resumenEdificios).length === 0) {
+                    lista.innerHTML = '<p style="color:#2e7d32;font-weight:600;">✅ Sin facturas pendientes</p>';
+                } else {
+                    lista.innerHTML = Object.entries(resumenEdificios).map(([eId, r]) => {
+                        const tieneVencidas = r.vencidas > 0;
+                        const bg = tieneVencidas ? '#fff5f5' : '#f8fbff';
+                        const border = tieneVencidas ? '#e53935' : '#1976d2';
+                        const icono = tieneVencidas ? '🔴' : '🟡';
+                        return `<div style="background:${bg};border:2px solid ${border};border-radius:12px;padding:16px;">
+                            <div style="font-weight:700;font-size:1.05em;margin-bottom:8px;">${icono} ${NOMBRES_EDIFICIOS[eId] || eId}</div>
+                            <div style="color:#555;font-size:0.95em;">📄 ${r.pendientes} factura${r.pendientes>1?'s':''} pendiente${r.pendientes>1?'s':''}</div>
+                            ${r.vencidas > 0 ? `<div style="color:#e53935;font-size:0.9em;font-weight:600;">⚠️ ${r.vencidas} vencida${r.vencidas>1?'s':''}</div>` : ''}
+                            <div style="font-size:1.15em;font-weight:700;color:${border};margin-top:8px;">$${r.saldo.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
+                            <a href="cuentas-por-pagar.html" style="display:inline-block;margin-top:8px;font-size:0.85em;color:${border};text-decoration:none;">Ver facturas →</a>
+                        </div>`;
+                    }).join('');
+                }
+            });
+        }
+        // ALERTAS DE VENCIMIENTO DE PÓLIZA Y REPRESENTACIÓN
+        function cargarAlertasVencimientos() {
+            const edificiosRef = ref(db, 'edificios');
+            get(edificiosRef).then((snapshot) => {
+                const lista = document.getElementById('alertas-lista');
+                const cargando = document.getElementById('alertas-cargando');
+                if (cargando) cargando.remove();
+                if (!snapshot.exists()) {
+                    lista.innerHTML = '<p style="color:#888;font-style:italic;">No hay edificios registrados.</p>';
+                    return;
+                }
+                const hoy = new Date();
+                hoy.setHours(0,0,0,0);
+                const alertas = [];
+                snapshot.forEach((child) => {
+                    const ed = child.val();
+                    const nombre = ed.nombre || child.key;
+                    [
+                        { campo: 'polizaVence', label: 'Póliza de Seguros' },
+                        { campo: 'representacionVence', label: 'Representación Legal' }
+                    ].forEach(({ campo, label }) => {
+                        if (!ed[campo]) return;
+                        const fecha = new Date(ed[campo] + 'T00:00:00');
+                        const dias = Math.round((fecha - hoy) / 86400000);
+                        if (dias > 90) return; // solo mostrar si vence en 90 días o menos
+                        let color, bg, icono;
+                        if (dias < 0)       { color = '#c62828'; bg = '#ffebee'; icono = '🔴'; }
+                        else if (dias <= 30) { color = '#e65100'; bg = '#fff3e0'; icono = '🟠'; }
+                        else                { color = '#f57f17'; bg = '#fffde7'; icono = '🟡'; }
+                        const texto = dias < 0
+                            ? `VENCIDA hace ${Math.abs(dias)} día(s)`
+                            : dias === 0 ? 'Vence HOY'
+                            : `Vence en ${dias} día(s) — ${fecha.toLocaleDateString('es-CO')}`;
+                        alertas.push({ nombre, label, icono, color, bg, texto, dias });
+                    });
+                });
+                if (alertas.length === 0) {
+                    lista.innerHTML = '<p style="color:#2e7d32;font-weight:600;">✅ Sin vencimientos próximos en los próximos 90 días.</p>';
+                    return;
+                }
+                alertas.sort((a,b) => a.dias - b.dias);
+                lista.innerHTML = alertas.map(a => `
+                    <div style="background:${a.bg};border:2px solid ${a.color};border-radius:10px;padding:14px 18px;">
+                        <div style="font-size:1.1em;font-weight:700;color:${a.color};margin-bottom:4px;">${a.icono} ${a.nombre}</div>
+                        <div style="font-weight:600;color:#555;margin-bottom:3px;">${a.label}</div>
+                        <div style="color:${a.color};font-weight:600;">${a.texto}</div>
+                    </div>`).join('');
+            }).catch(err => {
+                console.error('Error cargando alertas:', err);
+            });
+        }
+
+        // Cerrar sesión
+        window.cerrarSesion = function() {
+            signOut(auth).then(() => {
+                localStorage.removeItem('mcgUser');
+                window.location.href = 'index.html';
+            });
+        };
+
+        
+        
+    </script>
+
+    <script>
+        // NAVEGACIÓN
+        function mostrarSeccion(seccion) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (seccion === 'dashboard') {
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.querySelectorAll('.nav-btn')[0].classList.add('active');
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,914 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residentes y Propietarios - MCG Residencial 360</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo-box {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        
+        .logo-text {
+            font-size: 1.5em;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+        
+        .logo-blue { color: #8B6914; }
+        .logo-green { color: #C9A227; }
+        
+        .header h1 { font-size: 1.8em; }
+        
+        .btn-back {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-back:hover {
+            background: white;
+            color: #8B6914;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .select-edificio {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #8B6914;
+        }
+        
+        .search-box {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 105, 20, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #C9A227;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+        
+        .tabs {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        
+        .tab-btn {
+            padding: 15px 30px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #8B6914;
+            border-bottom-color: #8B6914;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn.active {
+            background: #8B6914;
+            color: white;
+            border-color: #8B6914;
+        }
+        
+        .lista {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .card.archivado {
+            opacity: 0.7;
+            background: #f5f5f5;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #8B6914;
+        }
+        
+        .card-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .badge-activo {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-archivado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .card-body {
+            margin-bottom: 15px;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .card-actions button {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 100px;
+        }
+        
+        .info-value {
+            color: #333;
+            word-break: break-word;
+        }
+        
+        .observaciones-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #8B6914;
+        }
+        
+        .observaciones-label {
+            font-weight: 600;
+            color: #8B6914;
+            margin-bottom: 5px;
+        }
+        
+        .observaciones-text {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .modal-header h2 {
+            color: #8B6914;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-section">
+            <div class="logo-box">
+                <span class="logo-text">
+                    <img src="logo.png" alt="MCG Residencial 360" style="height:50px;width:auto;object-fit:contain;">
+                </span>
+            </div>
+            <h1>👥 Residentes y Propietarios</h1>
+        </div>
+        <a href="Dashboard.html" class="btn-back">← Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <div class="controls-row">
+                <div class="select-edificio">
+                    <select id="edificioSelect" onchange="cambiarEdificio()">
+                        <option value="">Seleccionar Edificio</option>
+                        <option value="nepal-2">Nepal II</option>
+                        <option value="avalon">Avalon</option>
+                        <option value="convivienda-1">Convivienda 1</option>
+                        <option value="pinos-del-country">Pinos del Country</option>
+                        <option value="torre-amin-2">Torre Amin II</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, apartamento..." oninput="renderizar()">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="abrirModalAgregar()">+ Agregar</button>
+                    <button class="btn btn-secondary" onclick="exportarExcel()">📊 Exportar Excel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="cambiarTab('propietarios')">
+                    🏠 Propietarios <span id="countPropietarios">(0)</span>
+                </button>
+                <button class="tab-btn" onclick="cambiarTab('residentes')">
+                    👥 Residentes <span id="countResidentes">(0)</span>
+                </button>
+            </div>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="cambiarFiltro('activo')">✅ Activos</button>
+                <button class="filter-btn" onclick="cambiarFiltro('archivado')">📦 Archivados</button>
+                <button class="filter-btn" onclick="cambiarFiltro('todos')">📋 Todos</button>
+            </div>
+
+            <div id="tabPropietarios" class="tab-content active">
+                <div id="listaPropietarios" class="lista"></div>
+            </div>
+
+            <div id="tabResidentes" class="tab-content">
+                <div id="listaResidentes" class="lista"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar/Editar -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Agregar Propietario</h2>
+                <button class="btn-close" onclick="cerrarModal()">✕</button>
+            </div>
+            <form id="formulario" onsubmit="guardarDatos(event)">
+                <div class="form-group">
+                    <label class="required">Apartamento</label>
+                    <input type="text" id="inputApto" required>
+                </div>
+                <div class="form-group">
+                    <label class="required">Nombre Completo</label>
+                    <input type="text" id="inputNombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="inputTelefono">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="inputEmail">
+                </div>
+                <div class="form-group">
+                    <label>Documento</label>
+                    <input type="text" id="inputDocumento">
+                </div>
+                <div class="form-group" id="groupCoeficiente">
+                    <label>Coeficiente</label>
+                    <input type="number" step="0.0001" id="inputCoeficiente">
+                </div>
+                <div class="form-group">
+                    <label>🏷️ Matrícula Catastral — Apartamento <span style="color:#999;font-weight:400;">(cuando aplique)</span></label>
+                    <input type="text" id="inputMatriculaApto" placeholder="Ej: 50N-20-0001234">
+                </div>
+                <div class="form-group">
+                    <label>🅿️ Número de Parqueadero <span style="color:#999;font-weight:400;">(cuando aplique)</span></label>
+                    <input type="text" id="inputParqueadero" placeholder="Ej: P-12, 305, Piso 2 - 08">
+                </div>
+                <div class="form-group">
+                    <label>🚗 Matrícula Catastral — Garaje <span style="color:#999;font-weight:400;">(cuando aplique)</span></label>
+                    <input type="text" id="inputMatriculaGaraje" placeholder="Ej: 50N-20-0001235">
+                </div>
+                <div class="form-group">
+                    <label>📦 Matrícula Catastral — Depósito <span style="color:#999;font-weight:400;">(cuando aplique)</span></label>
+                    <input type="text" id="inputMatriculaDeposito" placeholder="Ej: 50N-20-0001236">
+                </div>
+                <div class="form-group">
+                    <label>Observaciones / Tips</label>
+                    <textarea id="inputObservaciones" placeholder="Notas, recordatorios, información adicional..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue, push, set, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let edificioActual = '';
+        let tabActual = 'propietarios';
+        let filtroEstado = 'activo';
+        let dataPropietarios = {};
+        let dataResidentes = {};
+        let modoEdicion = false;
+        let keyEdicion = '';
+
+        // Cargar datos
+        const propRef = ref(db, 'propietarios');
+        const resRef = ref(db, 'residentes');
+
+        onValue(propRef, (snapshot) => {
+            dataPropietarios = snapshot.val() || {};
+            renderizar();
+        });
+
+        onValue(resRef, (snapshot) => {
+            dataResidentes = snapshot.val() || {};
+            renderizar();
+        });
+
+        // Cambiar edificio
+        window.cambiarEdificio = function() {
+            edificioActual = document.getElementById('edificioSelect').value;
+            renderizar();
+        };
+
+        // Cambiar tab
+        window.cambiarTab = function(tab) {
+            tabActual = tab;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'propietarios') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('tabPropietarios').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('tabResidentes').classList.add('active');
+            }
+        };
+
+        // Cambiar filtro
+        window.cambiarFiltro = function(filtro) {
+            filtroEstado = filtro;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderizar();
+        };
+
+        // Renderizar
+        function renderizar() {
+            const edificio = edificioActual;
+            const busqueda = document.getElementById('searchInput').value.toLowerCase();
+        // FUNCIÓN PARA ORDENAR POR NÚMERO DE APARTAMENTO
+        function ordenarPorApartamento(entries) {
+            return entries.sort((a, b) => {
+                const aptoA = a[1].apto || '999999';
+                const aptoB = b[1].apto || '999999';
+                
+                // Extraer número del apartamento
+                const numA = parseInt(aptoA.replace(/\D/g, '')) || 999999;
+                const numB = parseInt(aptoB.replace(/\D/g, '')) || 999999;
+                
+                return numA - numB;
+            });
+        }
+
+
+            // Propietarios
+            const propList = document.getElementById('listaPropietarios');
+            propList.innerHTML = '';
+            let countProp = 0;
+
+            if (edificio && dataPropietarios[edificio]) {
+                ordenarPorApartamento(Object.entries(dataPropietarios[edificio])).forEach(([key, prop]) => {
+                    const estado = prop.estado || 'activo';
+                    
+                    if ((filtroEstado === 'todos' || estado === filtroEstado) &&
+                        (!busqueda || 
+                        prop.nombre?.toLowerCase().includes(busqueda) || 
+                        prop.apto?.toLowerCase().includes(busqueda))) {
+                        propList.innerHTML += crearCard(prop, key, 'propietario');
+                        countProp++;
+                    }
+                });
+            }
+
+            if (countProp === 0) {
+                propList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>📭 No hay propietarios</h3>
+                        <p>${!edificio ? 'Selecciona un edificio' : 'No se encontraron propietarios ' + (filtroEstado === 'activo' ? 'activos' : filtroEstado === 'archivado' ? 'archivados' : '')}</p>
+                    </div>
+                `;
+            }
+
+            // Residentes
+            const resList = document.getElementById('listaResidentes');
+            resList.innerHTML = '';
+            let countRes = 0;
+
+            if (edificio && dataResidentes[edificio]) {
+                ordenarPorApartamento(Object.entries(dataResidentes[edificio])).forEach(([key, res]) => {
+                    const estado = res.estado || 'activo';
+                    
+                    if ((filtroEstado === 'todos' || estado === filtroEstado) &&
+                        (!busqueda || 
+                        res.nombre?.toLowerCase().includes(busqueda) || 
+                        res.apto?.toLowerCase().includes(busqueda))) {
+                        resList.innerHTML += crearCard(res, key, 'residente');
+                        countRes++;
+                    }
+                });
+            }
+
+            if (countRes === 0) {
+                resList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>📭 No hay residentes</h3>
+                        <p>${!edificio ? 'Selecciona un edificio' : 'No se encontraron residentes ' + (filtroEstado === 'activo' ? 'activos' : filtroEstado === 'archivado' ? 'archivados' : '')}</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('countPropietarios').textContent = `(${countProp})`;
+            document.getElementById('countResidentes').textContent = `(${countRes})`;
+        }
+
+        window.renderizar = renderizar;
+
+        // Crear card
+        function crearCard(persona, key, tipo) {
+            const estado = persona.estado || 'activo';
+            const badge = estado === 'activo' ? 
+                '<span class="card-badge badge-activo">✅ Activo</span>' :
+                '<span class="card-badge badge-archivado">📦 Archivado</span>';
+            
+            const btnArchivar = estado === 'activo' ? 
+                `<button class="btn btn-info" onclick="archivarPersona('${key}', '${tipo}')">📦 Archivar</button>` :
+                `<button class="btn btn-info" onclick="desarchivarPersona('${key}', '${tipo}')">↩️ Restaurar</button>`;
+            
+            return `
+                <div class="card ${estado === 'archivado' ? 'archivado' : ''}">
+                    <div class="card-header">
+                        <div class="card-title">🏠 ${persona.apto || 'S/N'}</div>
+                        ${badge}
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Nombre:</span>
+                            <span class="info-value">${persona.nombre || 'Sin nombre'}</span>
+                        </div>
+                        ${persona.telefono ? `
+                        <div class="info-item">
+                            <span class="info-label">Teléfono:</span>
+                            <span class="info-value">${persona.telefono}</span>
+                        </div>
+                        ` : ''}
+                        ${persona.email ? `
+                        <div class="info-item">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value">${persona.email}</span>
+                        </div>
+                        ` : ''}
+                        ${persona.coeficiente ? `
+                        <div class="info-item">
+                            <span class="info-label">Coeficiente:</span>
+                            <span class="info-value">${(parseFloat(persona.coeficiente) * 100).toFixed(2)}%</span>
+                        </div>
+                        ` : ''}
+                        ${persona.documento ? `
+                        <div class="info-item">
+                            <span class="info-label">Documento:</span>
+                            <span class="info-value">${persona.documento}</span>
+                        </div>
+                        ` : ''}
+                        ${persona.parqueadero ? `
+                        <div class="info-item">
+                            <span class="info-label">🅿️ Parqueadero:</span>
+                            <span class="info-value">${persona.parqueadero}</span>
+                        </div>
+                        ` : ''}
+                        ${(persona.matriculaApto || persona.matriculaGaraje || persona.matriculaDeposito) ? `
+                        <div class="info-item" style="flex-direction:column; align-items:flex-start; gap:4px; background:#f0f4ff; padding:8px 10px; border-radius:8px; margin-top:4px;">
+                            <span class="info-label" style="margin-bottom:4px;">🏷️ Matrículas catastrales:</span>
+                            ${persona.matriculaApto ? `<span class="info-value">🏠 Apto: ${persona.matriculaApto}</span>` : ''}
+                            ${persona.matriculaGaraje ? `<span class="info-value">🚗 Garaje: ${persona.matriculaGaraje}</span>` : ''}
+                            ${persona.matriculaDeposito ? `<span class="info-value">📦 Depósito: ${persona.matriculaDeposito}</span>` : ''}
+                        </div>
+                        ` : ''}
+                        ${persona.observaciones ? `
+                        <div class="observaciones-box">
+                            <div class="observaciones-label">💡 Observaciones:</div>
+                            <div class="observaciones-text">${persona.observaciones}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-warning" onclick="editarPersona('${key}', '${tipo}')">✏️ Editar</button>
+                        ${btnArchivar}
+                        <button class="btn btn-danger" onclick="eliminarPersona('${key}', '${tipo}')">🗑️ Eliminar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Modal
+        window.abrirModalAgregar = function() {
+            if (!edificioActual) {
+                alert('⚠️ Primero selecciona un edificio');
+                return;
+            }
+            
+            modoEdicion = false;
+            document.getElementById('modalTitulo').textContent = 
+                tabActual === 'propietarios' ? 'Agregar Propietario' : 'Agregar Residente';
+            
+            document.getElementById('formulario').reset();
+            document.getElementById('groupCoeficiente').style.display = 
+                tabActual === 'propietarios' ? 'block' : 'none';
+            
+            document.getElementById('modal').classList.add('active');
+        };
+
+        window.cerrarModal = function() {
+            document.getElementById('modal').classList.remove('active');
+        };
+
+        // Editar
+        window.editarPersona = function(key, tipo) {
+            modoEdicion = true;
+            keyEdicion = key;
+            
+            const data = tipo === 'propietario' ? 
+                dataPropietarios[edificioActual][key] : 
+                dataResidentes[edificioActual][key];
+            
+            document.getElementById('modalTitulo').textContent = 
+                tipo === 'propietario' ? 'Editar Propietario' : 'Editar Residente';
+            
+            document.getElementById('inputApto').value = data.apto || '';
+            document.getElementById('inputNombre').value = data.nombre || '';
+            document.getElementById('inputTelefono').value = data.telefono || '';
+            document.getElementById('inputEmail').value = data.email || '';
+            document.getElementById('inputDocumento').value = data.documento || '';
+            document.getElementById('inputCoeficiente').value = data.coeficiente || '';
+            document.getElementById('inputMatriculaApto').value = data.matriculaApto || '';
+            document.getElementById('inputParqueadero').value = data.parqueadero || '';
+            document.getElementById('inputMatriculaGaraje').value = data.matriculaGaraje || '';
+            document.getElementById('inputMatriculaDeposito').value = data.matriculaDeposito || '';
+            document.getElementById('inputObservaciones').value = data.observaciones || '';
+            
+            document.getElementById('groupCoeficiente').style.display = 
+                tipo === 'propietario' ? 'block' : 'none';
+            
+            document.getElementById('modal').classList.add('active');
+        };
+
+        // Guardar
+        window.guardarDatos = async function(e) {
+            e.preventDefault();
+            
+            const datos = {
+                edificio: edificioActual,
+                apto: document.getElementById('inputApto').value,
+                nombre: document.getElementById('inputNombre').value,
+                telefono: document.getElementById('inputTelefono').value,
+                email: document.getElementById('inputEmail').value,
+                documento: document.getElementById('inputDocumento').value,
+                matriculaApto: document.getElementById('inputMatriculaApto').value,
+                parqueadero: document.getElementById('inputParqueadero').value,
+                matriculaGaraje: document.getElementById('inputMatriculaGaraje').value,
+                matriculaDeposito: document.getElementById('inputMatriculaDeposito').value,
+                observaciones: document.getElementById('inputObservaciones').value,
+                estado: 'activo'
+            };
+            
+            if (tabActual === 'propietarios') {
+                datos.coeficiente = parseFloat(document.getElementById('inputCoeficiente').value) || 0;
+            }
+            
+            try {
+                const tipo = tabActual === 'propietarios' ? 'propietarios' : 'residentes';
+                
+                if (modoEdicion) {
+                    // Mantener estado existente al editar
+                    const estadoActual = (tabActual === 'propietarios' ? 
+                        dataPropietarios[edificioActual][keyEdicion]?.estado : 
+                        dataResidentes[edificioActual][keyEdicion]?.estado) || 'activo';
+                    datos.estado = estadoActual;
+                    
+                    await update(ref(db, `${tipo}/${edificioActual}/${keyEdicion}`), datos);
+                    alert('✅ Actualizado correctamente');
+                } else {
+                    const nuevoRef = push(ref(db, `${tipo}/${edificioActual}`));
+                    await set(nuevoRef, datos);
+                    alert('✅ Agregado correctamente');
+                }
+                
+                cerrarModal();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+
+        // Archivar
+        window.archivarPersona = async function(key, tipo) {
+            if (!confirm('📦 ¿Archivar este registro?\n\nSe mantendrá en el sistema pero marcado como archivado.')) {
+                return;
+            }
+            
+            try {
+                const tipoPath = tipo === 'propietario' ? 'propietarios' : 'residentes';
+                await update(ref(db, `${tipoPath}/${edificioActual}/${key}`), { estado: 'archivado' });
+                alert('✅ Archivado correctamente');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+
+        // Desarchivar
+        window.desarchivarPersona = async function(key, tipo) {
+            try {
+                const tipoPath = tipo === 'propietario' ? 'propietarios' : 'residentes';
+                await update(ref(db, `${tipoPath}/${edificioActual}/${key}`), { estado: 'activo' });
+                alert('✅ Restaurado correctamente');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+
+        // Eliminar
+        window.eliminarPersona = async function(key, tipo) {
+            if (!confirm('⚠️ ¿ELIMINAR PERMANENTEMENTE este registro?\n\nEsta acción NO se puede deshacer.\n\nSi solo quieres ocultarlo temporalmente, usa "Archivar" en su lugar.')) {
+                return;
+            }
+            
+            try {
+                const tipoPath = tipo === 'propietario' ? 'propietarios' : 'residentes';
+                await remove(ref(db, `${tipoPath}/${edificioActual}/${key}`));
+                alert('✅ Eliminado permanentemente');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+
+        // Exportar Excel
+        window.exportarExcel = function() {
+            alert('Función de exportar Excel - Por implementar');
+        };
+    </script>
+</body>
+</html>

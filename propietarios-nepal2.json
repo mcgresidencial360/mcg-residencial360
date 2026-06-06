@@ -1,0 +1,23 @@
+{
+  "201": {"nombre": "Ricardo Hernández", "coeficiente": 0.0508},
+  "202": {"nombre": "Luz Stella Santaella", "coeficiente": 0.0524},
+  "203": {"nombre": "Marcela Gutierrez", "coeficiente": 0.0455},
+  "204": {"nombre": "Laura García", "coeficiente": 0.0361},
+  "301": {"nombre": "Pedro Pablo Eraso", "coeficiente": 0.0510},
+  "303": {"nombre": "Nairo Cano A", "coeficiente": 0.0456},
+  "304": {"nombre": "María Clemencia García", "coeficiente": 0.0439},
+  "401": {"nombre": "Karl Heinz Moog", "coeficiente": 0.0509},
+  "402": {"nombre": "Camilo Zabala", "coeficiente": 0.0524},
+  "403": {"nombre": "Fabio Espinosa", "coeficiente": 0.0516},
+  "404": {"nombre": "Leonardo Casas", "coeficiente": 0.0446},
+  "501": {"nombre": "Victoria Eugenia Mendoza", "coeficiente": 0.0515},
+  "503": {"nombre": "Hernando Maldonado", "coeficiente": 0.0460},
+  "504": {"nombre": "Yaneth de Moya / Luis Moya", "coeficiente": 0.0447},
+  "601": {"nombre": "Margarita Farias", "coeficiente": 0.0508},
+  "602": {"nombre": "Valentina Ramos", "coeficiente": 0.0526},
+  "603": {"nombre": "Fabio Navarrete", "coeficiente": 0.0455},
+  "604": {"nombre": "Catalina Benavides", "coeficiente": 0.0439},
+  "701": {"nombre": "Julián García", "coeficiente": 0.0508},
+  "703": {"nombre": "Luis Enrique Restrepo", "coeficiente": 0.0456},
+  "704": {"nombre": "Germán Antón / Radas", "coeficiente": 0.0438}
+}

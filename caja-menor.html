@@ -1,0 +1,974 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja Menor - MCG Residencial 360</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            padding: 25px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .header-logo img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-title h1 {
+            font-size: 1.8em;
+            font-weight: 800;
+        }
+
+        .header-title p {
+            font-size: 0.9em;
+            opacity: 0.85;
+            margin-top: 3px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-nav:hover {
+            background: white;
+            color: #8B6914;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* FILTROS Y ACCIONES */
+        .top-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.82em;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #C9A227;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(139,105,20,0.35);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover { background: #5a6268; }
+
+        /* RESUMEN SALDOS */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 22px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+        }
+
+        .summary-card .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .summary-card h3 {
+            font-size: 0.82em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .summary-card .amount {
+            font-size: 1.8em;
+            font-weight: 900;
+        }
+
+        .amount.ingresos  { color: #2e7d32; }
+        .amount.egresos   { color: #c62828; }
+        .amount.saldo     { color: #8B6914; }
+        .amount.movimientos { color: #1565c0; }
+
+        /* TABLA */
+        .table-wrapper {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .table-header-bar {
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .table-header-bar h2 {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+        }
+
+        th {
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9em;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover { background: #fdf6e3; }
+
+        .tipo-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            font-weight: 700;
+        }
+
+        .tipo-ingreso  { background: #e8f5e9; color: #2e7d32; }
+        .tipo-egreso   { background: #ffebee; color: #c62828; }
+
+        .monto-ingreso { color: #2e7d32; font-weight: 700; }
+        .monto-egreso  { color: #c62828; font-weight: 700; }
+
+        .btn-action {
+            padding: 5px 11px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            margin: 0 2px;
+        }
+
+        .btn-edit  { background: #ffc107; color: #333; }
+        .btn-del   { background: #dc3545; color: white; }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 18px;
+            padding: 35px;
+            max-width: 580px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #C9A227;
+        }
+
+        .modal-header h2 {
+            color: #8B6914;
+            font-size: 1.4em;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full { grid-column: 1 / -1; }
+
+        .form-group label {
+            font-weight: 700;
+            font-size: 0.9em;
+            color: #444;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #C9A227;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 14px;
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(139,105,20,0.35); }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 14px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #aaa;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon { font-size: 3em; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-logo">
+                    <img src="logo.png" alt="MCG Residencial 360">
+                </div>
+                <div class="header-title">
+                    <h1>💼 Caja Menor</h1>
+                    <p id="subtituloEdificio">Gestión de ingresos y egresos</p>
+                </div>
+            </div>
+            <div class="header-nav">
+                <button class="btn-nav" onclick="location.href='Dashboard.html'">🏠 Dashboard</button>
+                <button class="btn-nav" onclick="cerrarSesion()">🚪 Salir</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- FILTROS Y ACCIONES -->
+        <div class="top-panel">
+            <div class="filter-group">
+                <label>Edificio</label>
+                <select id="filtroEdificio" onchange="aplicarFiltros()">
+                    <option value="">Todos los edificios</option>
+                    <option value="nepal-2">Nepal 2</option>
+                    <option value="avalon">Avalon</option>
+                    <option value="convivienda-1">Convivienda I</option>
+                    <option value="pinos-del-country">Pinos del Country</option>
+                    <option value="torre-amin-2">Torres de Amin II</option>
+                    <option value="millenium-3">Millenium 3</option>
+                    <option value="general">General / Oficina</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tipo</label>
+                <select id="filtroTipo" onchange="aplicarFiltros()">
+                    <option value="">Todos</option>
+                    <option value="ingreso">Ingresos</option>
+                    <option value="egreso">Egresos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Desde</label>
+                <input type="date" id="filtroDesde" onchange="aplicarFiltros()">
+            </div>
+            <div class="filter-group">
+                <label>Hasta</label>
+                <input type="date" id="filtroHasta" onchange="aplicarFiltros()">
+            </div>
+            <div class="filter-group">
+                <label>Categoría</label>
+                <select id="filtroCategoria" onchange="aplicarFiltros()">
+                    <option value="">Todas</option>
+                    <option value="dotacion">Dotación y Suministros</option>
+                    <option value="servicios">Servicios Públicos</option>
+                    <option value="mantenimiento">Mantenimiento</option>
+                    <option value="aseo">Aseo y Limpieza</option>
+                    <option value="papeleria">Papelería y Oficina</option>
+                    <option value="transporte">Transporte y Mensajería</option>
+                    <option value="reembolso">Reembolso</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="abrirModal()">➕ Nuevo Movimiento</button>
+            <button class="btn btn-secondary" onclick="exportarPDF()">🖨️ Exportar PDF</button>
+        </div>
+
+        <!-- RESUMEN SALDOS -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="icon">💵</div>
+                <h3>Total Ingresos</h3>
+                <div class="amount ingresos" id="totalIngresos">$0</div>
+            </div>
+            <div class="summary-card">
+                <div class="icon">🔻</div>
+                <h3>Total Egresos</h3>
+                <div class="amount egresos" id="totalEgresos">$0</div>
+            </div>
+            <div class="summary-card">
+                <div class="icon">💼</div>
+                <h3>Saldo Disponible</h3>
+                <div class="amount saldo" id="saldoActual">$0</div>
+            </div>
+            <div class="summary-card">
+                <div class="icon">📋</div>
+                <h3>Movimientos</h3>
+                <div class="amount movimientos" id="totalMovimientos">0</div>
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-wrapper">
+            <div class="table-header-bar">
+                <h2>📋 Movimientos de Caja Menor</h2>
+            </div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Edificio</th>
+                            <th>Tipo</th>
+                            <th>Categoría</th>
+                            <th>Descripción</th>
+                            <th>Comprobante</th>
+                            <th>Monto</th>
+                            <th>Registrado por</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyCajaMenor">
+                        <tr>
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <div class="icon">💼</div>
+                                    <p>Cargando movimientos...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        © 2026 MCG Residencial 360 - Sistema Administrativo Integral
+    </div>
+
+    <!-- MODAL NUEVO / EDITAR MOVIMIENTO -->
+    <div class="modal" id="modalMovimiento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">➕ Nuevo Movimiento</h2>
+                <button class="btn-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="formMovimiento" onsubmit="guardarMovimiento(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📅 Fecha *</label>
+                        <input type="date" id="inputFecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🏢 Edificio *</label>
+                        <select id="inputEdificio" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="nepal-2">Nepal 2</option>
+                            <option value="avalon">Avalon</option>
+                            <option value="convivienda-1">Convivienda I</option>
+                            <option value="pinos-del-country">Pinos del Country</option>
+                            <option value="torre-amin-2">Torres de Amin II</option>
+                            <option value="millenium-3">Millenium 3</option>
+                            <option value="general">General / Oficina</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📊 Tipo *</label>
+                        <select id="inputTipo" required onchange="actualizarColorTipo()">
+                            <option value="">Seleccionar...</option>
+                            <option value="ingreso">💵 Ingreso</option>
+                            <option value="egreso">🔻 Egreso</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🏷️ Categoría *</label>
+                        <select id="inputCategoria" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="dotacion">Dotación y Suministros</option>
+                            <option value="servicios">Servicios Públicos</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="aseo">Aseo y Limpieza</option>
+                            <option value="papeleria">Papelería y Oficina</option>
+                            <option value="transporte">Transporte y Mensajería</option>
+                            <option value="reembolso">Reembolso</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>💰 Monto *</label>
+                        <input type="number" id="inputMonto" min="0" step="1" placeholder="Ej: 50000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🧾 No. Comprobante / Factura</label>
+                        <input type="text" id="inputComprobante" placeholder="Ej: FAC-001 o RECIBO-23">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full">
+                        <label>📝 Descripción / Detalle *</label>
+                        <textarea id="inputDescripcion" rows="3" placeholder="Describa el concepto del movimiento..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-save">💾 Guardar</button>
+                    <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getDatabase, ref, push, onValue, remove, update, get } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let editandoId = null;
+        let todosLosMovimientos = [];
+
+        const NOMBRES_EDIFICIOS = {
+            'nepal-2': 'Nepal 2',
+            'avalon': 'Avalon',
+            'convivienda-1': 'Convivienda I',
+            'pinos-del-country': 'Pinos del Country',
+            'torre-amin-2': 'Torres de Amin II',
+            'millenium-3': 'Millenium 3',
+            'general': 'General / Oficina'
+        };
+
+        const NOMBRES_CATEGORIAS = {
+            dotacion: 'Dotación y Suministros',
+            servicios: 'Servicios Públicos',
+            mantenimiento: 'Mantenimiento',
+            aseo: 'Aseo y Limpieza',
+            papeleria: 'Papelería y Oficina',
+            transporte: 'Transporte y Mensajería',
+            reembolso: 'Reembolso',
+            otro: 'Otro'
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                cargarMovimientos();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        window.cerrarSesion = () => {
+            signOut(auth).then(() => {
+                localStorage.removeItem('mcgUser');
+                window.location.href = 'index.html';
+            });
+        };
+
+        // ─── CARGAR MOVIMIENTOS ───────────────────────────────────────
+        function cargarMovimientos() {
+            onValue(ref(db, 'caja_menor'), (snapshot) => {
+                todosLosMovimientos = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        todosLosMovimientos.push({ id: child.key, ...child.val() });
+                    });
+                }
+                todosLosMovimientos.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+                aplicarFiltros();
+            });
+        }
+
+        // ─── APLICAR FILTROS ──────────────────────────────────────────
+        window.aplicarFiltros = function() {
+            const filtroEdificio  = document.getElementById('filtroEdificio').value;
+            const filtroTipo      = document.getElementById('filtroTipo').value;
+            const filtroDesde     = document.getElementById('filtroDesde').value;
+            const filtroHasta     = document.getElementById('filtroHasta').value;
+            const filtroCategoria = document.getElementById('filtroCategoria').value;
+
+            const filtrados = todosLosMovimientos.filter(m => {
+                if (filtroEdificio  && m.edificio  !== filtroEdificio)  return false;
+                if (filtroTipo      && m.tipo       !== filtroTipo)      return false;
+                if (filtroCategoria && m.categoria  !== filtroCategoria) return false;
+                if (filtroDesde && m.fecha < filtroDesde) return false;
+                if (filtroHasta && m.fecha > filtroHasta) return false;
+                return true;
+            });
+
+            renderizarTabla(filtrados);
+            actualizarResumen(filtrados);
+        };
+
+        // ─── RENDERIZAR TABLA ─────────────────────────────────────────
+        function renderizarTabla(movimientos) {
+            const tbody = document.getElementById('tbodyCajaMenor');
+
+            if (movimientos.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="9">
+                        <div class="empty-state">
+                            <div class="icon">💼</div>
+                            <p style="font-size:1.1em;color:#bbb;">No hay movimientos registrados</p>
+                        </div>
+                    </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = movimientos.map(m => {
+                const tipoClass  = m.tipo === 'ingreso' ? 'tipo-ingreso' : 'tipo-egreso';
+                const tipoLabel  = m.tipo === 'ingreso' ? '💵 Ingreso' : '🔻 Egreso';
+                const montoClass = m.tipo === 'ingreso' ? 'monto-ingreso' : 'monto-egreso';
+                const montoStr   = '$' + parseFloat(m.monto || 0).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                const catLabel   = NOMBRES_CATEGORIAS[m.categoria] || m.categoria || '-';
+                const edificioNombre = NOMBRES_EDIFICIOS[m.edificio] || m.edificio || '-';
+                const fecha = m.fecha ? new Date(m.fecha + 'T00:00:00').toLocaleDateString('es-CO') : '-';
+
+                return `<tr>
+                    <td>${fecha}</td>
+                    <td>${edificioNombre}</td>
+                    <td><span class="tipo-badge ${tipoClass}">${tipoLabel}</span></td>
+                    <td>${catLabel}</td>
+                    <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${(m.descripcion||'').replace(/"/g,'&quot;')}">${m.descripcion || '-'}</td>
+                    <td>${m.comprobante || '-'}</td>
+                    <td class="${montoClass}">${montoStr}</td>
+                    <td style="font-size:0.82em;color:#777;">${m.creadoPor || '-'}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn-action btn-edit" onclick="editarMovimiento('${m.id}')">✏️</button>
+                        <button class="btn-action btn-del"  onclick="eliminarMovimiento('${m.id}')">🗑️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ─── ACTUALIZAR RESUMEN ───────────────────────────────────────
+        function actualizarResumen(movimientos) {
+            let ingresos = 0, egresos = 0;
+            movimientos.forEach(m => {
+                const val = parseFloat(m.monto || 0);
+                if (m.tipo === 'ingreso') ingresos += val;
+                else                      egresos  += val;
+            });
+            const fmt = n => '$' + n.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            document.getElementById('totalIngresos').textContent    = fmt(ingresos);
+            document.getElementById('totalEgresos').textContent     = fmt(egresos);
+            document.getElementById('saldoActual').textContent      = fmt(ingresos - egresos);
+            document.getElementById('totalMovimientos').textContent = movimientos.length;
+        }
+
+        // ─── MODAL ────────────────────────────────────────────────────
+        window.abrirModal = function() {
+            editandoId = null;
+            document.getElementById('modalTitulo').textContent = '➕ Nuevo Movimiento';
+            document.getElementById('formMovimiento').reset();
+            const hoy = new Date().toISOString().slice(0, 10);
+            document.getElementById('inputFecha').value = hoy;
+            document.getElementById('modalMovimiento').classList.add('active');
+        };
+
+        window.cerrarModal = function() {
+            document.getElementById('modalMovimiento').classList.remove('active');
+            editandoId = null;
+        };
+
+        window.actualizarColorTipo = function() {};
+
+        // ─── GUARDAR MOVIMIENTO ───────────────────────────────────────
+        window.guardarMovimiento = async function(e) {
+            e.preventDefault();
+
+            const userInfo = JSON.parse(localStorage.getItem('mcgUser') || '{}');
+
+            const movimiento = {
+                fecha:        document.getElementById('inputFecha').value,
+                edificio:     document.getElementById('inputEdificio').value,
+                tipo:         document.getElementById('inputTipo').value,
+                categoria:    document.getElementById('inputCategoria').value,
+                monto:        parseFloat(document.getElementById('inputMonto').value) || 0,
+                comprobante:  document.getElementById('inputComprobante').value.trim(),
+                descripcion:  document.getElementById('inputDescripcion').value.trim(),
+                creadoPor:    userInfo.nombre || currentUser.email,
+                fechaRegistro: new Date().toISOString()
+            };
+
+            try {
+                if (editandoId) {
+                    await update(ref(db, 'caja_menor/' + editandoId), movimiento);
+                    alert('✅ Movimiento actualizado');
+                } else {
+                    await push(ref(db, 'caja_menor'), movimiento);
+                    alert('✅ Movimiento registrado');
+                }
+                cerrarModal();
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+
+        // ─── EDITAR ───────────────────────────────────────────────────
+        window.editarMovimiento = function(id) {
+            const m = todosLosMovimientos.find(x => x.id === id);
+            if (!m) return;
+
+            editandoId = id;
+            document.getElementById('modalTitulo').textContent = '✏️ Editar Movimiento';
+            document.getElementById('inputFecha').value        = m.fecha || '';
+            document.getElementById('inputEdificio').value     = m.edificio || '';
+            document.getElementById('inputTipo').value         = m.tipo || '';
+            document.getElementById('inputCategoria').value    = m.categoria || '';
+            document.getElementById('inputMonto').value        = m.monto || '';
+            document.getElementById('inputComprobante').value  = m.comprobante || '';
+            document.getElementById('inputDescripcion').value  = m.descripcion || '';
+            document.getElementById('modalMovimiento').classList.add('active');
+        };
+
+        // ─── ELIMINAR ─────────────────────────────────────────────────
+        window.eliminarMovimiento = async function(id) {
+            if (!confirm('¿Eliminar este movimiento permanentemente?')) return;
+            try {
+                await remove(ref(db, 'caja_menor/' + id));
+                alert('✅ Movimiento eliminado');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        };
+
+        // ─── EXPORTAR PDF ─────────────────────────────────────────────
+        window.exportarPDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const pageWidth  = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            const marginL = 12;
+            let yPos = 0;
+
+            const filtroEdificio = document.getElementById('filtroEdificio');
+            const edificioLabel  = filtroEdificio.options[filtroEdificio.selectedIndex].text;
+
+            function addHeader() {
+                doc.setFillColor(139, 105, 20);
+                doc.rect(0, 0, pageWidth, 18, 'F');
+                doc.setFillColor(255, 255, 255);
+                doc.rect(marginL, 2, 44, 14, 'F');
+                doc.setFontSize(10); doc.setFont(undefined, 'bold');
+                doc.setTextColor(139, 105, 20);
+                doc.text('MCG Residencial 360', marginL + 1, 11);
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14); doc.setFont(undefined, 'bold');
+                doc.text('REPORTE DE CAJA MENOR', pageWidth / 2 + 10, 10, { align: 'center' });
+                doc.setFontSize(8); doc.setFont(undefined, 'normal');
+                doc.text(`Generado: ${new Date().toLocaleDateString('es-CO')} — ${edificioLabel}`, pageWidth / 2 + 10, 15, { align: 'center' });
+                yPos = 24;
+            }
+
+            function addFooter(pageNum, totalPages) {
+                doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+                doc.text('MCG Residencial 360 | Caja Menor', marginL, pageHeight - 6);
+                doc.text(`Página ${pageNum} de ${totalPages}`, pageWidth - marginL, pageHeight - 6, { align: 'right' });
+            }
+
+            const filas = [];
+            document.querySelectorAll('#tbodyCajaMenor tr').forEach(tr => {
+                const celdas = tr.querySelectorAll('td');
+                if (celdas.length < 8) return;
+                filas.push([
+                    celdas[0].textContent.trim(),
+                    celdas[1].textContent.trim(),
+                    celdas[2].textContent.trim().replace('💵 ', '').replace('🔻 ', ''),
+                    celdas[3].textContent.trim(),
+                    celdas[4].textContent.trim(),
+                    celdas[5].textContent.trim(),
+                    celdas[6].textContent.trim()
+                ]);
+            });
+
+            if (filas.length === 0) {
+                alert('No hay movimientos para exportar.');
+                return;
+            }
+
+            addHeader();
+
+            const cols = ['Fecha', 'Edificio', 'Tipo', 'Categoría', 'Descripción', 'Comprobante', 'Monto'];
+            const colW = [22, 32, 18, 36, 70, 28, 28];
+            const rowH = 7;
+
+            function drawHeader() {
+                let xc = marginL;
+                cols.forEach((col, i) => {
+                    doc.setFillColor(139, 105, 20);
+                    doc.rect(xc, yPos, colW[i], 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+                    doc.text(col, xc + 2, yPos + 5.5);
+                    xc += colW[i];
+                });
+                yPos += 9;
+            }
+
+            drawHeader();
+
+            let pageNum = 1;
+            filas.forEach((fila, idx) => {
+                if (yPos + rowH + 6 > pageHeight - 14) {
+                    addFooter(pageNum, '?');
+                    doc.addPage(); pageNum++;
+                    addHeader(); drawHeader();
+                }
+                doc.setFillColor(idx % 2 === 0 ? 253 : 255, idx % 2 === 0 ? 246 : 255, idx % 2 === 0 ? 227 : 255);
+                let xc = marginL;
+                colW.forEach(w => { doc.rect(xc, yPos, w, rowH, 'F'); xc += w; });
+                doc.setDrawColor(220, 220, 220);
+                xc = marginL;
+                colW.forEach(w => { doc.rect(xc, yPos, w, rowH); xc += w; });
+                doc.setTextColor(30, 30, 30);
+                doc.setFontSize(6.5); doc.setFont(undefined, 'normal');
+                xc = marginL;
+                fila.forEach((txt, ci) => {
+                    const truncated = doc.splitTextToSize(String(txt), colW[ci] - 3)[0] || '';
+                    doc.text(truncated, xc + 2, yPos + 4.8);
+                    xc += colW[ci];
+                });
+                yPos += rowH;
+            });
+
+            const totalPagesNum = doc.internal.getNumberOfPages();
+            for (let p = 1; p <= totalPagesNum; p++) {
+                doc.setPage(p);
+                addFooter(p, totalPagesNum);
+            }
+
+            doc.save(`CajaMenor-MCG-${new Date().toISOString().slice(0,10)}.pdf`);
+        };
+
+    </script>
+</body>
+</html>

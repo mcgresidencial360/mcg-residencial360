@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Propietarios a Firebase</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 105, 20, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        #log {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 20px;
+        }
+        
+        .success { color: #4caf50; font-weight: 600; }
+        .error { color: #f44336; font-weight: 600; }
+        .info { color: #2196f3; }
+        .warning { color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Cargar Propietarios a Firebase</h1>
+        
+        <button id="btnCargar" class="btn" onclick="cargarDatos()">
+            📤 Cargar 104 Propietarios
+        </button>
+        
+        <button id="btnLimpiar" class="btn" onclick="limpiarLog()" style="background: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);">
+            🗑️ Limpiar Log
+        </button>
+        
+        <div id="log"></div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        function log(mensaje, tipo = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div class="${tipo}">[${timestamp}] ${mensaje}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        window.limpiarLog = function() {
+            document.getElementById('log').innerHTML = '';
+        };
+
+        window.cargarDatos = async function() {
+            const btn = document.getElementById('btnCargar');
+            btn.disabled = true;
+            btn.textContent = '⏳ Cargando...';
+            
+            log('🚀 Iniciando carga de datos...', 'info');
+            
+            try {
+                // Cargar JSON
+                log('📥 Cargando archivo JSON...', 'info');
+                const response = await fetch('datos_propietarios.json');
+                const datos = await response.json();
+                
+                log(`✅ JSON cargado: ${Object.keys(datos.propietarios).length} propietarios`, 'success');
+                
+                // Cargar a Firebase por edificio
+                const edificios = {
+                    'nepal-2': 0,
+                    'avalon': 0,
+                    'convivienda-1': 0,
+                    'pinos-del-country': 0,
+                    'torre-amin-2': 0
+                };
+                
+                log('', 'info');
+                log('📤 Subiendo a Firebase...', 'info');
+                
+                for (const [key, propietario] of Object.entries(datos.propietarios)) {
+                    const edificio = propietario.edificio;
+                    const path = `propietarios/${edificio}/${key}`;
+                    
+                    await set(ref(db, path), propietario);
+                    edificios[edificio]++;
+                    
+                    if (edificios[edificio] % 10 === 0) {
+                        log(`   ${edificio}: ${edificios[edificio]} propietarios...`, 'info');
+                    }
+                }
+                
+                log('', 'info');
+                log('🎉 ¡CARGA COMPLETADA!', 'success');
+                log('', 'info');
+                log(`📊 Resumen por edificio:`, 'info');
+                for (const [edificio, cantidad] of Object.entries(edificios)) {
+                    log(`   🏢 ${edificio}: ${cantidad} propietarios`, 'success');
+                }
+                
+                btn.textContent = '✅ Datos Cargados';
+                btn.style.background = '#4caf50';
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '🔄 Reintentar';
+            }
+        };
+    </script>
+</body>
+</html>

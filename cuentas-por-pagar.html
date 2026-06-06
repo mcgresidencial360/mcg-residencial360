@@ -1,0 +1,2688 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuentas por Pagar - MCG Residencial 360</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+            font-weight: 700;
+        }
+        
+        .edificio-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .edificio-selector select {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .edificio-selector select:hover {
+            background: #f0f4ff;
+        }
+        
+        .btn-drive {
+            background: #4285f4;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-drive:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+        }
+        
+        .btn-logout {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .actions-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #C9A227;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #00a049;
+            transform: translateY(-3px);
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-warning:hover {
+            background: #ffb300;
+            transform: translateY(-3px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-3px);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        .table-wrapper {
+            overflow: auto;
+            max-height: 70vh;
+            border-radius: 10px;
+            border: 1px solid #e8e8e8;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+        
+        td {
+            padding: 15px;
+            font-size: 14px;
+        }
+        
+        .estado {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+        }
+        
+        .estado-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .estado-pagada {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .estado-vencida {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn-table {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .btn-pagar {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+            margin-left: 5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 1.8em;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s;
+        }
+        
+        .btn-close:hover {
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        /* Preview Excel */
+        .preview-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .preview-table th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            position: sticky;
+            top: 0;
+        }
+        
+        .preview-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .preview-summary {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .preview-summary strong {
+            color: #667eea;
+            font-size: 1.2em;
+        }
+                
+        /* TABLA MEJORADA - MÁS COMPACTA */
+        .tabla-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        #tablaCuentas {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        #tablaCuentas thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        #tablaCuentas th {
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #tablaCuentas td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        
+        #tablaCuentas tbody tr:hover {
+            background: #f8f9ff;
+        }
+        
+        #tablaCuentas tbody tr:nth-child(even) {
+            background: #fafbff;
+        }
+        
+        /* Ancho de columnas específicas */
+        #tablaCuentas th:nth-child(1) { min-width: 150px; } /* Proveedor */
+        #tablaCuentas th:nth-child(7) { min-width: 180px; } /* Concepto */
+        #tablaCuentas th:nth-child(8) { min-width: 100px; } /* Nro Factura */
+        #tablaCuentas th:nth-child(9) { min-width: 110px; } /* Valor Bruto */
+        #tablaCuentas th:nth-child(10) { min-width: 80px; } /* AIU */
+        #tablaCuentas th:nth-child(11) { min-width: 80px; } /* IVA */
+        #tablaCuentas th:nth-child(12) { min-width: 100px; } /* Retención */
+        #tablaCuentas th:nth-child(13) { min-width: 130px; font-weight: 700; } /* Valor Neto */
+        #tablaCuentas th:nth-child(22) { min-width: 120px; } /* Acciones */
+        
+        /* Números alineados a la derecha */
+        #tablaCuentas td:nth-child(9),
+        #tablaCuentas td:nth-child(10),
+        #tablaCuentas td:nth-child(11),
+        #tablaCuentas td:nth-child(12),
+        #tablaCuentas td:nth-child(13) {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        
+        /* Valor Neto destacado */
+        
+        /* COLUMNA PROVEEDOR FIJA (STICKY) */
+        #tablaCuentas th:first-child,
+        #tablaCuentas td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        #tablaCuentas thead th:first-child {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 15;
+        }
+        
+        #tablaCuentas tbody tr:nth-child(even) td:first-child {
+            background: #fafbff;
+        }
+        
+        #tablaCuentas tbody tr:hover td:first-child {
+            background: #f8f9ff;
+        }
+
+        #tablaCuentas td:nth-child(13) {
+            background: #f0f4ff;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        /* Pendientes por edificio */
+        .pendientes-edificio-bloque {
+            margin-bottom: 30px;
+        }
+        .pendientes-edificio-titulo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px 12px 0 0;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        .pendientes-badge {
+            background: #e53935;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+        }
+        .pendientes-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .pendientes-tabla th {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px;
+            border-bottom: 2px solid #667eea;
+        }
+        .pendientes-tabla td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .pendientes-tabla tbody tr:hover {
+            background: #f8f9ff;
+        }
+        .pendientes-tabla .monto-col {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        .pendientes-tabla .total-row {
+            background: #f0f4ff;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .pendientes-tabla .total-row td {
+            border-top: 2px solid #667eea;
+            padding: 12px;
+        }
+        .pendientes-tabla .vencida-row {
+            background: #fff5f5;
+        }
+        .pendientes-tabla .vencida-row td:first-child {
+            border-left: 4px solid #e53935;
+        }
+        .pendientes-resumen-general {
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .pendientes-resumen-item {
+            text-align: center;
+        }
+        .pendientes-resumen-item .valor {
+            font-size: 1.8em;
+            font-weight: 700;
+            display: block;
+        }
+        .pendientes-resumen-item .label {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        .pendientes-scroll {
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+
+        .tarjeta-edificio { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; min-width: 280px; flex-shrink: 0; }
+        .tarjeta-edificio:hover { transform: translateY(-5px); }
+        .tarjeta-edificio h3 { margin-bottom: 15px; font-size: 1.2em; }
+        .tarjeta-dato { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .tarjeta-valor { font-weight: 700; font-size: 1.1em; }
+
+        /* ── ABONOS ── */
+        .abono-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #ede7f6; color: #6a1b9a;
+            padding: 3px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; border: none; white-space: nowrap;
+        }
+        .abono-badge:hover { background: #d1c4e9; }
+        .anticipo-badge {
+            display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+            background: #fff3e0; color: #e65100;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 700;
+            cursor: pointer; border: none; line-height: 1.3;
+        }
+        .anticipo-badge:hover { background: #ffe0b2; }
+        .anticipo-badge small { font-weight: 600; font-size: 10px; color: #ff9800; }
+        .btn-abonar {
+            background: #8e44ad; color: white;
+            padding: 5px 10px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 700; font-size: 11px;
+            margin-left: 4px;
+        }
+        .btn-abonar:hover { background: #7d3c98; }
+        #tablaCuentas th:nth-child(16),
+        #tablaCuentas td:nth-child(16) { color: #e53935; }
+        #tablaCuentas th:nth-child(17) { color: #8e44ad; }
+        .saldo-pend-ant { color: #e53935; font-weight: 700; font-family: 'Courier New', monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>💰 Cuentas por Pagar</h1>
+            <div class="edificio-selector">
+                <select id="edificioSelect" onchange="cambiarEdificio()">
+                    <option value="">Selecciona edificio</option>
+                    <option value="nepal-2">Nepal 2</option>
+                    <option value="avalon">Avalon</option>
+                    <option value="convivienda-1">Convivienda 1</option>
+                    <option value="pinos-del-country">Pinos del Country</option>
+                    <option value="torre-amin-2">Torres de Amin II</option>
+                </select>
+                <a href="#" id="btnDrive" class="btn-drive" target="_blank" style="display: none;">
+                    📁 Ver Facturas Drive
+                </a>
+
+            </div>
+            <button class="btn-logout" onclick="location.href='Dashboard.html'">
+                🏠 Dashboard
+            </button>
+        </div>
+
+        <!-- PANEL DE ACCIONES -->
+        <div class="actions-panel">
+            <button class="btn btn-primary" onclick="document.getElementById('fileExcel').click()">
+                📊 Cargar Excel de Facturas
+            </button>
+            <input type="file" id="fileExcel" accept=".xlsx,.xls,.csv" style="display: none;" onchange="procesarExcel(event)">
+            
+            <button class="btn btn-warning" onclick="abrirModalManual()">
+                ✏️ Agregar Cuenta Manual
+            </button>
+            <button class="btn btn-success" onclick="descargarExcel()">
+                📥 Descargar Excel
+            </button>
+            <button class="btn" style="background: #e53935; color: white;" onclick="verPendientesPorEdificio()">
+                🔴 Ver Pendientes por Edificio
+            </button>
+        </div>
+
+        <!-- RESUMEN DE FACTURAS POR EDIFICIO -->
+        <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px;">
+            <h2 style="color: #667eea; margin-bottom: 20px;">📊 Resumen de Facturas por Edificio</h2>
+            <div id="tarjetasEdificios" style="display: flex; gap: 15px; flex-wrap: nowrap; overflow-x: auto;"></div>
+        </div>
+
+        <!-- FILTROS DE BÚSQUEDA -->
+        <div class="actions-panel" style="background: white; margin-bottom: 20px;">
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; width: 100%;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #667eea;">🔍 Buscar por Proveedor:</label>
+                    <input type="text" id="filtroProveedor" placeholder="Escribe nombre del proveedor..." 
+                           style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;"
+                           oninput="aplicarFiltros()">
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #667eea;">📅 Filtrar por Mes:</label>
+                    <select id="filtroMes" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;" onchange="aplicarFiltros()">
+                        <option value="">Todos los meses</option>
+                        <option value="01">Enero</option>
+                        <option value="02">Febrero</option>
+                        <option value="03">Marzo</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Mayo</option>
+                        <option value="06">Junio</option>
+                        <option value="07">Julio</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="limpiarFiltros()" style="align-self: flex-end;">
+                    🔄 Limpiar Filtros
+                </button>
+                <div style="align-self: flex-end; padding: 10px; background: #f0f4ff; border-radius: 8px; font-weight: 600;">
+                    📊 Mostrando: <span id="contadorFacturas">0</span> facturas
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA DE CUENTAS -->
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="tablaCuentas">
+                    <thead>
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>Tipo de ID</th>
+                            <th>No. Identificación</th>
+                            <th>Banco</th>
+                            <th>Tipo de Cuenta</th>
+                            <th>Número de Cuenta</th>
+                            <th>Concepto</th>
+                            <th>Nro Factura</th>
+                            <th>Valor Bruto</th>
+                            <th>AIU</th>
+                            <th>IVA</th>
+                            <th>Retención</th>
+                            <th>Valor Neto a Pagar</th>
+                            <th style="color: #ff9800;">💰 Anticipos</th>
+                            <th style="color: #e53935;">⚡ Saldo Ant.</th>
+                            <th style="color: #8e44ad;">💳 Abonos</th>
+                            <th style="background: #e8f5e9; color: #C9A227;">✅ Saldo a Pagar</th>
+                            <th>Fecha de Recepción</th>
+                            <th>Fecha de Vencimiento</th>
+                            <th>Fecha de Pago</th>
+                            <th>Estado</th>
+                            <th>Método de Pago</th>
+                            <th>Categoría del Gasto</th>
+                            <th>Prioridad</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCuerpo">
+                        <tr>
+                            <td colspan="15">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📋</div>
+                                    <h3>No hay cuentas registradas para este edificio</h3>
+                                    <p>Carga un Excel o agrega una cuenta manualmente</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL AGREGAR MANUAL -->
+    <div class="modal" id="modalManual">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Agregar Cuenta Manual</h2>
+                <button class="btn-close" onclick="cerrarModal('modalManual')">&times;</button>
+            </div>
+            <form id="formManual">
+                <div class="form-group">
+                    <label>Proveedor *</label>
+                    <input type="text" id="proveedor" required list="listaProveedores">
+                    <datalist id="listaProveedores">
+                        <!-- Se llena dinámicamente -->
+                    </datalist>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de ID</label>
+                        <select id="tipoId">
+                            <option value="NIT">NIT</option>
+                            <option value="CC">CC</option>
+                            <option value="CE">CE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>No. Identificación</label>
+                        <input type="text" id="numeroId" placeholder="Opcional">
+                    </div>
+                </div>
+                
+                <!-- DATOS BANCARIOS -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Banco</label>
+                        <input type="text" id="banco" placeholder="Ej: Bancolombia">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Cuenta</label>
+                        <select id="tipoCuenta">
+                            <option value="">Seleccionar...</option>
+                            <option value="Ahorros">Ahorros</option>
+                            <option value="Corriente">Corriente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Número de Cuenta</label>
+                    <input type="text" id="numeroCuenta">
+                </div>
+
+                <!-- Selector cuando el proveedor tiene múltiples cuentas -->
+                <div id="selectorCuentaManualWrap" class="form-group" style="display:none; background:#f0f8ff; padding:12px; border-radius:8px; border:2px solid #cce0ff;">
+                    <label style="color:#8B6914; font-weight:700;">💳 Seleccionar Cuenta de Pago</label>
+                    <select id="selectorCuentaManual" onchange="aplicarCuentaSeleccionada('manual')"
+                            style="background:white; border:2px solid #8B6914; border-radius:8px; padding:10px; font-size:14px; width:100%;">
+                        <option value="">— Elegir cuenta —</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Concepto *</label>
+                    <input type="text" id="concepto" required>
+                </div>
+                <div class="form-group">
+                    <label>Nro Factura</label>
+                    <input type="text" id="facturaNo">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor Bruto *</label>
+                        <input type="number" id="valorBruto" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>AIU</label>
+                        <input type="number" id="aiu" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>IVA</label>
+                        <input type="number" id="iva" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Retención</label>
+                        <input type="number" id="retencion" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Valor Neto a Pagar (calculado)</label>
+                    <input type="number" id="valorNeto" step="0.01" placeholder="Se calcula o ingresa manual" oninput="calcularRestoAPagar()">
+
+                <!-- SALDO PENDIENTE ANTERIOR -->
+                <div class="form-group" style="background: #fff5f5; padding: 12px; border-radius: 8px; border: 2px solid #ffcccc; margin-top: 15px;">
+                    <label style="color: #e53935; font-weight: 700;">⚡ Saldo Pendiente Anterior</label>
+                    <input type="number" id="saldoPendienteAnterior" step="0.01" value="0" placeholder="0" oninput="calcularRestoAPagar()">
+                    <small style="color: #999; display: block; margin-top: 4px;">Deuda arrastrada de períodos anteriores (ej. 2024). Se suma al saldo final.</small>
+                </div>
+
+                <div class="form-row" style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 15px;">
+                    <div class="form-group">
+                        <label>💰 Anticipo</label>
+                        <input type="number" id="anticipo" step="0.01" value="0" oninput="calcularRestoAPagar()">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Fecha Anticipo</label>
+                        <input type="date" id="fechaAnticipo">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="color: #C9A227; font-weight: 700;">✅ Resto a Pagar</label>
+                    <input type="number" id="restoAPagar" step="0.01" readonly style="background: #e8f5e9; font-size: 1.1em; font-weight: 700; color: #C9A227;">
+                </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Recepción</label>
+                        <input type="date" id="fechaRecepcion">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Vencimiento</label>
+                        <input type="date" id="fechaVencimiento">
+                    </div>
+                </div>
+                
+                <!-- NUEVOS CAMPOS -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Método de Pago</label>
+                        <select id="metodoPago">
+                            <option value="">Seleccionar...</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Consignación">Consignación</option>
+                            <option value="Factura Domiciliada">Factura Domiciliada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Prioridad</label>
+                        <select id="prioridad">
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Baja">Baja</option>
+                            <option value="Urgente">Urgente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Categoría del Gasto</label>
+                    <select id="categoriaGasto">
+                        <option value="">Seleccionar...</option>
+                        <option value="Servicios Públicos">Servicios Públicos</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Conserjería y Monitoreo">Conserjería y Monitoreo</option>
+                        <option value="Aseo">Aseo</option>
+                        <option value="Prestación de Servicios">Prestación de Servicios</option>
+                        <option value="Impuestos">Impuestos</option>
+                        <option value="Seguros">Seguros</option>
+                        <option value="Compras">Compras</option>
+                        <option value="Contratos">Contratos</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="observaciones" rows="3" placeholder="Notas adicionales..."></textarea>
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="guardarCuentaManual()" style="width: 100%; margin-top: 20px;">
+                    💾 Guardar Cuenta
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR CUENTA -->
+    <div class="modal" id="modalEditar">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Cuenta</h2>
+                <button class="btn-close" onclick="cerrarModal('modalEditar')">&times;</button>
+            </div>
+            <form id="formEditar">
+                <input type="hidden" id="editarId">
+                <input type="hidden" id="editarEstadoActual">
+                <div class="form-group">
+                    <label>Proveedor *</label>
+                    <input type="text" id="editarProveedor" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de ID</label>
+                        <select id="editarTipoId">
+                            <option value="NIT">NIT</option>
+                            <option value="CC">CC</option>
+                            <option value="CE">CE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>No. Identificación</label>
+                        <input type="text" id="editarNumeroId" placeholder="Opcional">
+                    </div>
+                </div>
+                
+                <!-- DATOS BANCARIOS -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Banco</label>
+                        <input type="text" id="editarBanco" placeholder="Ej: Bancolombia">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Cuenta</label>
+                        <select id="editarTipoCuenta">
+                            <option value="">Seleccionar...</option>
+                            <option value="Ahorros">Ahorros</option>
+                            <option value="Corriente">Corriente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Número de Cuenta</label>
+                    <input type="text" id="editarNumeroCuenta">
+                </div>
+
+                <!-- Selector cuando el proveedor tiene múltiples cuentas -->
+                <div id="selectorCuentaEditarWrap" class="form-group" style="display:none; background:#f0f8ff; padding:12px; border-radius:8px; border:2px solid #cce0ff;">
+                    <label style="color:#8B6914; font-weight:700;">💳 Seleccionar Cuenta de Pago</label>
+                    <select id="selectorCuentaEditar" onchange="aplicarCuentaSeleccionada('editar')"
+                            style="background:white; border:2px solid #8B6914; border-radius:8px; padding:10px; font-size:14px; width:100%;">
+                        <option value="">— Elegir cuenta —</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Concepto *</label>
+                    <input type="text" id="editarConcepto" required>
+                </div>
+                <div class="form-group">
+                    <label>Nro Factura</label>
+                    <input type="text" id="editarFacturaNo">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor Bruto *</label>
+                        <input type="number" id="editarValorBruto" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>AIU</label>
+                        <input type="number" id="editarAiu" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>IVA</label>
+                        <input type="number" id="editarIva" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Retención</label>
+                        <input type="number" id="editarRetencion" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Valor Neto a Pagar (calculado)</label>
+                    <input type="number" id="editarValorNeto" step="0.01" readonly>
+                </div>
+
+                <!-- SALDO PENDIENTE ANTERIOR -->
+                <div class="form-group" style="background: #fff5f5; padding: 12px; border-radius: 8px; border: 2px solid #ffcccc;">
+                    <label style="color: #e53935; font-weight: 700;">⚡ Saldo Pendiente Anterior</label>
+                    <input type="number" id="editarSaldoPendienteAnterior" step="0.01" value="0" oninput="calcularRestoEditar()">
+                    <small style="color: #999; display: block; margin-top: 4px;">Deuda arrastrada de períodos anteriores. Se suma al saldo final.</small>
+                </div>
+
+                <!-- ADELANTO EN EDICIÓN -->
+                <div class="form-row" style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 15px;">
+                    <div class="form-group">
+                        <label>💰 Anticipo</label>
+                        <input type="number" id="editarAnticipo" step="0.01" value="0" oninput="calcularRestoEditar()">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 Fecha Anticipo</label>
+                        <input type="date" id="editarFechaAnticipo">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="color: #C9A227; font-weight: 700;">✅ Resto a Pagar</label>
+                    <input type="number" id="editarRestoAPagar" step="0.01" readonly style="background: #e8f5e9; font-size: 1.1em; font-weight: 700; color: #C9A227;">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Recepción</label>
+                        <input type="date" id="editarFechaRecepcion">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Vencimiento</label>
+                        <input type="date" id="editarFechaVencimiento">
+                    </div>
+                </div>
+                
+                <!-- NUEVOS CAMPOS -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Método de Pago</label>
+                        <select id="editarMetodoPago">
+                            <option value="">Seleccionar...</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Consignación">Consignación</option>
+                            <option value="Factura Domiciliada">Factura Domiciliada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Prioridad</label>
+                        <select id="editarPrioridad">
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Baja">Baja</option>
+                            <option value="Urgente">Urgente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Categoría del Gasto</label>
+                    <select id="editarCategoriaGasto">
+                        <option value="">Seleccionar...</option>
+                        <option value="Servicios Públicos">Servicios Públicos</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Conserjería y Monitoreo">Conserjería y Monitoreo</option>
+                        <option value="Aseo">Aseo</option>
+                        <option value="Prestación de Servicios">Prestación de Servicios</option>
+                        <option value="Impuestos">Impuestos</option>
+                        <option value="Seguros">Seguros</option>
+                        <option value="Compras">Compras</option>
+                        <option value="Contratos">Contratos</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="editarObservaciones" rows="3" placeholder="Notas adicionales..."></textarea>
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="guardarEdicion()" style="width: 100%; margin-top: 20px;">
+                    💾 Guardar Cambios
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PENDIENTES POR EDIFICIO -->
+    <div class="modal" id="modalPendientes">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h2>🔴 Cuentas Pendientes por Edificio</h2>
+                <button class="btn-close" onclick="cerrarModal('modalPendientes')">&times;</button>
+            </div>
+            <div id="pendientesContenido">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⏳</div>
+                    <h3>Cargando pendientes...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PREVIEW EXCEL -->
+    <div class="modal" id="modalPreview">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>📊 Preview - Facturas a Cargar</h2>
+                <button class="btn-close" onclick="cerrarModal('modalPreview')">&times;</button>
+            </div>
+            <div class="preview-summary">
+                Se van a cargar <strong id="totalFacturas">0</strong> facturas
+            </div>
+            <div class="preview-container" id="previewContainer"></div>
+            <button class="btn btn-primary" onclick="confirmarCargaExcel()" style="width: 100%; margin-top: 20px;">
+                ✅ Confirmar y Cargar Todas
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRAR ABONO -->
+    <div class="modal" id="modalAbono">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>💳 Registrar Abono</h2>
+                <button class="btn-close" onclick="cerrarModal('modalAbono')">&times;</button>
+            </div>
+            <div id="abonoInfoCuenta" style="background: #f0f4ff; padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
+            <div class="form-group">
+                <label>💰 Monto del Abono *</label>
+                <input type="number" id="abonoMonto" step="0.01" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+                <label>📅 Fecha del Abono *</label>
+                <input type="date" id="abonoFecha">
+            </div>
+            <div class="form-group">
+                <label>📝 Descripción / Referencia</label>
+                <input type="text" id="abonoDescripcion" placeholder="Ej: Pago parcial enero, transferencia #123...">
+            </div>
+            <input type="hidden" id="abonoIdCuenta">
+            <button type="button" class="btn btn-primary" onclick="guardarAbono()" style="width: 100%; margin-top: 10px;">
+                💾 Guardar Abono
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL HISTORIAL DE ABONOS -->
+    <div class="modal" id="modalHistorialAbonos">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h2>📋 Historial de Abonos</h2>
+                <button class="btn-close" onclick="cerrarModal('modalHistorialAbonos')">&times;</button>
+            </div>
+            <div id="historialAbonosContenido"></div>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRAR ANTICIPO -->
+    <div class="modal" id="modalAnticipo">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ff9800, #e65100);">
+                <h2>💰 Registrar Anticipo</h2>
+                <button class="btn-close" onclick="cerrarModal('modalAnticipo')">&times;</button>
+            </div>
+            <div id="anticipoInfoCuenta" style="background: #fff3e0; padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
+            <div class="form-group">
+                <label>💰 Monto del Anticipo *</label>
+                <input type="number" id="anticipoMonto" step="0.01" placeholder="0" min="0">
+            </div>
+            <div class="form-group">
+                <label>📅 Fecha del Anticipo *</label>
+                <input type="date" id="anticipoFecha">
+            </div>
+            <div class="form-group">
+                <label>📝 Descripción / Referencia</label>
+                <input type="text" id="anticipoDescripcion" placeholder="Ej: Anticipo inicial, transferencia #123...">
+            </div>
+            <input type="hidden" id="anticipoIdCuenta">
+            <button type="button" class="btn btn-primary" onclick="guardarAnticipo()" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #ff9800, #e65100);">
+                💾 Guardar Anticipo
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL HISTORIAL DE ANTICIPOS -->
+    <div class="modal" id="modalHistorialAnticipos">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ff9800, #e65100);">
+                <h2>📋 Historial de Anticipos</h2>
+                <button class="btn-close" onclick="cerrarModal('modalHistorialAnticipos')">&times;</button>
+            </div>
+            <div id="historialAnticiposContenido"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, push, set, onValue, update, remove, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        let edificioActual = '';
+        let facturasTemp = [];
+        let proveedoresDB = {}; // Base de datos de proveedores en memoria
+        
+        // Cargar proveedores desde Firebase al iniciar
+        const proveedoresRef = ref(db, 'proveedores');
+        onValue(proveedoresRef, (snapshot) => {
+            proveedoresDB = {};
+            const datalist = document.getElementById('listaProveedores');
+            datalist.innerHTML = '';
+            
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const prov = childSnapshot.val();
+                    const nombre = prov.nombre || prov.razonSocial || '';
+                    
+                    if (nombre) {
+                        // Normalizar cuentasPago
+                        let cuentasPago = [];
+                        if (prov.cuentasPago) {
+                            cuentasPago = Array.isArray(prov.cuentasPago)
+                                ? prov.cuentasPago
+                                : Object.values(prov.cuentasPago);
+                        } else if (prov.banco || prov.tipoCuenta || prov.numeroCuenta) {
+                            cuentasPago = [{ banco: prov.banco || '', tipoCuenta: prov.tipoCuenta || '', numeroCuenta: prov.numeroCuenta || prov.cuentaBancaria || '' }];
+                        }
+
+                        // Guardar en memoria
+                        proveedoresDB[nombre.toLowerCase()] = {
+                            nombre: nombre,
+                            tipoId: prov.tipoIdentificacion || prov.tipoId || 'NIT',
+                            numeroId: prov.noIdentificacion || prov.numeroId || prov.nit || '',
+                            banco: cuentasPago[0]?.banco || prov.banco || '',
+                            tipoCuenta: cuentasPago[0]?.tipoCuenta || prov.tipoCuenta || '',
+                            numeroCuenta: cuentasPago[0]?.numeroCuenta || prov.numeroCuenta || prov.cuentaBancaria || '',
+                            metodoPago: prov.metodoPago || '',
+                            cuentasPago: cuentasPago
+                        };
+                        
+                        // Agregar al datalist
+                        const option = document.createElement('option');
+                        option.value = nombre;
+                        datalist.appendChild(option);
+                    }
+                });
+                console.log(`✅ ${Object.keys(proveedoresDB).length} proveedores cargados`);
+            }
+        });
+        
+        // Listener para autocompletar cuando cambie el proveedor
+        document.getElementById('proveedor').addEventListener('input', function() {
+            const nombreBuscado = this.value.trim().toLowerCase();
+            if (!nombreBuscado) return;
+
+            let proveedor = proveedoresDB[nombreBuscado];
+            if (!proveedor) {
+                for (const [key, prov] of Object.entries(proveedoresDB)) {
+                    if (key.includes(nombreBuscado) || nombreBuscado.includes(key)) {
+                        proveedor = prov;
+                        break;
+                    }
+                }
+            }
+
+            if (proveedor) {
+                document.getElementById('tipoId').value  = proveedor.tipoId || 'NIT';
+                document.getElementById('numeroId').value = proveedor.numeroId || '';
+                if (proveedor.metodoPago) document.getElementById('metodoPago').value = proveedor.metodoPago;
+
+                const cuentas = proveedor.cuentasPago || [];
+                const wrap = document.getElementById('selectorCuentaManualWrap');
+                const sel  = document.getElementById('selectorCuentaManual');
+
+                if (cuentas.length > 1) {
+                    // Mostrar selector con todas las cuentas
+                    sel.innerHTML = '<option value="">— Elegir cuenta —</option>';
+                    cuentas.forEach((c, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = i;
+                        opt.textContent = `Cuenta ${i+1}: ${c.banco || 'Sin banco'} – ${c.tipoCuenta || ''} ${c.numeroCuenta ? '(' + c.numeroCuenta + ')' : ''}`.trim();
+                        sel.appendChild(opt);
+                    });
+                    sel.dataset.cuentas = JSON.stringify(cuentas);
+                    wrap.style.display = 'block';
+                    // Pre-cargar la primera cuenta
+                    document.getElementById('banco').value        = cuentas[0].banco || '';
+                    document.getElementById('tipoCuenta').value   = cuentas[0].tipoCuenta || '';
+                    document.getElementById('numeroCuenta').value = cuentas[0].numeroCuenta || '';
+                } else {
+                    wrap.style.display = 'none';
+                    document.getElementById('banco').value        = (cuentas[0] || proveedor).banco || '';
+                    document.getElementById('tipoCuenta').value   = (cuentas[0] || proveedor).tipoCuenta || '';
+                    document.getElementById('numeroCuenta').value = (cuentas[0] || proveedor).numeroCuenta || '';
+                }
+            }
+        });
+        
+        // Aplicar cuenta seleccionada en el selector
+        window.aplicarCuentaSeleccionada = function(tipo) {
+            const esManual = tipo === 'manual';
+            const sel = document.getElementById(esManual ? 'selectorCuentaManual' : 'selectorCuentaEditar');
+            const idx = parseInt(sel.value);
+            if (isNaN(idx)) return;
+
+            const cuentas = JSON.parse(sel.dataset.cuentas || '[]');
+            const cuenta  = cuentas[idx];
+            if (!cuenta) return;
+
+            if (esManual) {
+                document.getElementById('banco').value        = cuenta.banco || '';
+                document.getElementById('tipoCuenta').value   = cuenta.tipoCuenta || '';
+                document.getElementById('numeroCuenta').value = cuenta.numeroCuenta || '';
+            } else {
+                document.getElementById('editarBanco').value        = cuenta.banco || '';
+                document.getElementById('editarTipoCuenta').value   = cuenta.tipoCuenta || '';
+                document.getElementById('editarNumeroCuenta').value = cuenta.numeroCuenta || '';
+            }
+        };
+
+        // Links de Google Drive
+        const driveLinks = {
+            'nepal-2': 'https://drive.google.com/drive/folders/11zgqRM4LhNRW5luW0B6pA06e42Xzu4Hc',
+            'avalon': 'https://drive.google.com/drive/folders/1x_vnC5l8Q50KxdQfsvIHx1wy8s8Gjrlk',
+            'convivienda-1': 'https://drive.google.com/drive/folders/1mEeVfXj74AoSkeCb2uSB00QIblwSdD1W',
+            'pinos-del-country': 'https://drive.google.com/drive/folders/1QYPuq6w1fHNSl5aq1fD2R7hDJjScJAtu',
+            'torre-amin-2': ''
+        };
+        
+        window.cambiarEdificio = function() {
+            edificioActual = document.getElementById('edificioSelect').value;
+            
+            // Mostrar/ocultar botón Drive
+            const btnDrive = document.getElementById('btnDrive');
+            if (edificioActual && driveLinks[edificioActual]) {
+                btnDrive.href = driveLinks[edificioActual];
+                btnDrive.style.display = 'inline-flex';
+            } else {
+                btnDrive.style.display = 'none';
+            }
+            
+            cargarCuentas();
+        };
+        
+        function cargarCuentas() {
+            if (!edificioActual) {
+                document.getElementById('tablaCuerpo').innerHTML = `
+                    <tr><td colspan="22">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏢</div>
+                            <h3>Selecciona un edificio</h3>
+                        </div>
+                    </td></tr>
+                `;
+                document.getElementById('contadorFacturas').textContent = '0';
+                return;
+            }
+            
+            const cuentasRef = ref(db, `cuentas_por_pagar/${edificioActual}`);
+            onValue(cuentasRef, (snapshot) => {
+                console.log('📊 Cargando cuentas de Firebase...');
+                const tbody = document.getElementById('tablaCuerpo');
+                tbody.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    console.log('⚠️ No hay datos en Firebase');
+                    tbody.innerHTML = `
+                        <tr><td colspan="22">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <h3>No hay cuentas registradas para este edificio</h3>
+                                <p>Carga un Excel o agrega una cuenta manualmente</p>
+                            </div>
+                        </td></tr>
+                    `;
+                    document.getElementById('contadorFacturas').textContent = '0';
+                    return;
+                }
+                
+                let contador = 0;
+                snapshot.forEach((childSnapshot) => {
+                    const cuenta = childSnapshot.val();
+                    const id = childSnapshot.key;
+                    console.log('✅ Cargando cuenta:', cuenta.proveedor);
+                    tbody.innerHTML += crearFilaCuenta(cuenta, id);
+                    contador++;
+                });
+                
+                console.log(`✅ Total cuentas cargadas: ${contador}`);
+                
+                // Actualizar contador
+                document.getElementById('contadorFacturas').textContent = contador;
+                
+                // MIGRACIÓN AUTOMÁTICA: Actualizar datos bancarios vacíos
+                migrarDatosBancarios(snapshot);
+                
+                // Aplicar filtros si hay alguno activo
+                if (document.getElementById('filtroProveedor').value || document.getElementById('filtroMes').value) {
+                    aplicarFiltros();
+                }
+            });
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // MIGRACIÓN AUTOMÁTICA DE DATOS BANCARIOS
+        // ═══════════════════════════════════════════════════════════════
+        async function migrarDatosBancarios(snapshot) {
+            let actualizados = 0;
+            let sinCambios = 0;
+            
+            console.log('🔄 Iniciando migración automática de datos bancarios...');
+            
+            for (const childSnapshot of snapshot.val() ? Object.entries(snapshot.val()) : []) {
+                const [id, cuenta] = childSnapshot;
+                
+                // Verificar si faltan datos bancarios
+                const faltaBanco = !cuenta.banco || cuenta.banco === '-';
+                const faltaTipoCuenta = !cuenta.tipoCuenta || cuenta.tipoCuenta === '-';
+                const faltaNumeroCuenta = !cuenta.numeroCuenta || cuenta.numeroCuenta === '-';
+                
+                if (faltaBanco || faltaTipoCuenta || faltaNumeroCuenta) {
+                    // Buscar proveedor en base de datos
+                    const nombreProveedor = (cuenta.proveedor || '').toLowerCase();
+                    const proveedor = proveedoresDB[nombreProveedor];
+                    
+                    if (proveedor) {
+                        // Preparar datos a actualizar
+                        const datosActualizar = {};
+                        
+                        if (faltaBanco && proveedor.banco) {
+                            datosActualizar.banco = proveedor.banco;
+                        }
+                        if (faltaTipoCuenta && proveedor.tipoCuenta) {
+                            datosActualizar.tipoCuenta = proveedor.tipoCuenta;
+                        }
+                        if (faltaNumeroCuenta && proveedor.numeroCuenta) {
+                            datosActualizar.numeroCuenta = proveedor.numeroCuenta;
+                        }
+                        
+                        // Si hay datos para actualizar
+                        if (Object.keys(datosActualizar).length > 0) {
+                            try {
+                                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                                await update(cuentaRef, datosActualizar);
+                                actualizados++;
+                                console.log(`✅ Actualizado: ${cuenta.proveedor} (Factura: ${cuenta.facturaNo})`);
+                            } catch (error) {
+                                console.error(`❌ Error actualizando ${cuenta.proveedor}:`, error);
+                            }
+                        }
+                    } else {
+                        sinCambios++;
+                    }
+                } else {
+                    sinCambios++;
+                }
+            }
+            
+            if (actualizados > 0) {
+                console.log(`✅ Migración completada: ${actualizados} cuentas actualizadas, ${sinCambios} sin cambios`);
+            } else {
+                console.log(`ℹ️ No hay cuentas para actualizar (${sinCambios} ya tienen datos completos)`);
+            }
+        }
+        
+        function crearFilaCuenta(cuenta, id) {
+            const estadoClass = cuenta.estado === 'Pagada' ? 'estado-pagada' :
+                               (new Date(cuenta.fechaVencimiento) < new Date() ? 'estado-vencida' : 'estado-pendiente');
+
+            // Calcular total de abonos
+            const totalAbonos = cuenta.abonos
+                ? Object.values(cuenta.abonos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                : 0;
+            const numAbonos = cuenta.abonos ? Object.keys(cuenta.abonos).length : 0;
+
+            // Calcular total de anticipos (soporta tanto el nuevo formato lista como el campo escalar anterior)
+            const totalAnticipos = cuenta.anticipos
+                ? Object.values(cuenta.anticipos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                : (parseFloat(cuenta.anticipo) || 0);
+            const numAnticipos = cuenta.anticipos
+                ? Object.keys(cuenta.anticipos).length
+                : (parseFloat(cuenta.anticipo) > 0 ? 1 : 0);
+
+            // Saldo pendiente anterior (deuda preexistente)
+            const saldoPendAnterior = parseFloat(cuenta.saldoPendienteAnterior) || 0;
+
+            // Saldo actual = valorNeto + saldoPendAnterior - totalAnticipos - totalAbonos
+            const saldoActual = (parseFloat(cuenta.valorNeto) || 0)
+                + saldoPendAnterior
+                - totalAnticipos
+                - totalAbonos;
+
+            const saldoColor = saldoActual <= 0 ? '#C9A227' : '#e53935';
+
+            return `
+                <tr data-proveedor="${(cuenta.proveedor || '').toLowerCase()}" data-fecha="${cuenta.fechaRecepcion || ''}">
+                    <td>${cuenta.proveedor || ''}</td>
+                    <td>${cuenta.tipoId || ''}</td>
+                    <td>${cuenta.numeroId || ''}</td>
+                    <td>${cuenta.banco || '-'}</td>
+                    <td>${cuenta.tipoCuenta || '-'}</td>
+                    <td>${cuenta.numeroCuenta || '-'}</td>
+                    <td>${cuenta.concepto || ''}</td>
+                    <td>${cuenta.facturaNo || ''}</td>
+                    <td>$${Number(cuenta.valorBruto || 0).toLocaleString('es-CO')}</td>
+                    <td>$${Number(cuenta.aiu || 0).toLocaleString('es-CO')}</td>
+                    <td>$${Number(cuenta.iva || 0).toLocaleString('es-CO')}</td>
+                    <td>$${Number(cuenta.retencion || 0).toLocaleString('es-CO')}</td>
+                    <td><strong>$${Number(cuenta.valorNeto || 0).toLocaleString('es-CO')}</strong></td>
+                    <td>
+                        ${numAnticipos > 0
+                            ? `<button class="anticipo-badge" onclick="verHistorialAnticipos('${id}')">💰 ${numAnticipos} anticipo${numAnticipos !== 1 ? 's' : ''}<br><small>$${totalAnticipos.toLocaleString('es-CO')}</small></button>`
+                            : '-'}
+                    </td>
+                    <td class="saldo-pend-ant">${saldoPendAnterior > 0 ? '$' + saldoPendAnterior.toLocaleString('es-CO') : '-'}</td>
+                    <td>
+                        ${numAbonos > 0
+                            ? `<button class="abono-badge" onclick="verHistorialAbonos('${id}')">💳 ${numAbonos} abono${numAbonos !== 1 ? 's' : ''}</button>`
+                            : '-'}
+                    </td>
+                    <td style="background: #e8f5e9; font-weight: 700; color: ${saldoColor};"><strong>$${saldoActual.toLocaleString('es-CO')}</strong></td>
+                    <td>${cuenta.fechaRecepcion || '-'}</td>
+                    <td>${cuenta.fechaVencimiento || '-'}</td>
+                    <td>${cuenta.fechaPago || '-'}</td>
+                    <td><span class="estado ${estadoClass}">${cuenta.estado || 'Pendiente'}</span></td>
+                    <td>${cuenta.metodoPago || '-'}</td>
+                    <td>${cuenta.categoriaGasto || '-'}</td>
+                    <td>${cuenta.prioridad || 'Media'}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${cuenta.observaciones || ''}">${cuenta.observaciones || '-'}</td>
+                    <td style="white-space: nowrap;">
+                        <button class="btn-table" style="background: #4a90e2; color: white;" onclick="abrirEditar('${id}')">✏️</button>
+                        ${cuenta.estado !== 'Pagada' ?
+                            `<button class="btn-table btn-pagar" onclick="marcarPagada('${id}')">✅</button>
+                             <button class="btn-table btn-abonar" onclick="abrirModalAbono('${id}')">💳</button>
+                             <button class="btn-table" style="background:#ff9800;color:white;" onclick="abrirModalAnticipo('${id}')" title="Registrar anticipo">💰</button>` : ''}
+                        <button class="btn-table btn-eliminar" onclick="eliminarCuenta('${id}')">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // PROCESAR EXCEL
+        window.procesarExcel = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!edificioActual) {
+                alert('❌ Selecciona un edificio primero');
+                event.target.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    if (jsonData.length === 0) {
+                        alert('❌ El Excel está vacío');
+                        return;
+                    }
+                    
+                    // Convertir a formato del sistema
+                    facturasTemp = jsonData.map(row => ({
+                        proveedor: row['Proveedor'] || row['proveedor'] || '',
+                        tipoId: row['Tipo ID'] || row['tipoId'] || row['TipoID'] || 'NIT',
+                        numeroId: String(row['No. Identificación'] || row['numeroId'] || row['NIT'] || ''),
+                        concepto: row['Concepto'] || row['concepto'] || '',
+                        facturaNo: String(row['Factura No.'] || row['facturaNo'] || row['Factura'] || ''),
+                        valorBruto: Number(row['Valor Bruto'] || row['valorBruto'] || 0),
+                        aiu: Number(row['AIU'] || row['aiu'] || 0),
+                        iva: Number(row['IVA'] || row['iva'] || 0),
+                        retencion: Number(row['Retención'] || row['retencion'] || row['Retencion'] || 0),
+                        valorNeto: Number(row['Valor Neto'] || row['valorNeto'] || 0),
+                        fechaRecepcion: formatearFecha(row['F. Recepción'] || row['fechaRecepcion'] || row['Fecha Recepción']),
+                        fechaVencimiento: formatearFecha(row['F. Vencimiento'] || row['fechaVencimiento'] || row['Fecha Vencimiento']),
+                        fechaPago: row['F. Pago'] || row['fechaPago'] ? formatearFecha(row['F. Pago'] || row['fechaPago']) : null,
+                        estado: row['Estado'] || row['estado'] || 'Pendiente'
+                    }));
+                    
+                    // Calcular valor neto si no viene
+                    facturasTemp = facturasTemp.map(f => ({
+                        ...f,
+                        valorNeto: f.valorNeto || (f.valorBruto + f.aiu + f.iva - f.retencion)
+                    }));
+                    
+                    mostrarPreview();
+                    
+                } catch (error) {
+                    console.error(error);
+                    alert('❌ Error al leer el Excel: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+        
+        function formatearFecha(fecha) {
+            if (!fecha) return new Date().toISOString().split('T')[0];
+            if (typeof fecha === 'number') {
+                // Excel date
+                const date = new Date((fecha - 25569) * 86400 * 1000);
+                return date.toISOString().split('T')[0];
+            }
+            if (typeof fecha === 'string') {
+                const date = new Date(fecha);
+                if (!isNaN(date.getTime())) {
+                    return date.toISOString().split('T')[0];
+                }
+            }
+            return new Date().toISOString().split('T')[0];
+        }
+        
+        function mostrarPreview() {
+            document.getElementById('totalFacturas').textContent = facturasTemp.length;
+            
+            let html = '<table class="preview-table"><thead><tr>';
+            html += '<th>Proveedor</th><th>Concepto</th><th>Factura</th><th>Valor Neto</th><th>F. Venc.</th>';
+            html += '</tr></thead><tbody>';
+            
+            facturasTemp.forEach(f => {
+                html += `<tr>
+                    <td>${f.proveedor}</td>
+                    <td>${f.concepto}</td>
+                    <td>${f.facturaNo}</td>
+                    <td>$${f.valorNeto.toLocaleString('es-CO')}</td>
+                    <td>${f.fechaVencimiento}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('previewContainer').innerHTML = html;
+            document.getElementById('modalPreview').classList.add('active');
+        }
+        
+        window.confirmarCargaExcel = async function() {
+            if (!edificioActual) {
+                alert('❌ Selecciona un edificio');
+                return;
+            }
+            
+            try {
+                const cuentasRef = ref(db, `cuentas_por_pagar/${edificioActual}`);
+                
+                for (const factura of facturasTemp) {
+                    await push(cuentasRef, {
+                        ...factura,
+                        fechaCreacion: new Date().toISOString(),
+                        creadoPor: 'Carga Excel'
+                    });
+                }
+                
+                alert(`✅ ${facturasTemp.length} facturas cargadas exitosamente`);
+                cerrarModal('modalPreview');
+                facturasTemp = [];
+                document.getElementById('fileExcel').value = '';
+                
+            } catch (error) {
+                console.error(error);
+                alert('❌ Error al cargar facturas: ' + error.message);
+            }
+        };
+        
+        // MODAL MANUAL
+        window.abrirModalManual = function() {
+            if (!edificioActual) {
+                alert('❌ Selecciona un edificio primero');
+                return;
+            }
+            document.getElementById('modalManual').classList.add('active');
+            document.getElementById('fechaRecepcion').valueAsDate = new Date();
+        };
+        
+        ['valorBruto', 'aiu', 'iva', 'retencion'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calcularValorNeto);
+        });
+        
+        function calcularValorNeto() {
+            const bruto = parseFloat(document.getElementById('valorBruto').value) || 0;
+            const aiu = parseFloat(document.getElementById('aiu').value) || 0;
+            const iva = parseFloat(document.getElementById('iva').value) || 0;
+            const ret = parseFloat(document.getElementById('retencion').value) || 0;
+            
+            const neto = bruto + aiu + iva - ret;
+            document.getElementById('valorNeto').value = neto.toFixed(2);
+        }
+
+        // Calcular Resto a Pagar en formulario agregar
+        function calcularRestoAPagar() {
+            const valorNeto = parseFloat(document.getElementById('valorNeto').value) || 0;
+            const anticipo = parseFloat(document.getElementById('anticipo').value) || 0;
+            const saldoPendAnterior = parseFloat(document.getElementById('saldoPendienteAnterior').value) || 0;
+            const resto = valorNeto + saldoPendAnterior - anticipo;
+            document.getElementById('restoAPagar').value = resto.toFixed(2);
+        }
+
+        // Calcular Resto a Pagar en formulario editar
+        function calcularRestoEditar() {
+            const valorNeto = parseFloat(document.getElementById('editarValorNeto').value) || 0;
+            const anticipo = parseFloat(document.getElementById('editarAnticipo').value) || 0;
+            const saldoPendAnterior = parseFloat(document.getElementById('editarSaldoPendienteAnterior').value) || 0;
+            const resto = valorNeto + saldoPendAnterior - anticipo;
+            document.getElementById('editarRestoAPagar').value = resto.toFixed(2);
+        }
+        
+        // Recalcular también cuando cambia el valor neto
+        function calcularValorNetoEditar() {
+            const bruto = parseFloat(document.getElementById('editarValorBruto').value) || 0;
+            const aiu = parseFloat(document.getElementById('editarAiu').value) || 0;
+            const iva = parseFloat(document.getElementById('editarIva').value) || 0;
+            const ret = parseFloat(document.getElementById('editarRetencion').value) || 0;
+            const neto = bruto + aiu + iva - ret;
+            document.getElementById('editarValorNeto').value = neto.toFixed(2);
+            calcularRestoEditar(); // Recalcular resto
+        }
+        
+        window.guardarCuentaManual = async function() {
+            // Validar solo campos ESENCIALES
+            const proveedor = document.getElementById('proveedor').value.trim();
+            const numeroId = document.getElementById('numeroId').value.trim();
+            const concepto = document.getElementById('concepto').value.trim();
+            const valorBruto = document.getElementById('valorBruto').value;
+
+            if (!proveedor || !valorBruto) {
+                alert('❌ Completa los campos obligatorios:\n• Proveedor\n• Valor Bruto');
+                return;
+            }
+            
+            const nuevaCuenta = {
+                proveedor: proveedor,
+                tipoId: document.getElementById('tipoId').value,
+                numeroId: numeroId,
+                banco: document.getElementById('banco').value || '',
+                tipoCuenta: document.getElementById('tipoCuenta').value || '',
+                numeroCuenta: document.getElementById('numeroCuenta').value || '',
+                concepto: concepto,
+                facturaNo: document.getElementById('facturaNo').value || 'N/A',
+                valorBruto: parseFloat(valorBruto),
+                aiu: parseFloat(document.getElementById('aiu').value) || 0,
+                iva: parseFloat(document.getElementById('iva').value) || 0,
+                retencion: parseFloat(document.getElementById('retencion').value) || 0,
+                valorNeto: parseFloat(document.getElementById('valorNeto').value) || parseFloat(valorBruto) || 0,
+                saldoPendienteAnterior: parseFloat(document.getElementById('saldoPendienteAnterior').value) || 0,
+                anticipo: parseFloat(document.getElementById('anticipo').value) || 0,
+                fechaAnticipo: document.getElementById('fechaAnticipo').value || null,
+                restoAPagar: parseFloat(document.getElementById('restoAPagar').value) || parseFloat(document.getElementById('valorNeto').value) || parseFloat(valorBruto) || 0,
+                fechaRecepcion: document.getElementById('fechaRecepcion').value || null,
+                fechaVencimiento: document.getElementById('fechaVencimiento').value || null,
+                fechaPago: null,
+                estado: document.getElementById('metodoPago').value === 'Factura Domiciliada' ? 'Pagada' : 'Pendiente',
+                metodoPago: document.getElementById('metodoPago').value || '',
+                categoriaGasto: document.getElementById('categoriaGasto').value || '',
+                prioridad: document.getElementById('prioridad').value || 'Media',
+                observaciones: document.getElementById('observaciones').value || '',
+                creadoPor: 'Manual',
+                fechaCreacion: new Date().toISOString()
+            };
+            
+            try {
+                const cuentasRef = ref(db, `cuentas_por_pagar/${edificioActual}`);
+                const cuentaLimpia = Object.fromEntries(
+                    Object.entries(nuevaCuenta).filter(([_, v]) => v !== null && v !== undefined && !Number.isNaN(v))
+                );
+                await push(cuentasRef, cuentaLimpia);
+
+                // Si el proveedor no existe, guardarlo en el módulo de proveedores
+                const nombreKey = proveedor.toLowerCase();
+                if (!proveedoresDB[nombreKey]) {
+                    const nuevoProveedor = Object.fromEntries(Object.entries({
+                        nombre: proveedor,
+                        tipoIdentificacion: document.getElementById('tipoId').value || 'NIT',
+                        noIdentificacion: numeroId || '',
+                        banco: document.getElementById('banco').value || '',
+                        tipoCuenta: document.getElementById('tipoCuenta').value || '',
+                        numeroCuenta: document.getElementById('numeroCuenta').value || '',
+                        metodoPago: document.getElementById('metodoPago').value || '',
+                        creadoPor: 'Manual-CxP',
+                        fechaCreacion: new Date().toISOString(),
+                    }).filter(([_, v]) => v !== null && v !== undefined && v !== ''));
+                    await push(ref(db, 'proveedores'), nuevoProveedor);
+                }
+
+                alert('✅ Cuenta agregada exitosamente\n\nPuedes agregar los datos faltantes editándola después.');
+                cerrarModal('modalManual');
+                document.getElementById('formManual').reset();
+                aplicarFiltros();
+            } catch (error) {
+                alert('❌ Error al guardar: ' + error.message);
+                console.error('Error:', error);
+            }
+        };
+        
+        window.marcarPagada = async function(id) {
+            if (!confirm('¿Marcar como pagada?')) return;
+            
+            const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+            await update(cuentaRef, {
+                estado: 'Pagada',
+                fechaPago: new Date().toISOString().split('T')[0]
+            });
+            
+            alert('✅ Cuenta marcada como pagada');
+        };
+        
+        window.eliminarCuenta = async function(id) {
+            if (!confirm('¿Eliminar esta cuenta? No se puede deshacer.')) return;
+            
+            const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+            await remove(cuentaRef);
+            
+            alert('✅ Cuenta eliminada');
+        };
+        
+        // ═══════════════════════════════════════════════════════════════
+        // FUNCIONES DE EDICIÓN
+        // ═══════════════════════════════════════════════════════════════
+        window.abrirEditar = async function(id) {
+            try {
+                // Leer cuenta de Firebase
+                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                const snapshot = await new Promise((resolve) => {
+                    onValue(cuentaRef, resolve, { onlyOnce: true });
+                });
+                
+                if (!snapshot.exists()) {
+                    alert('❌ Cuenta no encontrada');
+                    return;
+                }
+                
+                const cuenta = snapshot.val();
+                
+                // Llenar formulario de edición
+                document.getElementById('editarId').value = id;
+                document.getElementById('editarEstadoActual').value = cuenta.estado || 'Pendiente';
+                document.getElementById('editarProveedor').value = cuenta.proveedor || '';
+                document.getElementById('editarTipoId').value = cuenta.tipoId || 'NIT';
+                document.getElementById('editarNumeroId').value = cuenta.numeroId || '';
+                document.getElementById('editarBanco').value = cuenta.banco || '';
+                document.getElementById('editarTipoCuenta').value = cuenta.tipoCuenta || '';
+                document.getElementById('editarNumeroCuenta').value = cuenta.numeroCuenta || '';
+                document.getElementById('editarConcepto').value = cuenta.concepto || '';
+                document.getElementById('editarFacturaNo').value = cuenta.facturaNo || '';
+                document.getElementById('editarValorBruto').value = cuenta.valorBruto || 0;
+                document.getElementById('editarAiu').value = cuenta.aiu || 0;
+                document.getElementById('editarIva').value = cuenta.iva || 0;
+                document.getElementById('editarRetencion').value = cuenta.retencion || 0;
+                document.getElementById('editarValorNeto').value = cuenta.valorNeto || 0;
+                document.getElementById('editarFechaRecepcion').value = cuenta.fechaRecepcion || '';
+                document.getElementById('editarFechaVencimiento').value = cuenta.fechaVencimiento || '';
+                document.getElementById('editarMetodoPago').value = cuenta.metodoPago || '';
+                document.getElementById('editarPrioridad').value = cuenta.prioridad || 'Media';
+                document.getElementById('editarCategoriaGasto').value = cuenta.categoriaGasto || '';
+                document.getElementById('editarObservaciones').value = cuenta.observaciones || '';
+                document.getElementById('editarSaldoPendienteAnterior').value = cuenta.saldoPendienteAnterior || 0;
+                document.getElementById('editarAnticipo').value = cuenta.anticipo || 0;
+                document.getElementById('editarFechaAnticipo').value = cuenta.fechaAnticipo || '';
+                document.getElementById('editarRestoAPagar').value = cuenta.restoAPagar || cuenta.valorNeto || 0;
+                
+                // Abrir modal
+                document.getElementById('modalEditar').classList.add('active');
+                
+            } catch (error) {
+                alert('❌ Error al cargar cuenta: ' + error.message);
+                console.error('Error:', error);
+            }
+        };
+        
+        // Calcular valor neto en edición
+        ['editarValorBruto', 'editarAiu', 'editarIva', 'editarRetencion'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                const bruto = parseFloat(document.getElementById('editarValorBruto').value) || 0;
+                const aiu = parseFloat(document.getElementById('editarAiu').value) || 0;
+                const iva = parseFloat(document.getElementById('editarIva').value) || 0;
+                const ret = parseFloat(document.getElementById('editarRetencion').value) || 0;
+                
+                const neto = bruto + aiu + iva - ret;
+                document.getElementById('editarValorNeto').value = neto.toFixed(2);
+            });
+        });
+        
+        window.guardarEdicion = async function() {
+            const id = document.getElementById('editarId').value;
+            
+            // Validar campos esenciales
+            const proveedor = document.getElementById('editarProveedor').value.trim();
+            const numeroId = document.getElementById('editarNumeroId').value.trim();
+            const concepto = document.getElementById('editarConcepto').value.trim();
+            const valorBruto = document.getElementById('editarValorBruto').value;
+
+            if (!proveedor || !valorBruto) {
+                alert('❌ Completa los campos obligatorios:\n• Proveedor\n• Valor Bruto');
+                return;
+            }
+            
+            try {
+                const metodoPagoVal = document.getElementById('editarMetodoPago').value || '';
+                const estadoActual = document.getElementById('editarEstadoActual').value || 'Pendiente';
+                const estadoFinal = metodoPagoVal === 'Factura Domiciliada' ? 'Pagada' : estadoActual;
+                const datosActualizados = {
+                    proveedor: proveedor,
+                    tipoId: document.getElementById('editarTipoId').value,
+                    numeroId: numeroId,
+                    banco: document.getElementById('editarBanco').value || '',
+                    tipoCuenta: document.getElementById('editarTipoCuenta').value || '',
+                    numeroCuenta: document.getElementById('editarNumeroCuenta').value || '',
+                    concepto: concepto,
+                    facturaNo: document.getElementById('editarFacturaNo').value || '',
+                    valorBruto: parseFloat(valorBruto),
+                    aiu: parseFloat(document.getElementById('editarAiu').value) || 0,
+                    iva: parseFloat(document.getElementById('editarIva').value) || 0,
+                    retencion: parseFloat(document.getElementById('editarRetencion').value) || 0,
+                    valorNeto: parseFloat(document.getElementById('editarValorNeto').value) || parseFloat(valorBruto),
+                    saldoPendienteAnterior: parseFloat(document.getElementById('editarSaldoPendienteAnterior').value) || 0,
+                    anticipo: parseFloat(document.getElementById('editarAnticipo').value) || 0,
+                    fechaAnticipo: document.getElementById('editarFechaAnticipo').value || null,
+                    restoAPagar: parseFloat(document.getElementById('editarRestoAPagar').value) || parseFloat(document.getElementById('editarValorNeto').value),
+                    fechaRecepcion: document.getElementById('editarFechaRecepcion').value || null,
+                    fechaVencimiento: document.getElementById('editarFechaVencimiento').value || null,
+                    estado: estadoFinal,
+                    metodoPago: metodoPagoVal,
+                    categoriaGasto: document.getElementById('editarCategoriaGasto').value || '',
+                    prioridad: document.getElementById('editarPrioridad').value || 'Media',
+                    observaciones: document.getElementById('editarObservaciones').value || ''
+                };
+                
+                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                const datosLimpios = Object.fromEntries(
+                    Object.entries(datosActualizados).filter(([_, v]) => v !== undefined)
+                );
+                await update(cuentaRef, datosLimpios);
+                
+                alert('✅ Cuenta actualizada exitosamente');
+                cerrarModal('modalEditar');
+                
+            } catch (error) {
+                alert('❌ Error al guardar: ' + error.message);
+                console.error('Error:', error);
+            }
+        };
+        
+        window.descargarExcel = async function() {
+            if (!edificioActual) {
+                alert('❌ Selecciona un edificio primero');
+                return;
+            }
+
+            const filtroMes = document.getElementById('filtroMes').value;
+            if (!filtroMes) {
+                alert('❌ Selecciona un mes para generar el Excel');
+                return;
+            }
+
+            try {
+                // Leer cuentas de Firebase
+                const cuentasRef = ref(db, `cuentas_por_pagar/${edificioActual}`);
+                const snapshot = await new Promise((resolve) => {
+                    onValue(cuentasRef, resolve, { onlyOnce: true });
+                });
+
+                if (!snapshot.exists()) {
+                    alert('❌ No hay cuentas registradas para este edificio');
+                    return;
+                }
+
+                // Convertir a array filtrando por mes seleccionado
+                const cuentas = [];
+                snapshot.forEach((childSnapshot) => {
+                    const c = { id: childSnapshot.key, ...childSnapshot.val() };
+                    const mesCuenta = c.fechaRecepcion ? c.fechaRecepcion.substring(5, 7) : '';
+                    if (mesCuenta === filtroMes) {
+                        cuentas.push(c);
+                    }
+                });
+
+                if (cuentas.length === 0) {
+                    const nombresMes = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                                        'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                    alert(`❌ No hay cuentas para ${nombresMes[parseInt(filtroMes)]}`);
+                    return;
+                }
+
+                // Crear datos para Excel
+                const datosExcel = cuentas.map(c => ({
+                    'Proveedor': c.proveedor || '',
+                    'Tipo de ID': c.tipoId || 'NIT',
+                    'No. Identificación': c.numeroId || '',
+                    'Banco': c.banco || '',
+                    'Tipo de Cuenta': c.tipoCuenta || '',
+                    'Número de Cuenta': c.numeroCuenta || '',
+                    'Concepto': c.concepto || '',
+                    'Nro Factura': c.facturaNo || '',
+                    'Valor Bruto': c.valorBruto || 0,
+                    'AIU': c.aiu || 0,
+                    'IVA': c.iva || 0,
+                    'Retención': c.retencion || 0,
+                    'Valor Neto a Pagar': c.valorNeto || 0,
+                    'Fecha de Recepción': c.fechaRecepcion || '',
+                    'Fecha de Vencimiento': c.fechaVencimiento || '',
+                    'Fecha de Pago': c.fechaPago || '',
+                    'Estado': c.estado || 'Pendiente',
+                    'Método de Pago': c.metodoPago || '',
+                    'Categoría del Gasto': c.categoriaGasto || '',
+                    'Prioridad': c.prioridad || 'Media',
+                    'Observaciones': c.observaciones || ''
+                }));
+                
+                // Crear workbook
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(datosExcel);
+                
+                // Ajustar anchos de columnas
+                ws['!cols'] = [
+                    { wch: 30 }, // Proveedor
+                    { wch: 12 }, // Tipo de ID
+                    { wch: 18 }, // No. ID
+                    { wch: 20 }, // Banco
+                    { wch: 15 }, // Tipo de Cuenta
+                    { wch: 20 }, // Número de Cuenta
+                    { wch: 35 }, // Concepto
+                    { wch: 15 }, // Nro Factura / CAE
+                    { wch: 14 }, // Valor Bruto
+                    { wch: 12 }, // AIU
+                    { wch: 12 }, // IVA
+                    { wch: 16 }, // Retención
+                    { wch: 18 }, // Valor Neto a Pagar
+                    { wch: 18 }, // Fecha Recepción
+                    { wch: 20 }, // Fecha Vencimiento
+                    { wch: 15 }, // Fecha Pago
+                    { wch: 12 }, // Estado
+                    { wch: 18 }, // Método de Pago
+                    { wch: 25 }, // Categoría del Gasto
+                    { wch: 12 }, // Prioridad
+                    { wch: 40 }  // Observaciones
+                ];
+                
+                XLSX.utils.book_append_sheet(wb, ws, 'Cuentas por Pagar');
+                
+                // Descargar
+                const nombresMes = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                                    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                const año = new Date().getFullYear();
+                const nombreArchivo = `Cuentas_Por_Pagar_${edificioActual}_${nombresMes[parseInt(filtroMes)]}_${año}.xlsx`;
+                XLSX.writeFile(wb, nombreArchivo);
+
+                alert(`✅ Excel descargado exitosamente!\n\n📊 ${cuentas.length} cuentas exportadas\n📁 Archivo: ${nombreArchivo}`);
+                
+            } catch (error) {
+                console.error('Error descargando Excel:', error);
+                alert('❌ Error al descargar Excel: ' + error.message);
+            }
+        };
+        
+        window.cerrarModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        };
+        
+        // ═══════════════════════════════════════════════════════════════
+        // FUNCIONES DE FILTROS
+        // ═══════════════════════════════════════════════════════════════
+        window.aplicarFiltros = function() {
+            const filtroProveedor = document.getElementById('filtroProveedor').value.toLowerCase();
+            const filtroMes = document.getElementById('filtroMes').value;
+            
+            const filas = document.querySelectorAll('#tablaCuerpo tr');
+            let contador = 0;
+            
+            filas.forEach(fila => {
+                // Obtener datos de la fila
+                const proveedor = fila.getAttribute('data-proveedor') || '';
+                const fecha = fila.getAttribute('data-fecha') || '';
+                const mesFecha = fecha ? fecha.substring(5, 7) : ''; // Extrae mes de YYYY-MM-DD
+                
+                // Aplicar filtros
+                const coincideProveedor = !filtroProveedor || proveedor.includes(filtroProveedor);
+                const coincideMes = !filtroMes || mesFecha === filtroMes;
+                
+                if (coincideProveedor && coincideMes) {
+                    fila.style.display = '';
+                    contador++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contador
+            document.getElementById('contadorFacturas').textContent = contador;
+        };
+        
+        window.limpiarFiltros = function() {
+            document.getElementById('filtroProveedor').value = '';
+            document.getElementById('filtroMes').value = '';
+            aplicarFiltros();
+        };
+
+        // CARGAR RESUMEN
+        async function cargarResumen() {
+            const container = document.getElementById('tarjetasEdificios');
+            if (!container) return;
+            
+            const edificios = [
+                { id: 'nepal-2', nombre: 'Nepal 2', icono: '🏢' },
+                { id: 'avalon', nombre: 'Avalon', icono: '🏰' },
+                { id: 'convivienda-1', nombre: 'Convivienda I', icono: '🏘️' },
+                { id: 'pinos-del-country', nombre: 'Pinos del Country', icono: '🌲' },
+                { id: 'torre-amin-2', nombre: 'Torres de Amin II', icono: '🏗️' }
+            ];
+            
+            let html = '';
+            for (const ed of edificios) {
+                const snap = await get(ref(db, `cuentas_por_pagar/${ed.id}`));
+                let total = 0, pend = 0, pag = 0, deuda = 0;
+                if (snap.exists()) {
+                    snap.forEach((c) => {
+                        const ct = c.val();
+                        total++;
+                        if (ct.estado === 'Pagada' || ct.estado === 'pagada') {
+                            pag++;
+                        } else {
+                            pend++;
+                            const totalAbonos = ct.abonos
+                                ? Object.values(ct.abonos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                                : 0;
+                            const totAnt = ct.anticipos
+                                ? Object.values(ct.anticipos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                                : (parseFloat(ct.anticipo) || 0);
+                            const saldoEdif = (parseFloat(ct.valorNeto) || 0)
+                                + (parseFloat(ct.saldoPendienteAnterior) || 0)
+                                - totAnt
+                                - totalAbonos;
+                            deuda += saldoEdif;
+                        }
+                    });
+                }
+                html += `<div class="tarjeta-edificio"><h3>${ed.icono} ${ed.nombre}</h3><div class="tarjeta-dato"><span>Total:</span><span class="tarjeta-valor">${total}</span></div><div class="tarjeta-dato" style="background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;margin:8px 0"><span>⚠️ Pendientes:</span><span class="tarjeta-valor" style="font-size:1.5em">${pend}</span></div><div class="tarjeta-dato"><span>✅ Pagadas:</span><span class="tarjeta-valor">${pag}</span></div><div class="tarjeta-dato" style="border-top:2px solid rgba(255,255,255,0.3);margin-top:8px;padding-top:8px"><span>Deuda:</span><span class="tarjeta-valor">$${deuda.toLocaleString('es-CO')}</span></div></div>`;
+            }
+            container.innerHTML = html;
+        }
+        
+        setTimeout(cargarResumen, 1000);
+
+        // ═══════════════════════════════════════════════════════════════
+        // VER PENDIENTES POR EDIFICIO
+        // ═══════════════════════════════════════════════════════════════
+        window.verPendientesPorEdificio = async function() {
+            const contenedor = document.getElementById('pendientesContenido');
+            contenedor.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><h3>Cargando cuentas pendientes...</h3></div>';
+            document.getElementById('modalPendientes').classList.add('active');
+
+            const todosEdificios = [
+                { id: 'nepal-2', nombre: 'Nepal 2', icono: '🏢' },
+                { id: 'avalon', nombre: 'Avalon', icono: '🏰' },
+                { id: 'convivienda-1', nombre: 'Convivienda I', icono: '🏘️' },
+                { id: 'pinos-del-country', nombre: 'Pinos del Country', icono: '🌲' },
+                { id: 'torre-amin-2', nombre: 'Torres de Amin II', icono: '🏗️' }
+            ];
+
+            // Si hay edificio seleccionado, solo mostrar ese; si no, mostrar todos
+            const edificios = edificioActual
+                ? todosEdificios.filter(e => e.id === edificioActual)
+                : todosEdificios;
+
+            let htmlBloques = '';
+            let totalGeneralCuentas = 0;
+            let totalGeneralDeuda = 0;
+            let totalGeneralVencidas = 0;
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+
+            for (const ed of edificios) {
+                try {
+                    const snap = await get(ref(db, `cuentas_por_pagar/${ed.id}`));
+                    const pendientes = [];
+
+                    if (snap.exists()) {
+                        snap.forEach((c) => {
+                            const ct = c.val();
+                            if (ct.estado !== 'Pagada' && ct.estado !== 'pagada') {
+                                const totalAbonos = ct.abonos
+                                    ? Object.values(ct.abonos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                                    : 0;
+                                const totalAnticipos = ct.anticipos
+                                    ? Object.values(ct.anticipos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                                    : (parseFloat(ct.anticipo) || 0);
+                                const saldoPendAnterior = parseFloat(ct.saldoPendienteAnterior) || 0;
+                                const saldo = (parseFloat(ct.valorNeto) || 0)
+                                    + saldoPendAnterior
+                                    - totalAnticipos
+                                    - totalAbonos;
+                                const fVenc = ct.fechaVencimiento ? new Date(ct.fechaVencimiento + 'T00:00:00') : null;
+                                const vencida = fVenc && fVenc < hoy;
+                                if (vencida) totalGeneralVencidas++;
+                                pendientes.push({
+                                    proveedor: ct.proveedor || '-',
+                                    concepto: ct.concepto || '-',
+                                    facturaNo: ct.facturaNo || '-',
+                                    valorNeto: parseFloat(ct.valorNeto) || 0,
+                                    anticipo: totalAnticipos,
+                                    saldoPendAnterior: saldoPendAnterior,
+                                    totalAbonos: totalAbonos,
+                                    saldo: saldo,
+                                    fechaVencimiento: ct.fechaVencimiento || '-',
+                                    prioridad: ct.prioridad || 'Media',
+                                    vencida: vencida
+                                });
+                            }
+                        });
+                    }
+
+                    if (pendientes.length === 0) continue;
+
+                    // Ordenar: vencidas primero, luego por fecha
+                    pendientes.sort((a, b) => {
+                        if (a.vencida && !b.vencida) return -1;
+                        if (!a.vencida && b.vencida) return 1;
+                        return (a.fechaVencimiento || '').localeCompare(b.fechaVencimiento || '');
+                    });
+
+                    const totalEdificio = pendientes.reduce((s, p) => s + p.saldo, 0);
+                    totalGeneralCuentas += pendientes.length;
+                    totalGeneralDeuda += totalEdificio;
+
+                    htmlBloques += `
+                    <div class="pendientes-edificio-bloque">
+                        <div class="pendientes-edificio-titulo">
+                            <span>${ed.icono} ${ed.nombre}</span>
+                            <span class="pendientes-badge">${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''} | $${totalEdificio.toLocaleString('es-CO')}</span>
+                        </div>
+                        <div style="overflow-x: auto; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+                            <table class="pendientes-tabla">
+                                <thead>
+                                    <tr>
+                                        <th>Proveedor</th>
+                                        <th>Concepto</th>
+                                        <th>Nro Factura</th>
+                                        <th>Valor Neto</th>
+                                        <th>Anticipo</th>
+                                        <th style="color:#e53935;">⚡ Saldo Ant.</th>
+                                        <th style="color:#8e44ad;">💳 Abonado</th>
+                                        <th style="color:#C9A227;">✅ Saldo a Pagar</th>
+                                        <th>F. Vencimiento</th>
+                                        <th>Prioridad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                    for (const p of pendientes) {
+                        const claseVencida = p.vencida ? 'vencida-row' : '';
+                        const prioridadColor = p.prioridad === 'Urgente' ? '#e53935' : p.prioridad === 'Alta' ? '#ff9800' : p.prioridad === 'Baja' ? '#4caf50' : '#757575';
+                        const saldoColor = p.saldo <= 0 ? '#C9A227' : '#e53935';
+                        htmlBloques += `
+                                    <tr class="${claseVencida}">
+                                        <td>${p.proveedor}</td>
+                                        <td>${p.concepto}</td>
+                                        <td>${p.facturaNo}</td>
+                                        <td class="monto-col">$${p.valorNeto.toLocaleString('es-CO')}</td>
+                                        <td class="monto-col" style="color:#ff9800;">${p.anticipo > 0 ? '$' + p.anticipo.toLocaleString('es-CO') : '-'}</td>
+                                        <td class="monto-col" style="color:#e53935;">${p.saldoPendAnterior > 0 ? '$' + p.saldoPendAnterior.toLocaleString('es-CO') : '-'}</td>
+                                        <td class="monto-col" style="color:#8e44ad;">${p.totalAbonos > 0 ? '$' + p.totalAbonos.toLocaleString('es-CO') : '-'}</td>
+                                        <td class="monto-col" style="color:${saldoColor}; font-weight:700;">$${p.saldo.toLocaleString('es-CO')}</td>
+                                        <td>${p.vencida ? '⚠️ ' : ''}${p.fechaVencimiento}</td>
+                                        <td><span style="color:${prioridadColor}; font-weight:600;">${p.prioridad}</span></td>
+                                    </tr>`;
+                    }
+
+                    htmlBloques += `
+                                    <tr class="total-row">
+                                        <td colspan="7" style="text-align:right;">Total pendiente ${ed.nombre}:</td>
+                                        <td class="monto-col" style="color:#e53935; font-size:1.1em;">$${totalEdificio.toLocaleString('es-CO')}</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>`;
+
+                } catch (error) {
+                    console.error(`Error cargando ${ed.nombre}:`, error);
+                }
+            }
+
+            // Resumen general
+            let htmlFinal = `
+                <div class="pendientes-resumen-general">
+                    <div class="pendientes-resumen-item">
+                        <span class="valor">${totalGeneralCuentas}</span>
+                        <span class="label">Cuentas Pendientes</span>
+                    </div>
+                    <div class="pendientes-resumen-item">
+                        <span class="valor">$${totalGeneralDeuda.toLocaleString('es-CO')}</span>
+                        <span class="label">Deuda Total</span>
+                    </div>
+                    <div class="pendientes-resumen-item">
+                        <span class="valor">${totalGeneralVencidas}</span>
+                        <span class="label">Vencidas</span>
+                    </div>
+                </div>
+                <div class="pendientes-scroll">
+                    ${htmlBloques || '<div class="empty-state"><div class="empty-state-icon">✅</div><h3>No hay cuentas pendientes</h3><p>Todas las cuentas están al día</p></div>'}
+                </div>`;
+
+            contenedor.innerHTML = htmlFinal;
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // SISTEMA DE ABONOS
+        // ═══════════════════════════════════════════════════════════════
+
+        window.abrirModalAbono = async function(id) {
+            try {
+                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                const snapshot = await new Promise((resolve) => {
+                    onValue(cuentaRef, resolve, { onlyOnce: true });
+                });
+                if (!snapshot.exists()) return;
+
+                const cuenta = snapshot.val();
+                const totalAbonos = cuenta.abonos
+                    ? Object.values(cuenta.abonos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                    : 0;
+                const totalAnticiposAb = cuenta.anticipos
+                    ? Object.values(cuenta.anticipos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                    : (parseFloat(cuenta.anticipo) || 0);
+                const saldoPendAnterior = parseFloat(cuenta.saldoPendienteAnterior) || 0;
+                const saldoActual = (parseFloat(cuenta.valorNeto) || 0)
+                    + saldoPendAnterior
+                    - totalAnticiposAb
+                    - totalAbonos;
+
+                document.getElementById('abonoIdCuenta').value = id;
+                document.getElementById('abonoFecha').valueAsDate = new Date();
+                document.getElementById('abonoMonto').value = '';
+                document.getElementById('abonoDescripcion').value = '';
+
+                document.getElementById('abonoInfoCuenta').innerHTML = `
+                    <div style="font-weight:700; font-size:1.1em; color:#667eea; margin-bottom:10px;">${cuenta.proveedor}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;">
+                        <div><span style="color:#666;">Factura:</span> <strong>${cuenta.facturaNo || 'N/A'}</strong></div>
+                        <div><span style="color:#666;">Valor Neto:</span> <strong>$${Number(cuenta.valorNeto||0).toLocaleString('es-CO')}</strong></div>
+                        ${saldoPendAnterior > 0 ? `<div><span style="color:#e53935;">Saldo Ant.:</span> <strong style="color:#e53935;">$${saldoPendAnterior.toLocaleString('es-CO')}</strong></div>` : ''}
+                        ${totalAbonos > 0 ? `<div><span style="color:#8e44ad;">Ya abonado:</span> <strong style="color:#8e44ad;">$${totalAbonos.toLocaleString('es-CO')}</strong></div>` : ''}
+                        <div style="grid-column:1/-1; background:white; padding:8px; border-radius:6px; text-align:center; margin-top:4px;">
+                            <span style="color:#666; font-size:11px;">SALDO PENDIENTE ACTUAL</span><br>
+                            <span style="color:${saldoActual <= 0 ? '#C9A227' : '#e53935'}; font-weight:700; font-size:1.4em;">$${saldoActual.toLocaleString('es-CO')}</span>
+                        </div>
+                    </div>`;
+
+                document.getElementById('modalAbono').classList.add('active');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al abrir modal de abono');
+            }
+        };
+
+        window.guardarAbono = async function() {
+            const id = document.getElementById('abonoIdCuenta').value;
+            const monto = parseFloat(document.getElementById('abonoMonto').value);
+            const fecha = document.getElementById('abonoFecha').value;
+            const descripcion = document.getElementById('abonoDescripcion').value.trim();
+
+            if (!monto || monto <= 0) {
+                alert('❌ El monto del abono debe ser mayor a 0');
+                return;
+            }
+            if (!fecha) {
+                alert('❌ Ingresa la fecha del abono');
+                return;
+            }
+
+            try {
+                const abonosRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}/abonos`);
+                await push(abonosRef, {
+                    monto: monto,
+                    fecha: fecha,
+                    descripcion: descripcion || 'Abono',
+                    creadoEn: new Date().toISOString()
+                });
+                alert(`✅ Abono de $${monto.toLocaleString('es-CO')} registrado correctamente`);
+                cerrarModal('modalAbono');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al guardar abono: ' + err.message);
+            }
+        };
+
+        window.verHistorialAbonos = async function(id) {
+            try {
+                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                const snapshot = await new Promise((resolve) => {
+                    onValue(cuentaRef, resolve, { onlyOnce: true });
+                });
+                if (!snapshot.exists()) return;
+
+                const cuenta = snapshot.val();
+                const abonos = cuenta.abonos ? Object.entries(cuenta.abonos) : [];
+                const totalAbonos = abonos.reduce((s, [, a]) => s + (parseFloat(a.monto) || 0), 0);
+                const totalAnticiposHist = cuenta.anticipos
+                    ? Object.values(cuenta.anticipos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                    : (parseFloat(cuenta.anticipo) || 0);
+                const saldoPendAnterior = parseFloat(cuenta.saldoPendienteAnterior) || 0;
+                const saldoActual = (parseFloat(cuenta.valorNeto) || 0)
+                    + saldoPendAnterior
+                    - totalAnticiposHist
+                    - totalAbonos;
+
+                let html = `
+                    <div style="background:#f0f4ff; padding:15px; border-radius:10px; margin-bottom:15px;">
+                        <div style="font-weight:700; color:#667eea; margin-bottom:10px;">${cuenta.proveedor} — Factura: ${cuenta.facturaNo||'N/A'}</div>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; font-size:13px; text-align:center;">
+                            <div style="background:white; padding:10px; border-radius:8px;">
+                                <div style="color:#666; font-size:11px;">Valor Neto</div>
+                                <div style="font-weight:700; color:#333;">$${Number(cuenta.valorNeto||0).toLocaleString('es-CO')}</div>
+                            </div>
+                            ${saldoPendAnterior > 0 ? `
+                            <div style="background:white; padding:10px; border-radius:8px;">
+                                <div style="color:#666; font-size:11px;">Saldo Ant. (anterior)</div>
+                                <div style="font-weight:700; color:#e53935;">$${saldoPendAnterior.toLocaleString('es-CO')}</div>
+                            </div>` : ''}
+                            <div style="background:white; padding:10px; border-radius:8px;">
+                                <div style="color:#666; font-size:11px;">Total Abonado</div>
+                                <div style="font-weight:700; color:#8e44ad;">$${totalAbonos.toLocaleString('es-CO')}</div>
+                            </div>
+                            <div style="background:white; padding:10px; border-radius:8px; ${saldoPendAnterior > 0 ? '' : 'grid-column:3/4;'}">
+                                <div style="color:#666; font-size:11px;">Saldo Pendiente</div>
+                                <div style="font-weight:700; color:${saldoActual<=0?'#C9A227':'#e53935'}; font-size:1.2em;">$${saldoActual.toLocaleString('es-CO')}</div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                if (abonos.length === 0) {
+                    html += '<div class="empty-state"><div class="empty-state-icon">💳</div><h3>No hay abonos registrados</h3><p>Usa el botón 💳 en la tabla para registrar el primer abono</p></div>';
+                } else {
+                    abonos.sort((a, b) => (a[1].fecha||'').localeCompare(b[1].fecha||''));
+                    html += `<table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background:#667eea; color:white;">
+                                <th style="padding:10px; text-align:left;">Fecha</th>
+                                <th style="padding:10px; text-align:right;">Monto</th>
+                                <th style="padding:10px; text-align:left;">Descripción</th>
+                                <th style="padding:10px; text-align:center;">Eliminar</th>
+                            </tr>
+                        </thead><tbody>`;
+                    for (const [abonoId, abono] of abonos) {
+                        html += `<tr style="border-bottom:1px solid #f0f0f0;">
+                            <td style="padding:10px;">${abono.fecha||'-'}</td>
+                            <td style="padding:10px; text-align:right; font-weight:700; color:#8e44ad;">$${Number(abono.monto||0).toLocaleString('es-CO')}</td>
+                            <td style="padding:10px; color:#666;">${abono.descripcion||'Abono'}</td>
+                            <td style="padding:10px; text-align:center;">
+                                <button onclick="eliminarAbono('${id}','${abonoId}')"
+                                    style="background:#e53935;color:white;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:700;">🗑️</button>
+                            </td>
+                        </tr>`;
+                    }
+                    html += '</tbody></table>';
+                }
+
+                // Botón para registrar nuevo abono desde historial
+                html += `<button onclick="cerrarModal('modalHistorialAbonos'); setTimeout(()=>abrirModalAbono('${id}'),200);"
+                    style="margin-top:15px; background:linear-gradient(135deg,#8e44ad,#6a1b9a); color:white; border:none; padding:12px 20px; border-radius:10px; cursor:pointer; font-weight:700; width:100%;">
+                    ➕ Registrar Nuevo Abono</button>`;
+
+                document.getElementById('historialAbonosContenido').innerHTML = html;
+                document.getElementById('modalHistorialAbonos').classList.add('active');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al cargar historial: ' + err.message);
+            }
+        };
+
+        window.eliminarAbono = async function(cuentaId, abonoId) {
+            if (!confirm('¿Eliminar este abono? No se puede deshacer.')) return;
+            try {
+                const abonoRef = ref(db, `cuentas_por_pagar/${edificioActual}/${cuentaId}/abonos/${abonoId}`);
+                await remove(abonoRef);
+                cerrarModal('modalHistorialAbonos');
+                alert('✅ Abono eliminado');
+            } catch (err) {
+                alert('❌ Error al eliminar abono: ' + err.message);
+            }
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // SISTEMA DE ANTICIPOS
+        // ═══════════════════════════════════════════════════════════════
+
+        window.abrirModalAnticipo = async function(id) {
+            try {
+                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                const snapshot = await new Promise((resolve) => {
+                    onValue(cuentaRef, resolve, { onlyOnce: true });
+                });
+                if (!snapshot.exists()) return;
+
+                const cuenta = snapshot.val();
+                const totalAnticipos = cuenta.anticipos
+                    ? Object.values(cuenta.anticipos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                    : (parseFloat(cuenta.anticipo) || 0);
+                const totalAbonos = cuenta.abonos
+                    ? Object.values(cuenta.abonos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                    : 0;
+                const saldoPendAnterior = parseFloat(cuenta.saldoPendienteAnterior) || 0;
+                const saldoActual = (parseFloat(cuenta.valorNeto) || 0) + saldoPendAnterior - totalAnticipos - totalAbonos;
+
+                document.getElementById('anticipoIdCuenta').value = id;
+                document.getElementById('anticipoFecha').valueAsDate = new Date();
+                document.getElementById('anticipoMonto').value = '';
+                document.getElementById('anticipoDescripcion').value = '';
+
+                document.getElementById('anticipoInfoCuenta').innerHTML = `
+                    <div style="font-weight:700; font-size:1.1em; color:#e65100; margin-bottom:10px;">${cuenta.proveedor}</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;">
+                        <div><span style="color:#666;">Factura:</span> <strong>${cuenta.facturaNo || 'N/A'}</strong></div>
+                        <div><span style="color:#666;">Valor Neto:</span> <strong>$${Number(cuenta.valorNeto||0).toLocaleString('es-CO')}</strong></div>
+                        ${totalAnticipos > 0 ? `<div><span style="color:#ff9800;">Ya anticipado:</span> <strong style="color:#ff9800;">$${totalAnticipos.toLocaleString('es-CO')}</strong></div>` : ''}
+                        ${totalAbonos > 0 ? `<div><span style="color:#8e44ad;">Ya abonado:</span> <strong style="color:#8e44ad;">$${totalAbonos.toLocaleString('es-CO')}</strong></div>` : ''}
+                        <div style="grid-column:1/-1; background:white; padding:8px; border-radius:6px; text-align:center; margin-top:4px;">
+                            <span style="color:#666; font-size:11px;">SALDO PENDIENTE ACTUAL</span><br>
+                            <span style="color:${saldoActual <= 0 ? '#C9A227' : '#e53935'}; font-weight:700; font-size:1.4em;">$${saldoActual.toLocaleString('es-CO')}</span>
+                        </div>
+                    </div>`;
+
+                document.getElementById('modalAnticipo').classList.add('active');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al abrir modal de anticipo');
+            }
+        };
+
+        window.guardarAnticipo = async function() {
+            const id = document.getElementById('anticipoIdCuenta').value;
+            const monto = parseFloat(document.getElementById('anticipoMonto').value);
+            const fecha = document.getElementById('anticipoFecha').value;
+            const descripcion = document.getElementById('anticipoDescripcion').value.trim();
+
+            if (!monto || monto <= 0) {
+                alert('❌ El monto del anticipo debe ser mayor a 0');
+                return;
+            }
+            if (!fecha) {
+                alert('❌ Ingresa la fecha del anticipo');
+                return;
+            }
+
+            try {
+                const anticiposRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}/anticipos`);
+                await push(anticiposRef, {
+                    monto: monto,
+                    fecha: fecha,
+                    descripcion: descripcion || 'Anticipo',
+                    creadoEn: new Date().toISOString()
+                });
+                alert(`✅ Anticipo de $${monto.toLocaleString('es-CO')} registrado correctamente`);
+                cerrarModal('modalAnticipo');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al guardar anticipo: ' + err.message);
+            }
+        };
+
+        window.verHistorialAnticipos = async function(id) {
+            try {
+                const cuentaRef = ref(db, `cuentas_por_pagar/${edificioActual}/${id}`);
+                const snapshot = await new Promise((resolve) => {
+                    onValue(cuentaRef, resolve, { onlyOnce: true });
+                });
+                if (!snapshot.exists()) return;
+
+                const cuenta = snapshot.val();
+
+                // Soportar tanto formato nuevo (lista) como antiguo (escalar)
+                let anticipos = [];
+                if (cuenta.anticipos) {
+                    anticipos = Object.entries(cuenta.anticipos);
+                } else if (parseFloat(cuenta.anticipo) > 0) {
+                    anticipos = [['legacy', { monto: cuenta.anticipo, fecha: cuenta.fechaAnticipo || '-', descripcion: 'Anticipo', creadoEn: null }]];
+                }
+
+                const totalAnticipos = anticipos.reduce((s, [, a]) => s + (parseFloat(a.monto) || 0), 0);
+                const totalAbonos = cuenta.abonos
+                    ? Object.values(cuenta.abonos).reduce((s, a) => s + (parseFloat(a.monto) || 0), 0)
+                    : 0;
+                const saldoPendAnterior = parseFloat(cuenta.saldoPendienteAnterior) || 0;
+                const saldoActual = (parseFloat(cuenta.valorNeto) || 0) + saldoPendAnterior - totalAnticipos - totalAbonos;
+
+                let html = `
+                    <div style="background:#fff3e0; padding:15px; border-radius:10px; margin-bottom:15px;">
+                        <div style="font-weight:700; color:#e65100; margin-bottom:10px;">${cuenta.proveedor} — Factura: ${cuenta.facturaNo||'N/A'}</div>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; font-size:13px; text-align:center;">
+                            <div style="background:white; padding:10px; border-radius:8px;">
+                                <div style="color:#666; font-size:11px;">Valor Neto</div>
+                                <div style="font-weight:700; color:#333;">$${Number(cuenta.valorNeto||0).toLocaleString('es-CO')}</div>
+                            </div>
+                            <div style="background:white; padding:10px; border-radius:8px;">
+                                <div style="color:#666; font-size:11px;">Total Anticipado</div>
+                                <div style="font-weight:700; color:#ff9800;">$${totalAnticipos.toLocaleString('es-CO')}</div>
+                            </div>
+                            <div style="background:white; padding:10px; border-radius:8px;">
+                                <div style="color:#666; font-size:11px;">Saldo Pendiente</div>
+                                <div style="font-weight:700; color:${saldoActual<=0?'#C9A227':'#e53935'}; font-size:1.2em;">$${saldoActual.toLocaleString('es-CO')}</div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                if (anticipos.length === 0) {
+                    html += '<div class="empty-state"><div class="empty-state-icon">💰</div><h3>No hay anticipos registrados</h3><p>Usa el botón 💰 en la tabla para registrar el primer anticipo</p></div>';
+                } else {
+                    anticipos.sort((a, b) => (a[1].fecha||'').localeCompare(b[1].fecha||''));
+                    html += `<table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg,#ff9800,#e65100); color:white;">
+                                <th style="padding:10px; text-align:left;">Fecha</th>
+                                <th style="padding:10px; text-align:right;">Monto</th>
+                                <th style="padding:10px; text-align:left;">Descripción</th>
+                                <th style="padding:10px; text-align:center;">Eliminar</th>
+                            </tr>
+                        </thead><tbody>`;
+                    for (const [anticipoId, anticipo] of anticipos) {
+                        html += `<tr style="border-bottom:1px solid #f0f0f0;">
+                            <td style="padding:10px;">${anticipo.fecha||'-'}</td>
+                            <td style="padding:10px; text-align:right; font-weight:700; color:#ff9800;">$${Number(anticipo.monto||0).toLocaleString('es-CO')}</td>
+                            <td style="padding:10px; color:#666;">${anticipo.descripcion||'Anticipo'}</td>
+                            <td style="padding:10px; text-align:center;">
+                                ${anticipoId !== 'legacy' ? `<button onclick="eliminarAnticipo('${id}','${anticipoId}')"
+                                    style="background:#e53935;color:white;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:700;">🗑️</button>` : '<span style="color:#999;font-size:11px;">registro antiguo</span>'}
+                            </td>
+                        </tr>`;
+                    }
+                    html += '</tbody></table>';
+                }
+
+                html += `<button onclick="cerrarModal('modalHistorialAnticipos'); setTimeout(()=>abrirModalAnticipo('${id}'),200);"
+                    style="margin-top:15px; background:linear-gradient(135deg,#ff9800,#e65100); color:white; border:none; padding:12px 20px; border-radius:10px; cursor:pointer; font-weight:700; width:100%;">
+                    ➕ Registrar Nuevo Anticipo</button>`;
+
+                document.getElementById('historialAnticiposContenido').innerHTML = html;
+                document.getElementById('modalHistorialAnticipos').classList.add('active');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al cargar historial: ' + err.message);
+            }
+        };
+
+        window.eliminarAnticipo = async function(cuentaId, anticipoId) {
+            if (!confirm('¿Eliminar este anticipo? No se puede deshacer.')) return;
+            try {
+                const anticipoRef = ref(db, `cuentas_por_pagar/${edificioActual}/${cuentaId}/anticipos/${anticipoId}`);
+                await remove(anticipoRef);
+                cerrarModal('modalHistorialAnticipos');
+                alert('✅ Anticipo eliminado');
+            } catch (err) {
+                alert('❌ Error al eliminar anticipo: ' + err.message);
+            }
+        };
+    </script>
+</body>
+</html>

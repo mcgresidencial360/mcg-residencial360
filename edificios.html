@@ -1,0 +1,848 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edificios - MCG Residencial 360</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+
+        .header {
+            background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%);
+            color: white; padding: 25px 30px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+        .header h1 { font-size: 1.8em; display: flex; align-items: center; gap: 12px; }
+
+        .header-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn-nav {
+            background: rgba(255,255,255,0.2); color: white;
+            border: 2px solid white; padding: 10px 18px;
+            border-radius: 10px; cursor: pointer; font-size: 0.95em; transition: all 0.3s;
+        }
+        .btn-nav:hover { background: white; color: #8B6914; transform: translateY(-2px); }
+
+        .btn-nuevo {
+            background: white; color: #8B6914;
+            border: none; padding: 12px 22px;
+            border-radius: 10px; cursor: pointer; font-size: 0.95em;
+            font-weight: 700; transition: all 0.3s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-nuevo:hover { background: #e8f0ff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        .content { padding: 30px; }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .stat-number { font-size: 2.5em; font-weight: bold; margin: 10px 0; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; }
+
+        .edificios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(370px, 1fr)); gap: 25px; }
+
+        /* TARJETA */
+        .edificio-card {
+            background: white; border-radius: 15px; padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1); border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .edificio-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.18); border-color: #8B6914; }
+
+        .edificio-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #8B6914; }
+        .edificio-icon { font-size: 2.8em; }
+        .edificio-title { flex: 1; }
+        .edificio-title h2 { color: #8B6914; font-size: 1.4em; margin-bottom: 4px; }
+        .edificio-title p { color: #888; font-size: 0.85em; }
+
+        .card-actions { display: flex; gap: 6px; }
+        .btn-card { border: none; padding: 7px 12px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 700; transition: all 0.2s; }
+        .btn-edit { background: #e8f0ff; color: #8B6914; }
+        .btn-edit:hover { background: #8B6914; color: white; }
+        .btn-del { background: #ffebee; color: #e53935; }
+        .btn-del:hover { background: #e53935; color: white; }
+
+        .info-group { margin: 12px 0; padding: 10px 0 10px 14px; border-left: 4px solid #C9A227; }
+        .info-label { font-weight: 700; color: #555; font-size: 0.82em; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-value { color: #333; font-size: 0.95em; line-height: 1.5; }
+        .info-value a { color: #8B6914; text-decoration: none; }
+        .info-value a:hover { text-decoration: underline; }
+
+        .password-field { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .password-value { font-family: monospace; font-size: 1.05em; }
+        .btn-toggle-password { background: #8B6914; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 1em; transition: all 0.3s; }
+        .btn-toggle-password:hover { background: #003d82; }
+        .btn-copy { background: #C9A227; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 0.85em; transition: all 0.3s; }
+        .btn-copy:hover { background: #008f42; }
+
+        /* SECCIÓN SENSIBLE */
+        .seccion-sensible {
+            margin-top: 15px; border-radius: 10px; overflow: hidden;
+            border: 2px solid #7c3aed;
+        }
+        .sensible-header {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            color: white; padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; font-weight: 700; font-size: 0.9em;
+        }
+        .sensible-header:hover { background: linear-gradient(135deg, #6d28d9, #4c1d95); }
+        .sensible-contenido { display: none; padding: 15px; background: #faf5ff; }
+        .sensible-contenido.visible { display: block; }
+        .sensible-contenido .info-group { border-left-color: #7c3aed; }
+        .sensible-label-nota { background: #f3e8ff; color: #5b21b6; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+        /* NO ACCESO - contadora */
+        .sin-acceso {
+            padding: 12px 15px; background: #f5f5f5; border-radius: 8px; margin-top: 15px;
+            color: #aaa; font-size: 13px; text-align: center; border: 2px dashed #ddd;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: flex-start;
+            padding: 20px; overflow-y: auto;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white; padding: 35px; border-radius: 20px;
+            max-width: 700px; width: 100%; margin: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0; }
+        .modal-header h2 { color: #8B6914; font-size: 1.4em; }
+        .btn-close { background: none; border: none; font-size: 2em; cursor: pointer; color: #999; }
+        .btn-close:hover { color: #e53935; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .form-full { grid-column: 1 / -1; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; color: #333; font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 11px 14px; border: 2px solid #ddd;
+            border-radius: 8px; font-size: 14px; transition: border 0.3s; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #8B6914; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .section-divider {
+            grid-column: 1 / -1; padding: 10px 15px; border-radius: 8px;
+            font-weight: 700; font-size: 13px; margin-top: 5px;
+        }
+        .divider-blue { background: #e8f0ff; color: #8B6914; }
+        .divider-green { background: #e8f5e9; color: #2e7d32; }
+        .divider-purple { background: #f3e8ff; color: #5b21b6; }
+
+        .btn-guardar { background: linear-gradient(135deg, #8B6914, #C9A227); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 10px; transition: all 0.3s; }
+        .btn-guardar:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        @media (max-width: 700px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-full { grid-column: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏢 Edificios - MCG Residencial 360</h1>
+        <div class="header-btns">
+            <button class="btn-nuevo" onclick="abrirModalNuevo()">➕ Nuevo Edificio</button>
+            <button class="btn-nav" onclick="window.location.href='Dashboard.html'">🏠 Dashboard</button>
+            <button class="btn-nav" onclick="logout()">🚪 Salir</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Edificios</div>
+                <div class="stat-number" id="totalEdificios">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Proveedores</div>
+                <div class="stat-number" id="totalProveedores">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cuentas Pendientes</div>
+                <div class="stat-number" id="totalCuentas">0</div>
+            </div>
+        </div>
+
+        <div class="edificios-grid" id="edificiosGrid">
+            <div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;">
+                <div style="font-size:3em;margin-bottom:15px;">🏢</div>
+                <h3>Cargando edificios...</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DOCUMENTOS -->
+<div class="modal" id="modalDocumentos">
+    <div class="modal-content" style="max-width:580px;">
+        <div class="modal-header">
+            <h2>📄 Documentos del Edificio</h2>
+            <button class="btn-close" onclick="cerrarModalDocumentos()">&times;</button>
+        </div>
+        <p style="color:#666;font-size:13px;margin-bottom:20px;">Pega el enlace de Google Drive u otra nube. Asegúrate de que el archivo sea compartido como "Cualquier persona con el enlace".</p>
+        <input type="hidden" id="docEdificioKey">
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#f0f4ff;padding:16px;border-radius:10px;border-left:4px solid #8B6914;">
+                <label style="font-weight:700;color:#8B6914;display:block;margin-bottom:8px;">📜 Reglamento de Propiedad Horizontal</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="url" id="docReglamento" placeholder="https://drive.google.com/..." style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:13px;">
+                    <button onclick="abrirDocLink('docReglamento')" style="background:#8B6914;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">🔗 Abrir</button>
+                </div>
+            </div>
+
+            <div style="background:#f0fff4;padding:16px;border-radius:10px;border-left:4px solid #C9A227;">
+                <label style="font-weight:700;color:#C9A227;display:block;margin-bottom:8px;">🤝 Manual de Convivencia</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="url" id="docManual" placeholder="https://drive.google.com/..." style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:13px;">
+                    <button onclick="abrirDocLink('docManual')" style="background:#C9A227;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">🔗 Abrir</button>
+                </div>
+            </div>
+
+            <div style="background:#fff8e1;padding:16px;border-radius:10px;border-left:4px solid #f57f17;">
+                <label style="font-weight:700;color:#e65100;display:block;margin-bottom:8px;">🏛️ Representación Legal (Alcaldía)</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="url" id="docRepresentacion" placeholder="https://drive.google.com/..." style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:13px;">
+                    <button onclick="abrirDocLink('docRepresentacion')" style="background:#f57f17;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">🔗 Abrir</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:24px;">
+            <button onclick="guardarDocumentos()" style="flex:1;background:linear-gradient(135deg,#8B6914,#C9A227);color:white;border:none;padding:14px;border-radius:10px;font-size:1em;font-weight:700;cursor:pointer;">💾 Guardar Enlaces</button>
+            <button onclick="cerrarModalDocumentos()" style="background:#eee;color:#666;border:none;padding:14px 20px;border-radius:10px;font-size:1em;cursor:pointer;">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NUEVO / EDITAR EDIFICIO -->
+<div class="modal" id="modalEdificio">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitulo">➕ Nuevo Edificio</h2>
+            <button class="btn-close" onclick="cerrarModal()">&times;</button>
+        </div>
+        <div class="form-grid">
+            <div class="section-divider divider-blue form-full">🏢 Datos Básicos</div>
+
+            <div class="form-group">
+                <label>Nombre del Edificio *</label>
+                <input type="text" id="fNombre" placeholder="Ej: Nepal 2">
+            </div>
+            <div class="form-group">
+                <label>Tipo</label>
+                <select id="fTipo">
+                    <option>EDIFICIO</option>
+                    <option>CONJUNTO RESIDENCIAL</option>
+                    <option>UNIDAD RESIDENCIAL</option>
+                    <option>CONJUNTO CERRADO</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Icono</label>
+                <select id="fIcono">
+                    <option value="🏢">🏢 Edificio</option>
+                    <option value="🏰">🏰 Castillo</option>
+                    <option value="🏘️">🏘️ Casas</option>
+                    <option value="🌲">🌲 Pinos</option>
+                    <option value="🏗️">🏗️ Construcción</option>
+                    <option value="🏛️">🏛️ Institución</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📍 Dirección</label>
+                <input type="text" id="fDireccion" placeholder="Ej: Calle 55 #4a-24">
+            </div>
+            <div class="form-group">
+                <label>📧 Email</label>
+                <input type="email" id="fEmail" placeholder="correo@gmail.com">
+            </div>
+            <div class="form-group">
+                <label>🔑 Contraseña Email</label>
+                <input type="text" id="fPassword" placeholder="Contraseña del correo">
+            </div>
+            <div class="form-group">
+                <label>🏛️ RUT / NIT</label>
+                <input type="text" id="fRut" placeholder="Ej: 830142380-4">
+            </div>
+            <div class="form-group">
+                <label>📞 Teléfono</label>
+                <input type="text" id="fTelefono" placeholder="Ej: 601 234 5678">
+            </div>
+
+            <div class="section-divider divider-green form-full">📋 Información Catastral y Legal</div>
+
+            <div class="form-group">
+                <label>🗺️ Matrícula Inmobiliaria</label>
+                <input type="text" id="fMatricula" placeholder="Ej: 50N-123456">
+            </div>
+            <div class="form-group">
+                <label>🔢 Chip Catastral</label>
+                <input type="text" id="fChip" placeholder="Número de chip catastral">
+            </div>
+            <div class="form-group form-full">
+                <label>📋 Descripción Catastral</label>
+                <textarea id="fCatastral" placeholder="Linderos, área privada, área común, otros datos catastrales..."></textarea>
+            </div>
+            <div class="section-divider divider-blue form-full">🛡️ Póliza de Seguros</div>
+
+            <div class="form-group">
+                <label>🛡️ No. Póliza de Seguro</label>
+                <input type="text" id="fPolizaNo" placeholder="Número de póliza">
+            </div>
+            <div class="form-group">
+                <label>🏦 Aseguradora</label>
+                <input type="text" id="fAseguradora" placeholder="Ej: Sura, Bolívar, Mapfre...">
+            </div>
+            <div class="form-group">
+                <label>📅 Inicio Vigencia</label>
+                <input type="date" id="fPolizaInicio">
+            </div>
+            <div class="form-group">
+                <label>📅 Vencimiento Póliza</label>
+                <input type="date" id="fPolizaVence">
+            </div>
+            <div class="form-group">
+                <label>💰 Valor Asegurado</label>
+                <input type="text" id="fPolizaValor" placeholder="Ej: $2.500.000.000">
+            </div>
+            <div class="form-group">
+                <label>💳 Tipo de Pago</label>
+                <select id="fPolizaTipoPago" onchange="togglePolizaPago()">
+                    <option value="">-- Sin registrar --</option>
+                    <option value="contado">De contado</option>
+                    <option value="financiado">Financiado (cuotas)</option>
+                </select>
+            </div>
+            <div class="form-group" id="rowPolizaCuotas" style="display:none;">
+                <label>🔢 No. Cuotas Total</label>
+                <input type="number" id="fPolizaCuotas" placeholder="Ej: 10" min="1">
+            </div>
+            <div class="form-group" id="rowPolizaCuotaValor" style="display:none;">
+                <label>💵 Valor por Cuota</label>
+                <input type="text" id="fPolizaCuotaValor" placeholder="Ej: $350.000">
+            </div>
+            <div class="form-group" id="rowPolizaCuotasPagadas" style="display:none;">
+                <label>✅ Cuotas Pagadas</label>
+                <input type="number" id="fPolizaCuotasPagadas" placeholder="Ej: 3" min="0">
+            </div>
+            <div class="form-group">
+                <label>🏛️ Vencimiento Representación Legal (Alcaldía)</label>
+                <input type="date" id="fRepresentacionVence">
+            </div>
+
+            <div class="section-divider divider-green form-full">🏦 Cuentas Bancarias</div>
+
+            <div class="form-group form-full">
+                <label>Cuentas Bancarias del Edificio</label>
+                <textarea id="fCuentasBancarias" rows="4" placeholder="Ej:&#10;Bancolombia - Ahorros - 123-456789-00 - Nepal 2 PH&#10;Davivienda - Corriente - 987-654321-00 - Nepal 2 PH"></textarea>
+            </div>
+
+            <div class="section-divider divider-purple form-full">🔐 Datos Sensibles (acceso restringido)</div>
+
+            <div class="form-group form-full">
+                <label>📷 Claves Cámaras / DVR / NVR</label>
+                <textarea id="fClavesCamaras" rows="4" placeholder="Ej:&#10;DVR Piso 1 - IP: 192.168.1.100 - User: admin - Pass: Nepal2025&#10;DVR Piso 5 - User: admin - Pass: Nepal2025B&#10;App móvil: XMEye - Usuario: nepal2 - Pass: ..."></textarea>
+            </div>
+            <div class="form-group form-full">
+                <label>🔒 Notas Sensibles / Privadas</label>
+                <textarea id="fNotas" rows="4" placeholder="Información confidencial, claves adicionales, notas internas sensibles..."></textarea>
+            </div>
+        </div>
+        <input type="hidden" id="fEditKey">
+        <button class="btn-guardar" onclick="guardarEdificio()">💾 Guardar Edificio</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, set, update, remove, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+    const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db  = getDatabase(app);
+
+    // Edificios predeterminados para migración inicial
+    const EDIFICIOS_DEFAULT = [
+        { nombre:'Nepal 2',           edificioId:'nepal-2',            tipo:'EDIFICIO', icono:'🏢',  email:'Nepal2edifico@gmail.com',           password:'Nepal&2025',        direccion:'Calle 55 #4a-24',  rut:'830142380-4', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
+        { nombre:'Pinos del Country', edificioId:'pinos-del-country',  tipo:'EDIFICIO', icono:'🌲',  email:'pinosdelcountryedificio@gmail.com',  password:'pinos%2024*',       direccion:'CR 12 127 B - 23', rut:'830059667-8', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
+        { nombre:'Convivienda I',     edificioId:'convivienda-1',      tipo:'EDIFICIO', icono:'🏘️', email:'edificioconvivienda@gmail.com',       password:'Convivi#2024',      direccion:'CR 10a #138-71',   rut:'830112728-5', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
+        { nombre:'Avalon',            edificioId:'avalon',             tipo:'EDIFICIO', icono:'🏰',  email:'edificioavalonadm@gmail.com',        password:'admin.avalon&2025', direccion:'Calle 65 #9-07',   rut:'800245101-1', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
+        { nombre:'Torres de Amin II', edificioId:'torre-amin-2',       tipo:'EDIFICIO', icono:'🏢',  email:'',                                  password:'',                  direccion:'',                 rut:'',            telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' }
+    ];
+
+    // Mapa de nombres conocidos a sus slugs (para migración de registros existentes)
+    const SLUGS_CONOCIDOS = {
+        'Nepal 2':'nepal-2', 'nepal 2':'nepal-2',
+        'Pinos del Country':'pinos-del-country', 'pinos del country':'pinos-del-country',
+        'Convivienda I':'convivienda-1', 'convivienda i':'convivienda-1',
+        'Convivienda 1':'convivienda-1', 'convivienda 1':'convivienda-1',
+        'Avalon':'avalon', 'avalon':'avalon',
+        'Torres de Amin II':'torre-amin-2', 'torres de amin ii':'torre-amin-2',
+        'Tores de Anim II':'torre-amin-2',  'tores de anim ii':'torre-amin-2',
+        'Millenium 3':'millenium-3',         'millenium 3':'millenium-3'
+    };
+
+    // Generar slug automático para edificios nuevos
+    function generarSlug(nombre) {
+        return nombre
+            .replace(/\bIV\b/g,'4').replace(/\bIII\b/g,'3').replace(/\bII\b/g,'2').replace(/\bI\b/g,'1')
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+            .trim().replace(/\s+/g,'-')
+            .replace(/[^a-z0-9-]/g,'');
+    }
+
+    // Rol del usuario actual
+    const userInfo = JSON.parse(localStorage.getItem('mcgUser') || '{}');
+    const puedeVerSensible = userInfo.rol === 'administrador' || userInfo.rol === 'creadora';
+
+    // ══════════════════════════════════════════════════
+    // INICIALIZAR: migrar si no existen datos
+    // ══════════════════════════════════════════════════
+    async function inicializar() {
+        const snap = await get(ref(db, 'edificios'));
+        if (!snap.exists()) {
+            for (const ed of EDIFICIOS_DEFAULT) {
+                await push(ref(db, 'edificios'), ed);
+            }
+        } else {
+            // Migración: agregar edificioId a registros que no lo tienen, y corregir slugs incorrectos
+            const SLUGS_INCORRECTOS = { 'tores-de-anim-2': 'torre-amin-2', 'torres-de-amin-2': 'torre-amin-2' };
+            const migraciones = [];
+            snap.forEach(child => {
+                const ed = child.val();
+                if (!ed.edificioId) {
+                    const nombreNorm = (ed.nombre || '').trim();
+                    const slug = SLUGS_CONOCIDOS[nombreNorm] || generarSlug(nombreNorm);
+                    migraciones.push(update(ref(db, `edificios/${child.key}`), { edificioId: slug }));
+                } else if (SLUGS_INCORRECTOS[ed.edificioId]) {
+                    migraciones.push(update(ref(db, `edificios/${child.key}`), { edificioId: SLUGS_INCORRECTOS[ed.edificioId] }));
+                }
+            });
+            if (migraciones.length > 0) await Promise.all(migraciones);
+        }
+        escucharEdificios();
+        cargarEstadisticas();
+    }
+
+    // ══════════════════════════════════════════════════
+    // ESCUCHAR CAMBIOS EN FIREBASE
+    // ══════════════════════════════════════════════════
+    function escucharEdificios() {
+        onValue(ref(db, 'edificios'), (snap) => {
+            const grid = document.getElementById('edificiosGrid');
+            document.getElementById('totalEdificios').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+
+            if (!snap.exists()) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;"><div style="font-size:3em;margin-bottom:15px;">🏢</div><h3>No hay edificios registrados</h3><p>Haz clic en "➕ Nuevo Edificio" para agregar uno.</p></div>`;
+                return;
+            }
+
+            let html = '';
+            snap.forEach(child => {
+                html += crearTarjeta(child.key, child.val());
+            });
+            grid.innerHTML = html;
+        });
+    }
+
+    // ══════════════════════════════════════════════════
+    // CREAR TARJETA HTML
+    // ══════════════════════════════════════════════════
+    function crearTarjeta(key, d) {
+        const pwd_id = 'pwd-' + key;
+
+        // Sección sensible según rol
+        let sensibleHtml = '';
+        if (puedeVerSensible) {
+            const tieneSensible = d.clavesCamaras || d.notas;
+            sensibleHtml = `
+            <div class="seccion-sensible">
+                <div class="sensible-header" onclick="toggleSensible('${key}')">
+                    <span>🔐 Datos Sensibles</span>
+                    <span id="ico-${key}">▼</span>
+                </div>
+                <div class="sensible-contenido" id="sens-${key}">
+                    ${d.clavesCamaras ? `
+                    <div class="info-group">
+                        <div class="info-label">📷 Claves Cámaras / DVR</div>
+                        <div class="info-value" style="white-space:pre-line;">${d.clavesCamaras}</div>
+                    </div>` : ''}
+                    ${d.notas ? `
+                    <div class="info-group">
+                        <div class="info-label">🔒 Notas Sensibles</div>
+                        <div class="info-value" style="white-space:pre-line;">${d.notas}</div>
+                    </div>` : ''}
+                    ${!tieneSensible ? `<p style="color:#aaa;font-size:13px;text-align:center;padding:10px;">Sin datos sensibles registrados. Edita el edificio para agregar.</p>` : ''}
+                </div>
+            </div>`;
+        } else {
+            sensibleHtml = `<div class="sin-acceso">🔐 Datos sensibles — Solo administración</div>`;
+        }
+
+        // Póliza
+        let polizaInfo = '';
+        if (d.polizaNo || d.aseguradora || d.polizaVence) {
+            // Vencimiento con color
+            let venceHtml = '';
+            if (d.polizaVence) {
+                const hoyP = new Date(); hoyP.setHours(0,0,0,0);
+                const venceP = new Date(d.polizaVence + 'T00:00:00');
+                const diasP = Math.ceil((venceP - hoyP) / 86400000);
+                const colP = diasP < 0 ? '#c62828' : diasP <= 30 ? '#e65100' : diasP <= 90 ? '#f57f17' : '#2e7d32';
+                const avisoP = diasP < 0 ? `⚠️ VENCIDA hace ${Math.abs(diasP)} días`
+                    : diasP === 0 ? '⚠️ Vence HOY'
+                    : diasP <= 30 ? `⚠️ Vence en ${diasP} días (${venceP.toLocaleDateString('es-CO')})`
+                    : diasP <= 90 ? `⏰ Vence en ${diasP} días (${venceP.toLocaleDateString('es-CO')})`
+                    : `✅ Vigente hasta ${venceP.toLocaleDateString('es-CO')}`;
+                venceHtml = `<br><span style="color:${colP};font-weight:600;">${avisoP}</span>`;
+            }
+            // Inicio vigencia
+            const inicioHtml = d.polizaInicio ? `<br><span style="color:#555;font-size:0.9em;">Inicio: ${d.polizaInicio}</span>` : '';
+            // Tipo de pago y cuotas
+            let pagoHtml = '';
+            if (d.polizaTipoPago === 'financiado' && d.polizaCuotas) {
+                const pagadas = parseInt(d.polizaCuotasPagadas) || 0;
+                const total = parseInt(d.polizaCuotas) || 0;
+                const resto = total - pagadas;
+                const pct = total > 0 ? Math.round(pagadas / total * 100) : 0;
+                pagoHtml = `<br><span style="color:#8B6914;font-weight:600;">💳 Financiado: ${pagadas}/${total} cuotas pagadas</span>`
+                    + (d.polizaCuotaValor ? `<br><span style="color:#555;font-size:0.9em;">Valor cuota: ${d.polizaCuotaValor} — Pendientes: ${resto}</span>` : `<br><span style="color:#555;font-size:0.9em;">Cuotas pendientes: ${resto}</span>`)
+                    + `<br><div style="background:#e0e0e0;border-radius:4px;height:8px;margin-top:5px;overflow:hidden;"><div style="background:#8B6914;height:100%;width:${pct}%;"></div></div>`;
+            } else if (d.polizaTipoPago === 'contado') {
+                pagoHtml = `<br><span style="color:#2e7d32;font-weight:600;">💵 Pagado de contado</span>`;
+            }
+            polizaInfo = `<div class="info-group">
+                <div class="info-label">🛡️ Póliza de Seguro</div>
+                <div class="info-value">
+                    ${d.aseguradora ? `<strong>${d.aseguradora}</strong>` : ''}
+                    ${d.polizaNo ? ` — No. <strong>${d.polizaNo}</strong>` : ''}
+                    ${d.polizaValor ? `<br>Valor asegurado: ${d.polizaValor}` : ''}
+                    ${inicioHtml}${venceHtml}${pagoHtml}
+                </div>
+            </div>`;
+        }
+
+        // Catastral
+        let catastralInfo = '';
+        if (d.matricula || d.chip || d.catastral) {
+            catastralInfo = `<div class="info-group">
+                <div class="info-label">🗺️ Datos Catastrales</div>
+                <div class="info-value">
+                    ${d.matricula ? `Matrícula: <strong>${d.matricula}</strong><br>` : ''}
+                    ${d.chip ? `Chip: <strong>${d.chip}</strong><br>` : ''}
+                    ${d.catastral ? `<span style="white-space:pre-line;font-size:0.9em;color:#555;">${d.catastral}</span>` : ''}
+                </div>
+            </div>`;
+        }
+
+        // Representación legal
+        let reprInfo = '';
+        if (d.representacionVence) {
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+            const vence = new Date(d.representacionVence + 'T00:00:00');
+            const dias = Math.ceil((vence - hoy) / 86400000);
+            const color = dias < 0 ? '#c62828' : dias <= 30 ? '#e65100' : dias <= 90 ? '#f57f17' : '#2e7d32';
+            const aviso = dias < 0 ? '⚠️ VENCIDA' : dias <= 30 ? `⚠️ Vence en ${dias} días` : dias <= 90 ? `⏰ Vence en ${dias} días` : '';
+            reprInfo = `<div class="info-group">
+                <div class="info-label">🏛️ Rep. Legal Alcaldía</div>
+                <div class="info-value" style="color:${color};font-weight:600;">
+                    Vence: ${d.representacionVence} ${aviso ? `<br><span style="font-size:0.9em;">${aviso}</span>` : ''}
+                </div>
+            </div>`;
+        }
+
+        // Cuentas bancarias
+        let cuentasInfo = '';
+        if (d.cuentasBancarias) {
+            cuentasInfo = `<div class="info-group">
+                <div class="info-label">🏦 Cuentas Bancarias</div>
+                <div class="info-value" style="white-space:pre-line;font-size:0.9em;">${d.cuentasBancarias}</div>
+            </div>`;
+        }
+
+        return `
+        <div class="edificio-card">
+            <div class="edificio-header">
+                <div class="edificio-icon">${d.icono || '🏢'}</div>
+                <div class="edificio-title">
+                    <h2>${d.nombre || 'Sin nombre'}</h2>
+                    <p>${d.tipo || 'EDIFICIO'}</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-card btn-edit" onclick="abrirEditar('${key}')">✏️ Editar</button>
+                    <button class="btn-card" style="background:#7c3aed;color:white;" onclick="abrirDocumentos('${key}')">📄 Docs</button>
+                    <button class="btn-card btn-del" onclick="eliminarEdificio('${key}','${(d.nombre||'').replace(/'/g,"\\'")}')">🗑️</button>
+                </div>
+            </div>
+
+            ${d.email ? `<div class="info-group"><div class="info-label">📧 Email</div><div class="info-value">${d.email}</div></div>` : ''}
+
+            <div class="info-group">
+                <div class="info-label">🔑 Contraseña Email</div>
+                <div class="password-field">
+                    <span class="password-value" id="${pwd_id}">••••••••••</span>
+                    <button class="btn-toggle-password" onclick="togglePassword('${pwd_id}','${(d.password||'').replace(/'/g,"\\'")}')">👁️</button>
+                    <button class="btn-copy" onclick="copyToClipboard('${(d.password||'').replace(/'/g,"\\'")}')">📋 Copiar</button>
+                </div>
+            </div>
+
+            ${d.direccion ? `<div class="info-group"><div class="info-label">📍 Dirección</div><div class="info-value">${d.direccion}</div></div>` : ''}
+            ${d.rut ? `<div class="info-group"><div class="info-label">🏛️ RUT / NIT</div><div class="info-value">${d.rut}</div></div>` : ''}
+            ${d.telefono ? `<div class="info-group"><div class="info-label">📞 Teléfono</div><div class="info-value"><a href="tel:${d.telefono}">${d.telefono}</a></div></div>` : ''}
+            ${catastralInfo}
+            ${polizaInfo}
+            ${reprInfo}
+            ${cuentasInfo}
+            ${sensibleHtml}
+        </div>`;
+    }
+
+    // ══════════════════════════════════════════════════
+    // MODAL NUEVO
+    // ══════════════════════════════════════════════════
+    window.abrirModalNuevo = function() {
+        document.getElementById('modalTitulo').textContent = '➕ Nuevo Edificio';
+        limpiarForm();
+        document.getElementById('fEditKey').value = '';
+        document.getElementById('modalEdificio').classList.add('active');
+    };
+
+    window.abrirEditar = async function(key) {
+        const snap = await get(ref(db, `edificios/${key}`));
+        if (!snap.exists()) return;
+        const d = snap.val();
+
+        document.getElementById('modalTitulo').textContent = `✏️ Editar — ${d.nombre}`;
+        document.getElementById('fEditKey').value = key;
+        document.getElementById('fNombre').value         = d.nombre || '';
+        document.getElementById('fTipo').value           = d.tipo || 'EDIFICIO';
+        document.getElementById('fIcono').value          = d.icono || '🏢';
+        document.getElementById('fDireccion').value      = d.direccion || '';
+        document.getElementById('fEmail').value          = d.email || '';
+        document.getElementById('fPassword').value       = d.password || '';
+        document.getElementById('fRut').value            = d.rut || '';
+        document.getElementById('fTelefono').value       = d.telefono || '';
+        document.getElementById('fMatricula').value      = d.matricula || '';
+        document.getElementById('fChip').value           = d.chip || '';
+        document.getElementById('fCatastral').value      = d.catastral || '';
+        document.getElementById('fPolizaNo').value             = d.polizaNo || '';
+        document.getElementById('fAseguradora').value          = d.aseguradora || '';
+        document.getElementById('fPolizaInicio').value         = d.polizaInicio || '';
+        document.getElementById('fPolizaVence').value          = d.polizaVence || '';
+        document.getElementById('fPolizaValor').value          = d.polizaValor || '';
+        document.getElementById('fPolizaTipoPago').value       = d.polizaTipoPago || '';
+        document.getElementById('fPolizaCuotas').value         = d.polizaCuotas || '';
+        document.getElementById('fPolizaCuotaValor').value     = d.polizaCuotaValor || '';
+        document.getElementById('fPolizaCuotasPagadas').value  = d.polizaCuotasPagadas || '';
+        togglePolizaPago();
+        document.getElementById('fRepresentacionVence').value = d.representacionVence || '';
+        document.getElementById('fCuentasBancarias').value    = d.cuentasBancarias || '';
+        document.getElementById('fClavesCamaras').value  = d.clavesCamaras || '';
+        document.getElementById('fNotas').value          = d.notas || '';
+
+        document.getElementById('modalEdificio').classList.add('active');
+    };
+
+    window.togglePolizaPago = function() {
+        const tipo = document.getElementById('fPolizaTipoPago').value;
+        const show = tipo === 'financiado';
+        ['rowPolizaCuotas','rowPolizaCuotaValor','rowPolizaCuotasPagadas'].forEach(id => {
+            document.getElementById(id).style.display = show ? '' : 'none';
+        });
+    };
+
+    window.guardarEdificio = async function() {
+        const nombre = document.getElementById('fNombre').value.trim();
+        if (!nombre) { alert('❌ El nombre del edificio es obligatorio'); return; }
+
+        const datos = {
+            nombre,
+            tipo:            document.getElementById('fTipo').value,
+            icono:           document.getElementById('fIcono').value,
+            direccion:       document.getElementById('fDireccion').value.trim(),
+            email:           document.getElementById('fEmail').value.trim(),
+            password:        document.getElementById('fPassword').value,
+            rut:             document.getElementById('fRut').value.trim(),
+            telefono:        document.getElementById('fTelefono').value.trim(),
+            matricula:       document.getElementById('fMatricula').value.trim(),
+            chip:            document.getElementById('fChip').value.trim(),
+            catastral:       document.getElementById('fCatastral').value.trim(),
+            polizaNo:           document.getElementById('fPolizaNo').value.trim(),
+            aseguradora:        document.getElementById('fAseguradora').value.trim(),
+            polizaInicio:       document.getElementById('fPolizaInicio').value,
+            polizaVence:        document.getElementById('fPolizaVence').value,
+            polizaValor:        document.getElementById('fPolizaValor').value.trim(),
+            polizaTipoPago:     document.getElementById('fPolizaTipoPago').value,
+            polizaCuotas:       document.getElementById('fPolizaCuotas').value || '',
+            polizaCuotaValor:   document.getElementById('fPolizaCuotaValor').value.trim(),
+            polizaCuotasPagadas:document.getElementById('fPolizaCuotasPagadas').value || '',
+            representacionVence:  document.getElementById('fRepresentacionVence').value,
+            cuentasBancarias:document.getElementById('fCuentasBancarias').value.trim(),
+            clavesCamaras:   document.getElementById('fClavesCamaras').value.trim(),
+            notas:           document.getElementById('fNotas').value.trim(),
+            actualizadoEn:   new Date().toISOString()
+        };
+
+        const key = document.getElementById('fEditKey').value;
+        if (!key) {
+            // Nuevo edificio: generar edificioId automáticamente
+            datos.edificioId = SLUGS_CONOCIDOS[nombre] || generarSlug(nombre);
+        }
+        try {
+            if (key) {
+                await update(ref(db, `edificios/${key}`), datos);
+                alert('✅ Edificio actualizado');
+            } else {
+                await push(ref(db, 'edificios'), datos);
+                alert('✅ Edificio creado');
+            }
+            cerrarModal();
+        } catch (err) {
+            alert('❌ Error al guardar: ' + err.message);
+        }
+    };
+
+    window.eliminarEdificio = async function(key, nombre) {
+        if (!confirm(`⚠️ ¿Eliminar el edificio "${nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
+        try {
+            await remove(ref(db, `edificios/${key}`));
+            alert('✅ Edificio eliminado');
+        } catch (err) {
+            alert('❌ Error: ' + err.message);
+        }
+    };
+
+    window.cerrarModal = function() {
+        document.getElementById('modalEdificio').classList.remove('active');
+    };
+
+    function limpiarForm() {
+        ['fNombre','fDireccion','fEmail','fPassword','fRut','fTelefono',
+         'fMatricula','fChip','fCatastral','fPolizaNo','fAseguradora',
+         'fPolizaInicio','fPolizaVence','fPolizaValor',
+         'fPolizaCuotas','fPolizaCuotaValor','fPolizaCuotasPagadas',
+         'fRepresentacionVence','fCuentasBancarias','fClavesCamaras','fNotas'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        document.getElementById('fTipo').value          = 'EDIFICIO';
+        document.getElementById('fIcono').value         = '🏢';
+        document.getElementById('fPolizaTipoPago').value = '';
+        ['rowPolizaCuotas','rowPolizaCuotaValor','rowPolizaCuotasPagadas'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+    }
+
+    // Datos sensibles toggle
+    window.toggleSensible = function(key) {
+        const contenido = document.getElementById('sens-' + key);
+        const ico = document.getElementById('ico-' + key);
+        const visible = contenido.classList.toggle('visible');
+        ico.textContent = visible ? '▲' : '▼';
+    };
+
+    // Estadísticas
+    async function cargarEstadisticas() {
+        const [snapProv, snapCuentas] = await Promise.all([
+            get(ref(db, 'proveedores')),
+            get(ref(db, 'cuentas_por_pagar'))
+        ]);
+
+        let totalCuentas = 0;
+        if (snapCuentas.exists()) {
+            snapCuentas.forEach(ed => ed.forEach(c => {
+                if ((c.val().estado || '').toLowerCase() !== 'pagada') totalCuentas++;
+            }));
+        }
+
+        document.getElementById('totalProveedores').textContent = snapProv.exists() ? Object.keys(snapProv.val()).length : 0;
+        document.getElementById('totalCuentas').textContent = totalCuentas;
+    }
+
+    // ══════════════════════════════════════════════════
+    // DOCUMENTOS
+    // ══════════════════════════════════════════════════
+    window.abrirDocumentos = async function(key) {
+        document.getElementById('docEdificioKey').value = key;
+        // Cargar links existentes
+        const snap = await get(ref(db, `edificios/${key}/documentos`));
+        const docs = snap.val() || {};
+        document.getElementById('docReglamento').value     = docs.reglamento || '';
+        document.getElementById('docManual').value         = docs.manual || '';
+        document.getElementById('docRepresentacion').value = docs.representacion || '';
+        document.getElementById('modalDocumentos').classList.add('active');
+    };
+
+    window.cerrarModalDocumentos = function() {
+        document.getElementById('modalDocumentos').classList.remove('active');
+    };
+
+    window.guardarDocumentos = async function() {
+        const key = document.getElementById('docEdificioKey').value;
+        if (!key) return;
+        const docs = {
+            reglamento:     document.getElementById('docReglamento').value.trim(),
+            manual:         document.getElementById('docManual').value.trim(),
+            representacion: document.getElementById('docRepresentacion').value.trim()
+        };
+        try {
+            await update(ref(db, `edificios/${key}/documentos`), docs);
+            alert('✅ Documentos guardados correctamente');
+            cerrarModalDocumentos();
+        } catch(err) {
+            alert('❌ Error: ' + err.message);
+        }
+    };
+
+    window.abrirDocLink = function(inputId) {
+        const url = document.getElementById(inputId).value.trim();
+        if (!url) { alert('⚠️ No hay enlace guardado para este documento'); return; }
+        window.open(url, '_blank');
+    };
+
+    window.logout = () => signOut(auth).then(() => { window.location.href = 'index.html'; });
+
+    // Iniciar
+    onAuthStateChanged(auth, () => inicializar());
+</script>
+
+<script>
+    // Funciones globales fuera del módulo
+    function togglePassword(pwd_id, password) {
+        const el = document.getElementById(pwd_id);
+        el.textContent = el.textContent === '••••••••••' ? password : '••••••••••';
+    }
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text)
+            .then(() => alert('✅ Copiado al portapapeles'))
+            .catch(() => alert('❌ Error al copiar'));
+    }
+</script>
+</body>
+</html>
