@@ -626,10 +626,10 @@
             <h1>💰 Cuentas por Pagar</h1>
             <div class="edificio-selector">
                 <select id="edificioSelect" onchange="cambiarEdificio()">
-                    <option value="">Selecciona edificio</option>
+                    <option value="">Selecciona conjunto</option>
                     
                     
-                    <option value="convivienda-1">Convivienda 1</option>
+                    
                     
                     
                 </select>
@@ -657,13 +657,13 @@
                 📥 Descargar Excel
             </button>
             <button class="btn" style="background: #e53935; color: white;" onclick="verPendientesPorEdificio()">
-                🔴 Ver Pendientes por Edificio
+                🔴 Ver Pendientes
             </button>
         </div>
 
         <!-- RESUMEN DE FACTURAS POR EDIFICIO -->
         <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px;">
-            <h2 style="color: #667eea; margin-bottom: 20px;">📊 Resumen de Facturas por Edificio</h2>
+            <h2 style="color: #667eea; margin-bottom: 20px;">📊 Resumen de Facturas</h2>
             <div id="tarjetasEdificios" style="display: flex; gap: 15px; flex-wrap: nowrap; overflow-x: auto;"></div>
         </div>
 
@@ -742,7 +742,7 @@
                             <td colspan="15">
                                 <div class="empty-state">
                                     <div class="empty-state-icon">📋</div>
-                                    <h3>No hay cuentas registradas para este edificio</h3>
+                                    <h3>No hay cuentas registradas para este conjunto</h3>
                                     <p>Carga un Excel o agrega una cuenta manualmente</p>
                                 </div>
                             </td>
@@ -1107,7 +1107,7 @@
     <div class="modal" id="modalPendientes">
         <div class="modal-content" style="max-width: 1200px;">
             <div class="modal-header">
-                <h2>🔴 Cuentas Pendientes por Edificio</h2>
+                <h2>🔴 Cuentas Pendientes</h2>
                 <button class="btn-close" onclick="cerrarModal('modalPendientes')">&times;</button>
             </div>
             <div id="pendientesContenido">
@@ -1399,7 +1399,7 @@
                         <tr><td colspan="22">
                             <div class="empty-state">
                                 <div class="empty-state-icon">📋</div>
-                                <h3>No hay cuentas registradas para este edificio</h3>
+                                <h3>No hay cuentas registradas para este conjunto</h3>
                                 <p>Carga un Excel o agrega una cuenta manualmente</p>
                             </div>
                         </td></tr>
@@ -1991,7 +1991,7 @@
                 });
 
                 if (!snapshot.exists()) {
-                    alert('❌ No hay cuentas registradas para este edificio');
+                    alert('❌ No hay cuentas registradas para este conjunto');
                     return;
                 }
 
