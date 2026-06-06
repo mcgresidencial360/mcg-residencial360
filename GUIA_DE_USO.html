@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Uso — MCG Residencial 360</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .page {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            padding: 50px 60px;
+        }
+
+        /* PORTADA */
+        .cover {
+            text-align: center;
+            padding: 60px 0 50px;
+            border-bottom: 4px solid #C9A227;
+            margin-bottom: 50px;
+        }
+
+        .cover img {
+            width: 280px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .cover h1 {
+            font-size: 2em;
+            color: #8B6914;
+            margin-bottom: 8px;
+        }
+
+        .cover p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .cover .fecha {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        /* SECCIONES */
+        .seccion {
+            margin-bottom: 45px;
+            page-break-inside: avoid;
+        }
+
+        .seccion-titulo {
+            background: linear-gradient(135deg, #8B6914, #C9A227);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* CAJA DE ACCESO */
+        .acceso-box {
+            background: #1a1a2e;
+            border-radius: 14px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+        }
+
+        .acceso-box .url-label {
+            color: #C9A227;
+            font-size: 0.85em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .acceso-box .url {
+            color: white;
+            font-size: 1.2em;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        /* TABLA CREDENCIALES */
+        .credenciales {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .credenciales thead {
+            background: linear-gradient(135deg, #8B6914, #C9A227);
+            color: white;
+        }
+
+        .credenciales th {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .credenciales td {
+            padding: 13px 18px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95em;
+        }
+
+        .credenciales tbody tr:nth-child(even) { background: #fdf6e3; }
+        .credenciales tbody tr:last-child td { border-bottom: none; }
+
+        .clave {
+            background: #1a1a2e;
+            color: #C9A227;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 1em;
+            font-weight: 700;
+        }
+
+        .rol-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            font-weight: 700;
+        }
+
+        .rol-admin { background: #fdf6e3; color: #8B6914; border: 1px solid #C9A227; }
+        .rol-dev   { background: #e8f5e9; color: #2e7d32; border: 1px solid #43a047; }
+
+        /* PASOS */
+        .pasos {
+            list-style: none;
+            margin-bottom: 15px;
+        }
+
+        .pasos li {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            padding: 14px 18px;
+            background: #fafafa;
+            border-radius: 10px;
+            border-left: 4px solid #C9A227;
+        }
+
+        .paso-num {
+            background: linear-gradient(135deg, #8B6914, #C9A227);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.9em;
+            flex-shrink: 0;
+        }
+
+        .paso-texto { flex: 1; padding-top: 3px; }
+        .paso-texto strong { color: #8B6914; }
+
+        /* MÓDULOS */
+        .modulo-card {
+            border: 2px solid #e8d08a;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 16px;
+            background: #fffef7;
+        }
+
+        .modulo-card h3 {
+            color: #8B6914;
+            font-size: 1.05em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modulo-card ul {
+            padding-left: 20px;
+        }
+
+        .modulo-card ul li {
+            margin-bottom: 5px;
+            color: #444;
+        }
+
+        /* ALERTA */
+        .alerta {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alerta-icon { font-size: 1.4em; flex-shrink: 0; }
+        .alerta-texto { font-size: 0.95em; color: #555; }
+        .alerta-texto strong { color: #8B6914; }
+
+        /* NOTA */
+        .nota {
+            background: #e8f5e9;
+            border: 2px solid #43a047;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 18px;
+            font-size: 0.92em;
+            color: #2e7d32;
+        }
+
+        /* SEPARADOR */
+        .sep {
+            border: none;
+            border-top: 2px dashed #e8d08a;
+            margin: 40px 0;
+        }
+
+        /* PIE */
+        .pie {
+            text-align: center;
+            padding: 30px 0 10px;
+            border-top: 3px solid #C9A227;
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 50px;
+        }
+
+        @media print {
+            body { background: white; }
+            .page { padding: 30px 40px; }
+            .seccion { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- PORTADA -->
+    <div class="cover">
+        <img src="logo.png" alt="MCG Residencial 360">
+        <h1>Guía de Uso del Sistema</h1>
+        <p>MCG Residencial 360 — Administración de Propiedad Horizontal</p>
+        <div class="fecha">Versión 1.0 — Junio 2026</div>
+    </div>
+
+    <!-- ACCESO A LA APP -->
+    <div class="seccion">
+        <div class="seccion-titulo">🌐 Paso 1 — Cómo Entrar a la Aplicación</div>
+
+        <p style="margin-bottom:15px;">La aplicación funciona desde cualquier navegador de internet (Chrome, Edge, Firefox). No se instala nada.</p>
+
+        <div class="acceso-box">
+            <div class="url-label">📌 Dirección de la aplicación (URL)</div>
+            <div class="url">https://mcgresidencial360.github.io/mcg-residencial360/</div>
+        </div>
+
+        <div class="alerta">
+            <div class="alerta-icon">💡</div>
+            <div class="alerta-texto">
+                <strong>Consejo:</strong> Guarda esta dirección en tus favoritos del navegador para acceder rápido. En Chrome, haz clic en la estrella ⭐ que aparece al lado de la dirección.
+            </div>
+        </div>
+
+        <ol class="pasos">
+            <li>
+                <div class="paso-num">1</div>
+                <div class="paso-texto">Abre tu navegador (Chrome o Edge) en tu celular o computador.</div>
+            </li>
+            <li>
+                <div class="paso-num">2</div>
+                <div class="paso-texto">En la barra de dirección (arriba), escribe o pega la URL indicada arriba y presiona <strong>Enter</strong>.</div>
+            </li>
+            <li>
+                <div class="paso-num">3</div>
+                <div class="paso-texto">Aparecerá la pantalla de inicio de sesión de MCG Residencial 360.</div>
+            </li>
+        </ol>
+    </div>
+
+    <hr class="sep">
+
+    <!-- INICIO DE SESIÓN -->
+    <div class="seccion">
+        <div class="seccion-titulo">🔐 Paso 2 — Iniciar Sesión</div>
+
+        <p style="margin-bottom:18px;">Hay dos formas de entrar:</p>
+
+        <div class="modulo-card">
+            <h3>🚀 Opción A — Acceso Rápido (Recomendada)</h3>
+            <ul>
+                <li>En la pantalla de login verás dos botones grandes con tu nombre.</li>
+                <li>Haz clic en el botón dorado <strong>👑 María Cristina González</strong>.</li>
+                <li>El sistema te pedirá tu contraseña en una ventana pequeña.</li>
+                <li>Escribe la contraseña y haz clic en <strong>Aceptar</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>📧 Opción B — Con Email y Contraseña</h3>
+            <ul>
+                <li>Escribe tu correo y contraseña en los campos del formulario.</li>
+                <li>Haz clic en el botón <strong>"Iniciar Sesión"</strong>.</li>
+            </ul>
+        </div>
+
+        <br>
+        <p style="font-weight:700;color:#8B6914;margin-bottom:12px;">🗝️ Datos de Acceso:</p>
+        <table class="credenciales">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Correo Electrónico</th>
+                    <th>Contraseña</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>👑 María Cristina González</strong></td>
+                    <td>admin@mcgresidencial360.com</td>
+                    <td><span class="clave">MCGAdm2026!</span></td>
+                    <td><span class="rol-badge rol-admin">Administradora</span></td>
+                </tr>
+                <tr>
+                    <td><strong>👩‍💻 Carla Castellano</strong></td>
+                    <td>c3madriz@mcgresidencial360.com</td>
+                    <td><span class="clave">C3madriz2026!</span></td>
+                    <td><span class="rol-badge rol-dev">Soporte Técnico</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="alerta">
+            <div class="alerta-icon">⚠️</div>
+            <div class="alerta-texto">
+                <strong>Importante:</strong> No compartas estas contraseñas con nadie. Si necesitas cambiarlas, contacta a Carla Castellano (soporte técnico).
+            </div>
+        </div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- MÓDULOS -->
+    <div class="seccion">
+        <div class="seccion-titulo">📋 Paso 3 — Los Módulos del Sistema</div>
+
+        <p style="margin-bottom:18px;">Después de iniciar sesión verás el <strong>Dashboard</strong> con un menú de botones en la parte superior. Cada botón lleva a un módulo diferente:</p>
+
+        <div class="modulo-card">
+            <h3>📊 Dashboard (Inicio)</h3>
+            <ul>
+                <li>Es la pantalla principal. Muestra un resumen general.</li>
+                <li>Verás cuántos conjuntos hay registrados, facturas pendientes y saldo por pagar.</li>
+                <li>También muestra alertas de pólizas o documentos próximos a vencer.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>🏢 Conjunto</h3>
+            <ul>
+                <li>Aquí registras la información del conjunto residencial que administras.</li>
+                <li>Haz clic en <strong>"➕ Nuevo Conjunto"</strong> para agregar los datos del conjunto.</li>
+                <li>Puedes guardar: nombre, dirección, NIT, email, póliza de seguros, cuentas bancarias y más.</li>
+                <li>Una vez guardado, puedes editarlo o ver sus documentos con los botones <strong>✏️ Editar</strong> y <strong>📄 Docs</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>💰 Cuentas por Pagar</h3>
+            <ul>
+                <li>Registra todas las facturas y pagos que el conjunto debe hacer (servicios, proveedores, etc.).</li>
+                <li>Haz clic en <strong>"Agregar Cuenta Manual"</strong> para registrar una nueva factura.</li>
+                <li>Puedes también cargar varias facturas desde un archivo Excel con <strong>"Cargar Excel de Facturas"</strong>.</li>
+                <li>Cada factura puede marcarse como <strong>Pendiente</strong> o <strong>Pagada</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>📊 Cuentas por Cobrar</h3>
+            <ul>
+                <li>Controla los saldos que los residentes deben pagar (cuotas de administración, mora, etc.).</li>
+                <li>Haz clic en <strong>"Agregar Manual"</strong> para ingresar el saldo de un apartamento.</li>
+                <li>El botón <strong>"Ver Solo Morosos"</strong> filtra los apartamentos con saldo en mora.</li>
+                <li>Puedes exportar el listado completo a Excel con <strong>"Descargar Excel"</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>👥 Residentes y Propietarios</h3>
+            <ul>
+                <li>Aquí guardas la información de todas las personas que viven o son dueñas de apartamentos.</li>
+                <li>Haz clic en <strong>"+ Agregar"</strong> para registrar un nuevo residente o propietario.</li>
+                <li>Puedes buscar por nombre o número de apartamento en la barra de búsqueda.</li>
+                <li>Los registros pueden marcarse como <strong>Activos</strong> o <strong>Archivados</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>💼 Caja Menor</h3>
+            <ul>
+                <li>Registra los gastos pequeños del día a día (compras, transportes, papelería, etc.).</li>
+                <li>Haz clic en <strong>"➕ Nuevo Movimiento"</strong> para registrar un ingreso o egreso.</li>
+                <li>Selecciona si es un <strong>💵 Ingreso</strong> (dinero que entra) o <strong>🔻 Egreso</strong> (dinero que sale).</li>
+                <li>El sistema calcula automáticamente el saldo disponible.</li>
+                <li>Puedes exportar el reporte en PDF con el botón <strong>"Exportar PDF"</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="modulo-card">
+            <h3>🤝 Proveedores</h3>
+            <ul>
+                <li>Guarda el directorio de todas las empresas y personas que prestan servicios al conjunto.</li>
+                <li>Haz clic en <strong>"➕ Nuevo Proveedor"</strong> para agregar uno.</li>
+                <li>Puedes guardar: nombre, NIT/cédula, teléfonos, correo, cuentas bancarias y descripción del servicio.</li>
+                <li>Usa el botón <strong>"🖨️ Imprimir Lista PDF"</strong> para generar un directorio en PDF.</li>
+            </ul>
+        </div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- CERRAR SESIÓN -->
+    <div class="seccion">
+        <div class="seccion-titulo">🚪 Cerrar Sesión</div>
+        <ol class="pasos">
+            <li>
+                <div class="paso-num">1</div>
+                <div class="paso-texto">Cuando termines de usar el sistema, haz clic en el botón <strong>🚪 Cerrar Sesión</strong> que aparece en la esquina superior derecha del Dashboard.</div>
+            </li>
+            <li>
+                <div class="paso-num">2</div>
+                <div class="paso-texto">El sistema te llevará de vuelta a la pantalla de inicio de sesión. Ya puedes cerrar el navegador.</div>
+            </li>
+        </ol>
+        <div class="nota">
+            ✅ <strong>Recomendación:</strong> Siempre cierra sesión antes de cerrar el navegador, especialmente si estás usando un computador compartido.
+        </div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- SOPORTE -->
+    <div class="seccion">
+        <div class="seccion-titulo">📞 Soporte Técnico</div>
+        <div class="modulo-card">
+            <h3>👩‍💻 ¿Necesitas ayuda?</h3>
+            <ul>
+                <li><strong>Responsable técnica:</strong> Carla Castellano (C3madriz)</li>
+                <li><strong>Correo:</strong> carlaccastellanomadriz@gmail.com</li>
+                <li>Para reportar errores, cambios o nuevas funcionalidades contactar directamente.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PIE -->
+    <div class="pie">
+        <img src="logo.png" alt="MCG" style="height:50px;border-radius:8px;margin-bottom:10px;display:block;margin:0 auto 10px;">
+        <p>© 2026 MCG Residencial 360 — Administración de Propiedad Horizontal</p>
+        <p style="margin-top:5px;">Desarrollado por Carla Castellano · Documento confidencial</p>
+    </div>
+
+</div>
+</body>
+</html>
