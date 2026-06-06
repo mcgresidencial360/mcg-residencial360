@@ -48,21 +48,21 @@
         .stat-number { font-size: 2.5em; font-weight: bold; margin: 10px 0; }
         .stat-label { font-size: 0.9em; opacity: 0.9; }
 
-        .edificios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(370px, 1fr)); gap: 25px; }
+        .conjuntos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(370px, 1fr)); gap: 25px; }
 
         /* TARJETA */
-        .edificio-card {
+        .conjunto-card {
             background: white; border-radius: 15px; padding: 25px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1); border: 2px solid #e0e0e0;
             transition: all 0.3s;
         }
-        .edificio-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.18); border-color: #8B6914; }
+        .conjunto-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.18); border-color: #8B6914; }
 
-        .edificio-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #8B6914; }
-        .edificio-icon { font-size: 2.8em; }
-        .edificio-title { flex: 1; }
-        .edificio-title h2 { color: #8B6914; font-size: 1.4em; margin-bottom: 4px; }
-        .edificio-title p { color: #888; font-size: 0.85em; }
+        .conjunto-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 3px solid #8B6914; }
+        .conjunto-icon { font-size: 2.8em; }
+        .conjunto-title { flex: 1; }
+        .conjunto-title h2 { color: #8B6914; font-size: 1.4em; margin-bottom: 4px; }
+        .conjunto-title p { color: #888; font-size: 0.85em; }
 
         .card-actions { display: flex; gap: 6px; }
         .btn-card { border: none; padding: 7px 12px; border-radius: 7px; cursor: pointer; font-size: 12px; font-weight: 700; transition: all 0.2s; }
@@ -155,7 +155,7 @@
     <div class="header">
         <h1>🏢 Conjunto - MCG Residencial 360</h1>
         <div class="header-btns">
-            <button class="btn-nuevo" onclick="abrirModalNuevo()">➕ Nuevo Edificio</button>
+            <button class="btn-nuevo" onclick="abrirModalNuevo()">➕ Nuevo Conjunto</button>
             <button class="btn-nav" onclick="window.location.href='Dashboard.html'">🏠 Dashboard</button>
             <button class="btn-nav" onclick="logout()">🚪 Salir</button>
         </div>
@@ -164,7 +164,7 @@
     <div class="content">
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-label">Total Edificios</div>
+                <div class="stat-label">Total Conjuntos</div>
                 <div class="stat-number" id="totalConjunto">0</div>
             </div>
             <div class="stat-card">
@@ -177,10 +177,10 @@
             </div>
         </div>
 
-        <div class="edificios-grid" id="edificiosGrid">
+        <div class="conjuntos-grid" id="edificiosGrid">
             <div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;">
                 <div style="font-size:3em;margin-bottom:15px;">🏢</div>
-                <h3>Cargando edificios...</h3>
+                <h3>Cargando conjuntos...</h3>
             </div>
         </div>
     </div>
@@ -229,11 +229,11 @@
     </div>
 </div>
 
-<!-- MODAL NUEVO / EDITAR EDIFICIO -->
+<!-- MODAL NUEVO / EDITAR CONJUNTO -->
 <div class="modal" id="modalEdificio">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 id="modalTitulo">➕ Nuevo Edificio</h2>
+            <h2 id="modalTitulo">➕ Nuevo Conjunto</h2>
             <button class="btn-close" onclick="cerrarModal()">&times;</button>
         </div>
         <div class="form-grid">
@@ -246,7 +246,7 @@
             <div class="form-group">
                 <label>Tipo</label>
                 <select id="fTipo">
-                    <option>EDIFICIO</option>
+                    <option>CONJUNTO</option>
                     <option>CONJUNTO RESIDENCIAL</option>
                     <option>UNIDAD RESIDENCIAL</option>
                     <option>CONJUNTO CERRADO</option>
@@ -387,70 +387,11 @@
     const auth = getAuth(app);
     const db  = getDatabase(app);
 
-    // Edificios predeterminados para migración inicial
-    const EDIFICIOS_DEFAULT = [
-        { nombre:'Nepal 2',           edificioId:'nepal-2',            tipo:'EDIFICIO', icono:'🏢',  email:'Nepal2edifico@gmail.com',           password:'Nepal&2025',        direccion:'Calle 55 #4a-24',  rut:'830142380-4', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
-        { nombre:'Pinos del Country', edificioId:'pinos-del-country',  tipo:'EDIFICIO', icono:'🌲',  email:'pinosdelcountryedificio@gmail.com',  password:'pinos%2024*',       direccion:'CR 12 127 B - 23', rut:'830059667-8', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
-        { nombre:'Convivienda I',     edificioId:'convivienda-1',      tipo:'EDIFICIO', icono:'🏘️', email:'edificioconvivienda@gmail.com',       password:'Convivi#2024',      direccion:'CR 10a #138-71',   rut:'830112728-5', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
-        { nombre:'Avalon',            edificioId:'avalon',             tipo:'EDIFICIO', icono:'🏰',  email:'edificioavalonadm@gmail.com',        password:'admin.avalon&2025', direccion:'Calle 65 #9-07',   rut:'800245101-1', telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' },
-        { nombre:'Torres de Amin II', edificioId:'torre-amin-2',       tipo:'EDIFICIO', icono:'🏢',  email:'',                                  password:'',                  direccion:'',                 rut:'',            telefono:'', matricula:'', chip:'', catastral:'', polizaNo:'', aseguradora:'', polizaVence:'', polizaValor:'', cuentasBancarias:'', clavesCamaras:'', notas:'' }
-    ];
-
-    // Mapa de nombres conocidos a sus slugs (para migración de registros existentes)
-    const SLUGS_CONOCIDOS = {
-        'Nepal 2':'nepal-2', 'nepal 2':'nepal-2',
-        'Pinos del Country':'pinos-del-country', 'pinos del country':'pinos-del-country',
-        'Convivienda I':'convivienda-1', 'convivienda i':'convivienda-1',
-        'Convivienda 1':'convivienda-1', 'convivienda 1':'convivienda-1',
-        'Avalon':'avalon', 'avalon':'avalon',
-        'Torres de Amin II':'torre-amin-2', 'torres de amin ii':'torre-amin-2',
-        'Tores de Anim II':'torre-amin-2',  'tores de anim ii':'torre-amin-2',
-        'Millenium 3':'millenium-3',         'millenium 3':'millenium-3'
-    };
-
-    // Generar slug automático para edificios nuevos
-    function generarSlug(nombre) {
-        return nombre
-            .replace(/\bIV\b/g,'4').replace(/\bIII\b/g,'3').replace(/\bII\b/g,'2').replace(/\bI\b/g,'1')
-            .toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-            .trim().replace(/\s+/g,'-')
-            .replace(/[^a-z0-9-]/g,'');
-    }
-
-    // Rol del usuario actual
-    const userInfo = JSON.parse(localStorage.getItem('mcgUser') || '{}');
-    const puedeVerSensible = userInfo.rol === 'administrador' || userInfo.rol === 'creadora';
-
-    // ══════════════════════════════════════════════════
-    // INICIALIZAR: migrar si no existen datos
-    // ══════════════════════════════════════════════════
+    // INICIALIZAR
     async function inicializar() {
-        const snap = await get(ref(db, 'edificios'));
-        if (!snap.exists()) {
-            for (const ed of EDIFICIOS_DEFAULT) {
-                await push(ref(db, 'edificios'), ed);
-            }
-        } else {
-            // Migración: agregar edificioId a registros que no lo tienen, y corregir slugs incorrectos
-            const SLUGS_INCORRECTOS = { 'tores-de-anim-2': 'torre-amin-2', 'torres-de-amin-2': 'torre-amin-2' };
-            const migraciones = [];
-            snap.forEach(child => {
-                const ed = child.val();
-                if (!ed.edificioId) {
-                    const nombreNorm = (ed.nombre || '').trim();
-                    const slug = SLUGS_CONOCIDOS[nombreNorm] || generarSlug(nombreNorm);
-                    migraciones.push(update(ref(db, `edificios/${child.key}`), { edificioId: slug }));
-                } else if (SLUGS_INCORRECTOS[ed.edificioId]) {
-                    migraciones.push(update(ref(db, `edificios/${child.key}`), { edificioId: SLUGS_INCORRECTOS[ed.edificioId] }));
-                }
-            });
-            if (migraciones.length > 0) await Promise.all(migraciones);
-        }
         escucharEdificios();
         cargarEstadisticas();
     }
-
     // ══════════════════════════════════════════════════
     // ESCUCHAR CAMBIOS EN FIREBASE
     // ══════════════════════════════════════════════════
@@ -460,7 +401,7 @@
             document.getElementById('totalConjunto').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
 
             if (!snap.exists()) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;"><div style="font-size:3em;margin-bottom:15px;">🏢</div><h3>No hay edificios registrados</h3><p>Haz clic en "➕ Nuevo Edificio" para agregar uno.</p></div>`;
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;"><div style="font-size:3em;margin-bottom:15px;">🏢</div><h3>No hay edificios registrados</h3><p>Haz clic en "➕ Nuevo Conjunto" para agregar uno.</p></div>`;
                 return;
             }
 
@@ -588,12 +529,12 @@
         }
 
         return `
-        <div class="edificio-card">
-            <div class="edificio-header">
-                <div class="edificio-icon">${d.icono || '🏢'}</div>
-                <div class="edificio-title">
+        <div class="conjunto-card">
+            <div class="conjunto-header">
+                <div class="conjunto-icon">${d.icono || '🏢'}</div>
+                <div class="conjunto-title">
                     <h2>${d.nombre || 'Sin nombre'}</h2>
-                    <p>${d.tipo || 'EDIFICIO'}</p>
+                    <p>${d.tipo || 'CONJUNTO'}</p>
                 </div>
                 <div class="card-actions">
                     <button class="btn-card btn-edit" onclick="abrirEditar('${key}')">✏️ Editar</button>
@@ -628,7 +569,7 @@
     // MODAL NUEVO
     // ══════════════════════════════════════════════════
     window.abrirModalNuevo = function() {
-        document.getElementById('modalTitulo').textContent = '➕ Nuevo Edificio';
+        document.getElementById('modalTitulo').textContent = '➕ Nuevo Conjunto';
         limpiarForm();
         document.getElementById('fEditKey').value = '';
         document.getElementById('modalEdificio').classList.add('active');
@@ -642,7 +583,7 @@
         document.getElementById('modalTitulo').textContent = `✏️ Editar — ${d.nombre}`;
         document.getElementById('fEditKey').value = key;
         document.getElementById('fNombre').value         = d.nombre || '';
-        document.getElementById('fTipo').value           = d.tipo || 'EDIFICIO';
+        document.getElementById('fTipo').value           = d.tipo || 'CONJUNTO';
         document.getElementById('fIcono').value          = d.icono || '🏢';
         document.getElementById('fDireccion').value      = d.direccion || '';
         document.getElementById('fEmail').value          = d.email || '';
@@ -713,7 +654,7 @@
         const key = document.getElementById('fEditKey').value;
         if (!key) {
             // Nuevo edificio: generar edificioId automáticamente
-            datos.edificioId = SLUGS_CONOCIDOS[nombre] || generarSlug(nombre);
+            datos.edificioId = generarSlug(nombre);
         }
         try {
             if (key) {
@@ -751,7 +692,7 @@
          'fRepresentacionVence','fCuentasBancarias','fClavesCamaras','fNotas'].forEach(id => {
             document.getElementById(id).value = '';
         });
-        document.getElementById('fTipo').value          = 'EDIFICIO';
+        document.getElementById('fTipo').value          = 'CONJUNTO';
         document.getElementById('fIcono').value         = '🏢';
         document.getElementById('fPolizaTipoPago').value = '';
         ['rowPolizaCuotas','rowPolizaCuotaValor','rowPolizaCuotasPagadas'].forEach(id => {

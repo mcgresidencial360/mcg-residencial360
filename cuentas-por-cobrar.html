@@ -216,7 +216,7 @@
             <h1>📊 Cuentas por <span>Cobrar</span> - Cartera</h1>
             <div class="edificio-selector">
                 <select id="edificioSelect" onchange="cambiarEdificio()">
-                    <option value="">Selecciona edificio</option>
+                    <option value="">Selecciona conjunto</option>
                 </select>
                 <button class="btn-dash" onclick="location.href='Dashboard.html'">🏠 Dashboard</button>
             </div>
@@ -436,7 +436,7 @@
             const sel = document.getElementById('edificioSelect');
             if (!sel) return;
             const v = sel.value;
-            sel.innerHTML = '<option value="">Selecciona edificio</option>';
+            sel.innerHTML = '<option value="">Selecciona conjunto</option>';
             if (snap.exists()) snap.forEach(child => {
                 const ed = child.val();
                 const opt = document.createElement('option');
