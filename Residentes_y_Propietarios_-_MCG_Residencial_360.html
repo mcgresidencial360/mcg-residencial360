@@ -433,12 +433,7 @@
             <div class="controls-row">
                 <div class="select-edificio">
                     <select id="edificioSelect" onchange="cambiarEdificio()">
-                        <option value="">Seleccionar Edificio</option>
-                        <option value="nepal-2">Nepal II</option>
-                        
-                        <option value="convivienda-1">Convivienda 1</option>
-                        
-                        <option value="torre-amin-2">Torre Amin II</option>
+                        <option value="conjunto" selected>MCG Residencial 360</option>
                     </select>
                 </div>
                 <div class="search-box">
@@ -650,7 +645,7 @@
                 propList.innerHTML = `
                     <div class="empty-state">
                         <h3>📭 No hay propietarios</h3>
-                        <p>${!edificio ? 'Selecciona un edificio' : 'No se encontraron propietarios ' + (filtroEstado === 'activo' ? 'activos' : filtroEstado === 'archivado' ? 'archivados' : '')}</p>
+                        <p>${!edificio ? 'Selecciona un conjunto' : 'No se encontraron propietarios ' + (filtroEstado === 'activo' ? 'activos' : filtroEstado === 'archivado' ? 'archivados' : '')}</p>
                     </div>
                 `;
             }
@@ -678,7 +673,7 @@
                 resList.innerHTML = `
                     <div class="empty-state">
                         <h3>📭 No hay residentes</h3>
-                        <p>${!edificio ? 'Selecciona un edificio' : 'No se encontraron residentes ' + (filtroEstado === 'activo' ? 'activos' : filtroEstado === 'archivado' ? 'archivados' : '')}</p>
+                        <p>${!edificio ? 'Selecciona un conjunto' : 'No se encontraron residentes ' + (filtroEstado === 'activo' ? 'activos' : filtroEstado === 'archivado' ? 'archivados' : '')}</p>
                     </div>
                 `;
             }
@@ -768,7 +763,7 @@
         // Modal
         window.abrirModalAgregar = function() {
             if (!edificioActual) {
-                alert('⚠️ Primero selecciona un edificio');
+                alert('⚠️ Primero selecciona un conjunto');
                 return;
             }
             

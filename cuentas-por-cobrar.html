@@ -278,7 +278,7 @@
                         </tr>
                     </thead>
                     <tbody id="tablaCuerpo">
-                        <tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">📄</div><h3>Selecciona un edificio y sube los PDFs</h3><p>Extractos individuales de Daytona InterCloud</p></div></td></tr>
+                        <tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">📄</div><h3>Selecciona un conjunto y sube los PDFs</h3><p>Extractos individuales de Daytona InterCloud</p></div></td></tr>
                     </tbody>
                     <tfoot id="tablaFoot" style="display: none;">
                         <tr>
@@ -685,7 +685,7 @@
         window.procesarPDFs = async function(event) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            if (!edificioActual) { alert('❌ Selecciona un edificio primero'); event.target.value = ''; return; }
+            if (!edificioActual) { alert('❌ Selecciona un conjunto primero'); event.target.value = ''; return; }
 
             const progress = document.getElementById('uploadProgress');
             const bar = document.getElementById('progressBar');
@@ -773,7 +773,7 @@
             const keys = Object.keys(carteraData);
 
             if (keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">📄</div><h3>${edificioActual ? 'No hay extractos cargados' : 'Selecciona un edificio'}</h3></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">📄</div><h3>${edificioActual ? 'No hay extractos cargados' : 'Selecciona un conjunto'}</h3></div></td></tr>`;
                 tfoot.style.display = 'none';
                 resumen.style.display = 'none';
                 document.getElementById('contadorAptos').textContent = '0';
@@ -1009,7 +1009,7 @@
 
         // AGREGAR MANUAL
         window.agregarManual = function() {
-            if (!edificioActual) { alert('❌ Selecciona un edificio primero'); return; }
+            if (!edificioActual) { alert('❌ Selecciona un conjunto primero'); return; }
             document.getElementById('modalManual').classList.add('active');
         };
 
@@ -1049,7 +1049,7 @@
 
         // UTILIDADES
         window.toggleDropZone = function() {
-            if (!edificioActual) { alert('❌ Selecciona un edificio primero'); return; }
+            if (!edificioActual) { alert('❌ Selecciona un conjunto primero'); return; }
             document.getElementById('dropZone').classList.toggle('active');
         };
 
@@ -1118,7 +1118,7 @@
         };
 
         window.limpiarCartera = async function() {
-            if (!edificioActual) { alert('❌ Selecciona un edificio'); return; }
+            if (!edificioActual) { alert('❌ Selecciona un conjunto'); return; }
             if (!confirm(`⚠️ ¿Eliminar TODA la cartera de ${edificioActual}?`)) return;
             try {
                 await remove(ref(db, `cartera_morosos/${edificioActual}`));

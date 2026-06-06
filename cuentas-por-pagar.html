@@ -1379,7 +1379,7 @@
                     <tr><td colspan="22">
                         <div class="empty-state">
                             <div class="empty-state-icon">🏢</div>
-                            <h3>Selecciona un edificio</h3>
+                            <h3>Selecciona un conjunto</h3>
                         </div>
                     </td></tr>
                 `;
@@ -1576,7 +1576,7 @@
             if (!file) return;
             
             if (!edificioActual) {
-                alert('❌ Selecciona un edificio primero');
+                alert('❌ Selecciona un conjunto primero');
                 event.target.value = '';
                 return;
             }
@@ -1668,7 +1668,7 @@
         
         window.confirmarCargaExcel = async function() {
             if (!edificioActual) {
-                alert('❌ Selecciona un edificio');
+                alert('❌ Selecciona un conjunto');
                 return;
             }
             
@@ -1697,7 +1697,7 @@
         // MODAL MANUAL
         window.abrirModalManual = function() {
             if (!edificioActual) {
-                alert('❌ Selecciona un edificio primero');
+                alert('❌ Selecciona un conjunto primero');
                 return;
             }
             document.getElementById('modalManual').classList.add('active');
@@ -1973,7 +1973,7 @@
         
         window.descargarExcel = async function() {
             if (!edificioActual) {
-                alert('❌ Selecciona un edificio primero');
+                alert('❌ Selecciona un conjunto primero');
                 return;
             }
 

@@ -508,11 +508,9 @@
     <div class="header">
         <div class="header-content">
             <div class="logo-section">
-                <div class="logo-box">
-                    <div class="logo-text">
-                        <img src="logo.png" alt="MCG Residencial 360" style="height:50px;width:auto;object-fit:contain;">
-                        <span class="logo-subtitle">ADMINISTRACIÓN DE PROPIEDAD HORIZONTAL</span>
-                    </div>
+                <div class="logo-box" style="padding:10px 20px;">
+                    <img src="logo.png" alt="MCG Residencial 360" style="height:90px;width:auto;object-fit:contain;display:block;">
+                    <div style="font-size:0.62em;font-weight:600;letter-spacing:2px;color:#888;text-align:center;margin-top:4px;">ADMINISTRACIÓN DE PROPIEDAD HORIZONTAL</div>
                 </div>
                 <div class="welcome-text">
                     <h1>¡Bienvenida!</h1>
@@ -579,17 +577,20 @@
 
             <!-- FACTURAS PENDIENTES POR EDIFICIO -->
             <div id="facturas-por-edificio" style="margin-top:28px;">
-                <h3 style="font-size:1.3em;font-weight:700;color:#333;margin-bottom:14px;">💰 Cuentas por Pagar por Edificio</h3>
+                <h3 style="font-size:1.3em;font-weight:700;color:#333;margin-bottom:14px;">💰 Cuentas por Pagar por Conjunto</h3>
                 <div id="edificios-facturas-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
                     <p style="color:#888;font-style:italic;">Cargando...</p>
                 </div>
             </div>
 
             <!-- ALERTAS DE VENCIMIENTOS -->
-            <div id="alertas-vencimientos" style="margin-top:28px;">
-                <h3 style="font-size:1.3em;font-weight:700;color:#333;margin-bottom:14px;">⚠️ Alertas de Vencimientos</h3>
-                <div id="alertas-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;">
-                    <p id="alertas-cargando" style="color:#888;font-style:italic;">Cargando alertas...</p>
+            <div id="alertas-vencimientos" style="margin-top:28px;background:white;border-radius:15px;padding:22px 25px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+                <h3 style="font-size:1.1em;font-weight:700;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px;">⚠️ Alertas de Vencimientos</h3>
+                <div id="alertas-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;">
+                    <div style="display:flex;align-items:center;gap:10px;color:#aaa;font-style:italic;padding:10px 0;">
+                        <span style="font-size:1.3em;">⏳</span>
+                        <span id="alertas-cargando">Cargando alertas...</span>
+                    </div>
                 </div>
             </div>
         </div>
