@@ -1236,10 +1236,44 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
+
         let edificioActual = '';
         let facturasTemp = [];
         let proveedoresDB = {}; // Base de datos de proveedores en memoria
+
+        // Helper slug (fallback si edificioId no está aún en Firebase)
+        function slugEdificio(n) {
+            if (!n) return '';
+            return n.replace(/\bIV\b/g,'4').replace(/\bIII\b/g,'3').replace(/\bII\b/g,'2').replace(/\bI\b/g,'1')
+                .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+        }
+
+        // ─── EDIFICIOS DINÁMICOS ────────────────────────────────────────
+        let edificiosDinamicos = [];
+        onValue(ref(db, 'edificios'), (snap) => {
+            const sel = document.getElementById('edificioSelect');
+            edificiosDinamicos = [];
+            if (snap.exists()) snap.forEach(child => {
+                const ed = child.val();
+                edificiosDinamicos.push({
+                    id: ed.edificioId || slugEdificio(ed.nombre) || child.key,
+                    nombre: ed.nombre || child.key,
+                    icono: ed.icono || '🏢'
+                });
+            });
+            if (!sel) return;
+            const v = sel.value;
+            sel.innerHTML = '<option value="">Selecciona conjunto</option>';
+            edificiosDinamicos.forEach(ed => {
+                const opt = document.createElement('option');
+                opt.value = ed.id;
+                opt.textContent = ed.icono + ' ' + ed.nombre;
+                sel.appendChild(opt);
+            });
+            if (v) sel.value = v;
+            cargarResumen();
+        });
+        // ───────────────────────────────────────────────────────────────
         
         // Cargar proveedores desde Firebase al iniciar
         const proveedoresRef = ref(db, 'proveedores');
@@ -2136,15 +2170,9 @@
         async function cargarResumen() {
             const container = document.getElementById('tarjetasEdificios');
             if (!container) return;
-            
-            const edificios = [
-                { id: 'nepal-2', nombre: 'Nepal 2', icono: '🏢' },
-                { id: 'avalon', nombre: 'Avalon', icono: '🏰' },
-                { id: 'convivienda-1', nombre: 'Convivienda I', icono: '🏘️' },
-                { id: 'pinos-del-country', nombre: 'Pinos del Country', icono: '🌲' },
-                { id: 'torre-amin-2', nombre: 'Torres de Amin II', icono: '🏗️' }
-            ];
-            
+
+            const edificios = edificiosDinamicos;
+
             let html = '';
             for (const ed of edificios) {
                 const snap = await get(ref(db, `cuentas_por_pagar/${ed.id}`));
@@ -2175,8 +2203,6 @@
             }
             container.innerHTML = html;
         }
-        
-        setTimeout(cargarResumen, 1000);
 
         // ═══════════════════════════════════════════════════════════════
         // VER PENDIENTES POR EDIFICIO
@@ -2186,13 +2212,7 @@
             contenedor.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><h3>Cargando cuentas pendientes...</h3></div>';
             document.getElementById('modalPendientes').classList.add('active');
 
-            const todosEdificios = [
-                { id: 'nepal-2', nombre: 'Nepal 2', icono: '🏢' },
-                { id: 'avalon', nombre: 'Avalon', icono: '🏰' },
-                { id: 'convivienda-1', nombre: 'Convivienda I', icono: '🏘️' },
-                { id: 'pinos-del-country', nombre: 'Pinos del Country', icono: '🌲' },
-                { id: 'torre-amin-2', nombre: 'Torres de Amin II', icono: '🏗️' }
-            ];
+            const todosEdificios = edificiosDinamicos;
 
             // Si hay edificio seleccionado, solo mostrar ese; si no, mostrar todos
             const edificios = edificioActual
