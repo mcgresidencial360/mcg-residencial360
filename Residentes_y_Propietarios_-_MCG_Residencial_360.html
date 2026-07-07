@@ -444,7 +444,7 @@
                     </select>
                 </div>
                 <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, apartamento..." oninput="renderizar()">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, apto/casa..." oninput="renderizar()">
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="abrirModalAgregar()">+ Agregar</button>
@@ -488,7 +488,7 @@
             </div>
             <form id="formulario" onsubmit="guardarDatos(event)">
                 <div class="form-group">
-                    <label class="required">Apartamento</label>
+                    <label class="required">Apartamento / Casa</label>
                     <input type="text" id="inputApto" required>
                 </div>
                 <div class="form-group">
@@ -512,7 +512,7 @@
                     <input type="number" step="0.0001" id="inputCoeficiente">
                 </div>
                 <div class="form-group">
-                    <label>🏷️ Matrícula Catastral — Apartamento <span style="color:#999;font-weight:400;">(cuando aplique)</span></label>
+                    <label>🏷️ Matrícula Catastral — Apartamento/Casa <span style="color:#999;font-weight:400;">(cuando aplique)</span></label>
                     <input type="text" id="inputMatriculaApto" placeholder="Ej: 50N-20-0001234">
                 </div>
                 <div class="form-group">
