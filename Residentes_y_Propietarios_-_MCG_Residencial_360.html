@@ -541,6 +541,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getDatabase, ref, onValue, push, set, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
@@ -554,6 +555,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
         let edificioActual = 'conjunto';
@@ -563,6 +565,11 @@
         let dataResidentes = {};
         let modoEdicion = false;
         let keyEdicion = '';
+
+        // Esperar a que Firebase Auth confirme la sesión antes de leer/escribir
+        // (si se lee antes de tiempo, las reglas de la BD niegan el permiso
+        // y el listener queda cancelado para siempre)
+        onAuthStateChanged(auth, () => {
 
         // Cargar datos
         const propRef = ref(db, 'propietarios');
@@ -577,6 +584,8 @@
             dataResidentes = snapshot.val() || {};
             renderizar();
         });
+
+        }); // fin onAuthStateChanged
 
         // Cambiar edificio
         window.cambiarEdificio = function() {

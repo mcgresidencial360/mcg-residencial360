@@ -416,6 +416,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getDatabase, ref, set, onValue, remove, get, update, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
@@ -429,6 +430,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
         let edificioActual = '';
@@ -437,6 +439,11 @@
         // Helper slug (fallback si edificioId no está aún en Firebase)
         const _SLUGS_CONOCIDOS = {'Nepal 2':'nepal-2','Pinos del Country':'pinos-del-country','Convivienda I':'convivienda-1','Convivienda 1':'convivienda-1','Avalon':'avalon','Torres de Amin II':'torre-amin-2','Tores de Anim II':'torre-amin-2','Millenium 3':'millenium-3'};
         function slugEdificio(n){if(!n)return'';if(_SLUGS_CONOCIDOS[n])return _SLUGS_CONOCIDOS[n];return n.replace(/\bIV\b/g,'4').replace(/\bIII\b/g,'3').replace(/\bII\b/g,'2').replace(/\bI\b/g,'1').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');}
+
+        // Esperar a que Firebase Auth confirme la sesión antes de leer/escribir
+        // (si se lee antes de tiempo, las reglas de la BD niegan el permiso
+        // y el listener queda cancelado para siempre)
+        onAuthStateChanged(auth, () => {
 
         // ─── EDIFICIOS DINÁMICOS ────────────────────────────────────────
         onValue(ref(db, 'edificios'), (snap) => {
@@ -456,6 +463,8 @@
             if (v) sel.value = v;
         });
         // ───────────────────────────────────────────────────────────────
+
+        }); // fin onAuthStateChanged
         let sortCol = 8; // Por defecto ordenar por saldo final
         let sortAsc = false; // Mayor a menor
         let soloMorosos = false;

@@ -1222,6 +1222,7 @@
     <script type="module">
         // Firebase
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getDatabase, ref, push, set, onValue, update, remove, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
@@ -1235,11 +1236,13 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
         let edificioActual = '';
         let facturasTemp = [];
         let proveedoresDB = {}; // Base de datos de proveedores en memoria
+        let edificiosDinamicos = [];
 
         // Helper slug (fallback si edificioId no está aún en Firebase)
         function slugEdificio(n) {
@@ -1248,8 +1251,12 @@
                 .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
         }
 
+        // Esperar a que Firebase Auth confirme la sesión antes de leer/escribir
+        // (si se lee antes de tiempo, las reglas de la BD niegan el permiso
+        // y el listener queda cancelado para siempre)
+        onAuthStateChanged(auth, () => {
+
         // ─── EDIFICIOS DINÁMICOS ────────────────────────────────────────
-        let edificiosDinamicos = [];
         onValue(ref(db, 'edificios'), (snap) => {
             const sel = document.getElementById('edificioSelect');
             edificiosDinamicos = [];
@@ -1319,7 +1326,9 @@
                 console.log(`✅ ${Object.keys(proveedoresDB).length} proveedores cargados`);
             }
         });
-        
+
+        }); // fin onAuthStateChanged
+
         // Listener para autocompletar cuando cambie el proveedor
         document.getElementById('proveedor').addEventListener('input', function() {
             const nombreBuscado = this.value.trim().toLowerCase();
