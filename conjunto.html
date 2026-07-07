@@ -394,6 +394,10 @@
     const auth = getAuth(app);
     const db  = getDatabase(app);
 
+    // Solo administradora/creadora ven datos sensibles (claves camaras, notas privadas)
+    const mcgUser = JSON.parse(localStorage.getItem('mcgUser') || '{}');
+    const puedeVerSensible = mcgUser.rol === 'administrador' || mcgUser.rol === 'creadora';
+
     // INICIALIZAR
     async function inicializar() {
         escucharEdificios();
