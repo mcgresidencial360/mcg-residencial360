@@ -571,6 +571,14 @@
         // y el listener queda cancelado para siempre)
         onAuthStateChanged(auth, () => {
 
+        // Mostrar el nombre real del conjunto registrado (modulo Conjunto)
+        onValue(ref(db, 'edificios'), (snap) => {
+            const opt = document.querySelector('#edificioSelect option[value="conjunto"]');
+            if (!opt || !snap.exists()) return;
+            const primero = Object.values(snap.val())[0];
+            if (primero?.nombre) opt.textContent = (primero.icono || '🏘️') + ' ' + primero.nombre;
+        });
+
         // Cargar datos
         const propRef = ref(db, 'propietarios');
         const resRef = ref(db, 'residentes');
