@@ -745,7 +745,7 @@
                         ${persona.coeficiente ? `
                         <div class="info-item">
                             <span class="info-label">Coeficiente:</span>
-                            <span class="info-value">${(parseFloat(persona.coeficiente) * 100).toFixed(2)}%</span>
+                            <span class="info-value">${parseFloat(persona.coeficiente).toFixed(2).replace('.', ',')}%</span>
                         </div>
                         ` : ''}
                         ${persona.documento ? `
