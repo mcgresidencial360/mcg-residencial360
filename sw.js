@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mcg-360-v1';
+const CACHE_NAME = 'mcg-360-v2';
 const ASSETS = [
   'index.html',
   'Dashboard.html',
@@ -38,16 +38,15 @@ self.addEventListener('fetch', event => {
   // Solo cachear recursos del mismo origen (no Firebase ni CDNs externos)
   if (url.origin !== self.location.origin) return;
 
+  // Network-first: siempre intenta traer la version mas nueva primero.
+  // Solo usa el cache si no hay internet.
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response && response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      });
-    })
+    fetch(event.request).then(response => {
+      if (response && response.ok) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+      }
+      return response;
+    }).catch(() => caches.match(event.request))
   );
 });
