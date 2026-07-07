@@ -399,6 +399,15 @@
         escucharEdificios();
         cargarEstadisticas();
     }
+
+    // Generar slug a partir del nombre (sin tildes, minusculas, guiones)
+    function generarSlug(nombre) {
+        return nombre
+            .toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
     // ══════════════════════════════════════════════════
     // ESCUCHAR CAMBIOS EN FIREBASE
     // ══════════════════════════════════════════════════
