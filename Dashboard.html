@@ -597,6 +597,35 @@
                     </div>
                 </div>
             </div>
+
+            <!-- TAREAS PENDIENTES -->
+            <div id="tareas-pendientes" style="margin-top:28px;background:white;border-radius:15px;padding:22px 25px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+                <h3 style="font-size:1.1em;font-weight:700;color:#333;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                    ✅ Tareas Pendientes <span id="tareasContador" style="font-size:0.8em;color:#888;font-weight:500;"></span>
+                </h3>
+                <form id="formTarea" style="display:grid;grid-template-columns:1fr 150px 160px auto;gap:10px;align-items:end;margin-bottom:18px;">
+                    <div>
+                        <label style="display:block;font-size:0.8em;color:#666;margin-bottom:4px;">Tarea *</label>
+                        <input type="text" id="tareaTitulo" required placeholder="Ej: Renovar póliza de zonas comunes" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8em;color:#666;margin-bottom:4px;">Prioridad</label>
+                        <select id="tareaPrioridad" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;">
+                            <option value="Alta">Alta</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Baja">Baja</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.8em;color:#666;margin-bottom:4px;">Fecha límite</label>
+                        <input type="date" id="tareaFecha" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;">
+                    </div>
+                    <button type="submit" style="padding:10px 18px;background:#C9A227;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">➕ Agregar</button>
+                </form>
+                <div id="lista-tareas" style="display:grid;gap:10px;">
+                    <p style="color:#888;font-style:italic;">Cargando...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -637,6 +666,7 @@
                 // Cargar contadores dinámicos
                 cargarContadores();
                 cargarAlertasVencimientos();
+                cargarTareas();
             }
         });
         
@@ -773,6 +803,81 @@
                 console.error('Error cargando alertas:', err);
             });
         }
+
+        // ─── TAREAS PENDIENTES ─────────────────────────────────────────
+        function cargarTareas() {
+            onValue(ref(db, 'tareas'), (snapshot) => {
+                const cont = document.getElementById('lista-tareas');
+                const contador = document.getElementById('tareasContador');
+                const tareas = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(ch => tareas.push({ id: ch.key, ...ch.val() }));
+                }
+                const pendientes = tareas.filter(t => t.estado !== 'completada');
+                contador.textContent = pendientes.length ? `(${pendientes.length})` : '';
+
+                if (!pendientes.length) {
+                    cont.innerHTML = '<p style="color:#888;font-style:italic;">No hay tareas pendientes. 🎉</p>';
+                    return;
+                }
+
+                const rank = { Alta: 0, Media: 1, Baja: 2 };
+                pendientes.sort((a, b) => {
+                    const r = (rank[a.prioridad] ?? 1) - (rank[b.prioridad] ?? 1);
+                    if (r !== 0) return r;
+                    return (a.fechaLimite || '9999') < (b.fechaLimite || '9999') ? -1 : 1;
+                });
+
+                const colorPri = { Alta: '#e53935', Media: '#f59e0b', Baja: '#2e7d32' };
+                const hoy = new Date().toISOString().slice(0, 10);
+                cont.innerHTML = pendientes.map(t => {
+                    const vencida = t.fechaLimite && t.fechaLimite < hoy;
+                    const fechaTxt = t.fechaLimite
+                        ? `<span style="color:${vencida ? '#e53935' : '#666'};font-weight:${vencida ? '700' : '400'};">📅 ${t.fechaLimite}${vencida ? ' (vencida)' : ''}</span>`
+                        : '';
+                    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #eee;border-left:4px solid ${colorPri[t.prioridad] || '#f59e0b'};border-radius:8px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600;color:#333;">${t.titulo || '(sin título)'}</div>
+                            <div style="font-size:0.82em;color:#888;margin-top:3px;display:flex;gap:12px;flex-wrap:wrap;">
+                                <span>${t.prioridad || 'Media'}</span>${fechaTxt}
+                            </div>
+                        </div>
+                        <button onclick="completarTarea('${t.id}')" title="Marcar como hecha" style="padding:7px 12px;background:#4caf50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">✓</button>
+                        <button onclick="eliminarTarea('${t.id}')" title="Eliminar" style="padding:7px 12px;background:#f44336;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;">🗑️</button>
+                    </div>`;
+                }).join('');
+            });
+        }
+
+        document.getElementById('formTarea').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('tareaTitulo').value.trim();
+            if (!titulo) return;
+            try {
+                await push(ref(db, 'tareas'), {
+                    titulo,
+                    prioridad: document.getElementById('tareaPrioridad').value,
+                    fechaLimite: document.getElementById('tareaFecha').value || null,
+                    estado: 'pendiente',
+                    creada: new Date().toISOString()
+                });
+                e.target.reset();
+                document.getElementById('tareaPrioridad').value = 'Media';
+            } catch (err) {
+                alert('❌ No se pudo guardar la tarea: ' + err.message);
+            }
+        });
+
+        window.completarTarea = async function(id) {
+            try { await update(ref(db, `tareas/${id}`), { estado: 'completada', completadaEn: new Date().toISOString() }); }
+            catch (err) { alert('❌ Error: ' + err.message); }
+        };
+
+        window.eliminarTarea = async function(id) {
+            if (!confirm('¿Eliminar esta tarea?')) return;
+            try { await remove(ref(db, `tareas/${id}`)); }
+            catch (err) { alert('❌ Error: ' + err.message); }
+        };
 
         // Cerrar sesión
         window.cerrarSesion = function() {
