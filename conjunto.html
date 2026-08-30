@@ -444,6 +444,12 @@
     // ══════════════════════════════════════════════════
     // CREAR TARJETA HTML
     // ══════════════════════════════════════════════════
+    function escAttr(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     function crearTarjeta(key, d) {
         const pwd_id = 'pwd-' + key;
 
@@ -577,9 +583,9 @@
             <div class="info-group">
                 <div class="info-label">🔑 Contraseña Email</div>
                 <div class="password-field">
-                    <span class="password-value" id="${pwd_id}">••••••••••</span>
-                    <button class="btn-toggle-password" onclick="togglePassword('${pwd_id}','${(d.password||'').replace(/'/g,"\\'")}')">👁️</button>
-                    <button class="btn-copy" onclick="copyToClipboard('${(d.password||'').replace(/'/g,"\\'")}')">📋 Copiar</button>
+                    <span class="password-value" id="${pwd_id}" data-pwd="${escAttr(d.password)}">••••••••••</span>
+                    <button class="btn-toggle-password" onclick="togglePassword('${pwd_id}')">👁️</button>
+                    <button class="btn-copy" onclick="copyPassword('${pwd_id}')">📋 Copiar</button>
                 </div>
             </div>
 
@@ -856,11 +862,23 @@
 
 <script>
     // Funciones globales fuera del módulo
-    function togglePassword(pwd_id, password) {
+    const PWD_MASK = '••••••••••';
+    function togglePassword(pwd_id) {
         const el = document.getElementById(pwd_id);
-        el.textContent = el.textContent === '••••••••••' ? password : '••••••••••';
+        if (!el) return;
+        const pwd = el.dataset.pwd || '';
+        if (el.textContent === PWD_MASK) {
+            el.textContent = pwd ? pwd : '(sin contraseña registrada)';
+        } else {
+            el.textContent = PWD_MASK;
+        }
+    }
+    function copyPassword(pwd_id) {
+        const el = document.getElementById(pwd_id);
+        copyToClipboard(el ? (el.dataset.pwd || '') : '');
     }
     function copyToClipboard(text) {
+        if (!text) { alert('⚠️ No hay contraseña registrada para este conjunto'); return; }
         navigator.clipboard.writeText(text)
             .then(() => alert('✅ Copiado al portapapeles'))
             .catch(() => alert('❌ Error al copiar'));
