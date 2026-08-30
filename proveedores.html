@@ -375,6 +375,52 @@
         }
         .cuenta-info-card p { margin: 4px 0; font-size: 0.95em; }
         .cuenta-info-card strong { color: #8B6914; }
+
+        /* Buscador */
+        .buscador-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            background: #fdf6e3;
+            border: 2px solid #e8d08a;
+            border-radius: 12px;
+            padding: 12px 18px;
+        }
+        .buscador-wrap input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            outline: none;
+            color: #333;
+        }
+        .buscador-wrap .icono { font-size: 1.3em; color: #8B6914; }
+        .buscador-wrap .contador { font-size: 0.85em; color: #666; white-space: nowrap; }
+        .btn-limpiar-busqueda {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+        .btn-limpiar-busqueda:hover { color: #e53935; }
+        tr.oculto-busqueda { display: none; }
+
+        /* Alerta duplicado */
+        .alerta-duplicado {
+            display: none;
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            color: #e65100;
+            font-size: 0.95em;
+        }
+        .alerta-duplicado.visible { display: block; }
+        .alerta-duplicado strong { color: #bf360c; }
     </style>
 </head>
 <body>
@@ -403,6 +449,7 @@
             <div id="formContainer" class="form-container">
                 <h2 style="margin-bottom: 20px; color: #8B6914;">📝 Datos del Proveedor</h2>
                 <form id="formProveedor" onsubmit="guardarProveedor(event)">
+                    <div class="alerta-duplicado" id="alertaDuplicado"></div>
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Nombre del Proveedor *</label>
@@ -474,6 +521,14 @@
                 </form>
             </div>
 
+            <!-- BUSCADOR -->
+            <div class="buscador-wrap">
+                <span class="icono">🔍</span>
+                <input type="text" id="inputBusqueda" placeholder="Buscar por nombre, identificación, teléfono, correo..." oninput="filtrarTabla(this.value)">
+                <span class="contador" id="contadorResultados"></span>
+                <button class="btn-limpiar-busqueda" onclick="limpiarBusqueda()" title="Limpiar búsqueda">✕</button>
+            </div>
+
             <!-- TABLA DE PROVEEDORES -->
             <div class="table-container">
                 <table>
@@ -536,6 +591,7 @@
 
         let currentUser = null;
         let editandoId = null;
+        let _allProveedores = {}; // cache local para búsqueda y detección de duplicados
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -552,6 +608,8 @@
         window.toggleFormulario = () => {
             const form = document.getElementById('formContainer');
             const formElement = document.getElementById('formProveedor');
+
+            document.getElementById('alertaDuplicado').classList.remove('visible');
 
             if (form.classList.contains('active')) {
                 form.classList.remove('active');
@@ -610,6 +668,14 @@
                 }
             });
 
+            const nombreVal = document.getElementById('nombre').value.trim();
+            const noIdVal   = document.getElementById('noIdentificacion').value.trim();
+
+            // Verificar duplicado — si hay coincidencia pedir confirmación
+            if (verificarDuplicado(nombreVal, noIdVal)) {
+                if (!confirm('⚠️ Se encontró un proveedor similar (ver alerta en el formulario).\n\n¿Deseas guardar de todas formas?')) return;
+            }
+
             const proveedor = {
                 nombre:             document.getElementById('nombre').value,
                 tipoIdentificacion: document.getElementById('tipoIdentificacion').value,
@@ -650,13 +716,17 @@
                 const tbody = document.getElementById('tbodyProveedores');
                 tbody.innerHTML = '';
 
+                _allProveedores = {};
+
                 if (!snapshot.exists()) {
                     tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:50px;color:#999;">No hay proveedores registrados</td></tr>';
+                    actualizarContador(0, 0);
                     return;
                 }
 
                 snapshot.forEach((child) => {
                     const p = child.val();
+                    _allProveedores[child.key] = p;
 
                     let cuentas = [];
                     if (p.cuentasPago) {
@@ -673,6 +743,8 @@
                         : '<span style="color:#999;font-size:0.85em;">Sin cuenta</span>';
 
                     const row = tbody.insertRow();
+                    // Atributo para búsqueda rápida
+                    row.dataset.busqueda = [p.nombre, p.noIdentificacion, p.descripcion, p.telefono, p.whatsapp, p.correo, p.telefonoAlt].join(' ').toLowerCase();
                     row.innerHTML = `
                         <td><strong>${p.nombre}</strong><br><small style="color:#666;">${p.tipoIdentificacion || ''} ${p.noIdentificacion || ''}</small></td>
                         <td>${p.tipoIdentificacion || '-'} ${p.noIdentificacion || '-'}</td>
@@ -689,7 +761,60 @@
                         </td>
                     `;
                 });
+
+                // Reaplicar búsqueda activa si había una
+                const q = document.getElementById('inputBusqueda').value;
+                if (q) filtrarTabla(q);
+                else actualizarContador(Object.keys(_allProveedores).length, Object.keys(_allProveedores).length);
             });
+        }
+
+        // ─── BUSCADOR ──────────────────────────────────────────────────
+        window.filtrarTabla = (query) => {
+            const q = query.trim().toLowerCase();
+            const filas = document.querySelectorAll('#tbodyProveedores tr');
+            let visibles = 0;
+            filas.forEach(tr => {
+                if (!tr.dataset.busqueda) return;
+                const coincide = !q || tr.dataset.busqueda.includes(q);
+                tr.classList.toggle('oculto-busqueda', !coincide);
+                if (coincide) visibles++;
+            });
+            actualizarContador(visibles, filas.length);
+        };
+
+        window.limpiarBusqueda = () => {
+            document.getElementById('inputBusqueda').value = '';
+            filtrarTabla('');
+        };
+
+        function actualizarContador(visibles, total) {
+            const el = document.getElementById('contadorResultados');
+            if (!el) return;
+            el.textContent = total === 0 ? '' : visibles === total ? `${total} proveedores` : `${visibles} de ${total}`;
+        }
+
+        // ─── DETECCIÓN DE DUPLICADOS ───────────────────────────────────
+        function verificarDuplicado(nombre, noId) {
+            const nombreNorm = nombre.trim().toLowerCase();
+            const idNorm     = noId.trim().replace(/[.\-\s]/g, '');
+            const alertaEl   = document.getElementById('alertaDuplicado');
+
+            for (const [key, p] of Object.entries(_allProveedores)) {
+                if (editandoId && key === editandoId) continue; // ignorar el propio registro al editar
+                const mismoNombre = (p.nombre || '').trim().toLowerCase() === nombreNorm;
+                const mismoId     = noId && idNorm && (p.noIdentificacion || '').replace(/[.\-\s]/g, '') === idNorm;
+                if (mismoNombre || mismoId) {
+                    const razon = mismoNombre && mismoId ? 'mismo nombre e identificación'
+                                : mismoNombre ? 'mismo nombre'
+                                : 'mismo número de identificación';
+                    alertaEl.innerHTML = `⚠️ <strong>Posible duplicado:</strong> Ya existe el proveedor <strong>"${p.nombre}"</strong> con ${razon}.`;
+                    alertaEl.classList.add('visible');
+                    return true;
+                }
+            }
+            alertaEl.classList.remove('visible');
+            return false;
         }
 
         // ─── VER CUENTAS (MODAL) ───────────────────────────────────────
@@ -741,6 +866,7 @@
                 }
 
                 editandoId = id;
+                document.getElementById('alertaDuplicado').classList.remove('visible');
                 document.getElementById('formContainer').classList.add('active');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }, { onlyOnce: true });
