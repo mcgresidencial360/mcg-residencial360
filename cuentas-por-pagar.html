@@ -830,38 +830,38 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Valor Bruto *</label>
-                        <input type="number" id="valorBruto" step="0.01" required>
+                        <input type="text" inputmode="decimal" id="valorBruto" placeholder="Ej: 1.355.010 o 1.295 + 29.013" required>
                     </div>
                     <div class="form-group">
                         <label>AIU</label>
-                        <input type="number" id="aiu" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" id="aiu" value="0">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>IVA</label>
-                        <input type="number" id="iva" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" id="iva" value="0">
                     </div>
                     <div class="form-group">
                         <label>Retención</label>
-                        <input type="number" id="retencion" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" id="retencion" value="0">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Valor Neto a Pagar (calculado)</label>
-                    <input type="number" id="valorNeto" step="0.01" placeholder="Se calcula o ingresa manual" oninput="calcularRestoAPagar()">
+                    <input type="text" inputmode="decimal" id="valorNeto" placeholder="Se calcula o ingresa manual" oninput="calcularRestoAPagar()">
 
                 <!-- SALDO PENDIENTE ANTERIOR -->
                 <div class="form-group" style="background: #fff5f5; padding: 12px; border-radius: 8px; border: 2px solid #ffcccc; margin-top: 15px;">
                     <label style="color: #e53935; font-weight: 700;">⚡ Saldo Pendiente Anterior</label>
-                    <input type="number" id="saldoPendienteAnterior" step="0.01" value="0" placeholder="0" oninput="calcularRestoAPagar()">
+                    <input type="text" inputmode="decimal" id="saldoPendienteAnterior" value="0" placeholder="0" oninput="calcularRestoAPagar()">
                     <small style="color: #999; display: block; margin-top: 4px;">Deuda arrastrada de períodos anteriores (ej. 2024). Se suma al saldo final.</small>
                 </div>
 
                 <div class="form-row" style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 15px;">
                     <div class="form-group">
                         <label>💰 Anticipo</label>
-                        <input type="number" id="anticipo" step="0.01" value="0" oninput="calcularRestoAPagar()">
+                        <input type="text" inputmode="decimal" id="anticipo" value="0" oninput="calcularRestoAPagar()">
                     </div>
                     <div class="form-group">
                         <label>📅 Fecha Anticipo</label>
@@ -870,7 +870,7 @@
                 </div>
                 <div class="form-group">
                     <label style="color: #C9A227; font-weight: 700;">✅ Resto a Pagar</label>
-                    <input type="number" id="restoAPagar" step="0.01" readonly style="background: #e8f5e9; font-size: 1.1em; font-weight: 700; color: #C9A227;">
+                    <input type="text" id="restoAPagar" readonly style="background: #e8f5e9; font-size: 1.1em; font-weight: 700; color: #C9A227;">
                 </div>
                 </div>
                 <div class="form-row">
@@ -1004,32 +1004,32 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Valor Bruto *</label>
-                        <input type="number" id="editarValorBruto" step="0.01" required>
+                        <input type="text" inputmode="decimal" id="editarValorBruto" placeholder="Ej: 1.355.010 o 1.295 + 29.013" required>
                     </div>
                     <div class="form-group">
                         <label>AIU</label>
-                        <input type="number" id="editarAiu" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" id="editarAiu" value="0">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>IVA</label>
-                        <input type="number" id="editarIva" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" id="editarIva" value="0">
                     </div>
                     <div class="form-group">
                         <label>Retención</label>
-                        <input type="number" id="editarRetencion" step="0.01" value="0">
+                        <input type="text" inputmode="decimal" id="editarRetencion" value="0">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Valor Neto a Pagar (calculado)</label>
-                    <input type="number" id="editarValorNeto" step="0.01" readonly>
+                    <input type="text" inputmode="decimal" id="editarValorNeto" readonly>
                 </div>
 
                 <!-- SALDO PENDIENTE ANTERIOR -->
                 <div class="form-group" style="background: #fff5f5; padding: 12px; border-radius: 8px; border: 2px solid #ffcccc;">
                     <label style="color: #e53935; font-weight: 700;">⚡ Saldo Pendiente Anterior</label>
-                    <input type="number" id="editarSaldoPendienteAnterior" step="0.01" value="0" oninput="calcularRestoEditar()">
+                    <input type="text" inputmode="decimal" id="editarSaldoPendienteAnterior" value="0" oninput="calcularRestoEditar()">
                     <small style="color: #999; display: block; margin-top: 4px;">Deuda arrastrada de períodos anteriores. Se suma al saldo final.</small>
                 </div>
 
@@ -1037,7 +1037,7 @@
                 <div class="form-row" style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 15px;">
                     <div class="form-group">
                         <label>💰 Anticipo</label>
-                        <input type="number" id="editarAnticipo" step="0.01" value="0" oninput="calcularRestoEditar()">
+                        <input type="text" inputmode="decimal" id="editarAnticipo" value="0" oninput="calcularRestoEditar()">
                     </div>
                     <div class="form-group">
                         <label>📅 Fecha Anticipo</label>
@@ -1046,7 +1046,7 @@
                 </div>
                 <div class="form-group">
                     <label style="color: #C9A227; font-weight: 700;">✅ Resto a Pagar</label>
-                    <input type="number" id="editarRestoAPagar" step="0.01" readonly style="background: #e8f5e9; font-size: 1.1em; font-weight: 700; color: #C9A227;">
+                    <input type="text" id="editarRestoAPagar" readonly style="background: #e8f5e9; font-size: 1.1em; font-weight: 700; color: #C9A227;">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1153,7 +1153,7 @@
             <div id="abonoInfoCuenta" style="background: #f0f4ff; padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
             <div class="form-group">
                 <label>💰 Monto del Abono *</label>
-                <input type="number" id="abonoMonto" step="0.01" placeholder="0" min="0">
+                <input type="text" inputmode="decimal" id="abonoMonto" placeholder="Ej: 500.000">
             </div>
             <div class="form-group">
                 <label>📅 Fecha del Abono *</label>
@@ -1191,7 +1191,7 @@
             <div id="anticipoInfoCuenta" style="background: #fff3e0; padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
             <div class="form-group">
                 <label>💰 Monto del Anticipo *</label>
-                <input type="number" id="anticipoMonto" step="0.01" placeholder="0" min="0">
+                <input type="text" inputmode="decimal" id="anticipoMonto" placeholder="Ej: 500.000">
             </div>
             <div class="form-group">
                 <label>📅 Fecha del Anticipo *</label>
@@ -1754,48 +1754,133 @@
             document.getElementById('fechaRecepcion').valueAsDate = new Date();
         };
         
+        // ── Parseo de moneda colombiana + expresiones aritméticas ──
+        // Convierte un token numérico (formato CO o EN) a número estándar
+        function _numCOP(t) {
+            t = t.replace(/[$\s]/g, '');
+            if (!t) return '0';
+            const commaIdx = t.lastIndexOf(',');
+            const dotIdx   = t.lastIndexOf('.');
+            if (commaIdx === -1 && dotIdx === -1) return t; // número sin separadores
+            if (commaIdx === -1) {
+                // solo puntos
+                const dotCount = (t.match(/\./g) || []).length;
+                if (dotCount > 1) {
+                    const lastGroup = t.split('.').pop();
+                    if (lastGroup.length < 3) {
+                        // último punto es decimal: 1.887.515.10 → 1887515.10
+                        const parts = t.split('.');
+                        const dec = parts.pop();
+                        return parts.join('') + '.' + dec;
+                    }
+                    return t.replace(/\./g, ''); // 1.355.010 → 1355010
+                }
+                const afterDot = t.split('.').pop();
+                if (afterDot.length === 3) return t.replace('.', ''); // 205.900 → 205900
+                return t; // 205.90 → decimal
+            }
+            if (dotIdx === -1) {
+                // solo comas
+                const commaCount = (t.match(/,/g) || []).length;
+                if (commaCount > 1) return t.replace(/,/g, ''); // 1,355,010 → 1355010
+                const afterComma = t.split(',').pop();
+                if (afterComma.length === 3) return t.replace(',', ''); // 205,900 → 205900
+                return t.replace(',', '.'); // 205,90 → decimal
+            }
+            // tienen ambos: la posición relativa determina el formato
+            if (commaIdx < dotIdx) {
+                return t.replace(/,/g, ''); // 279,833.00 → formato inglés
+            } else {
+                return t.replace(/\./g, '').replace(',', '.'); // 279.833,00 → formato colombiano
+            }
+        }
+
+        // Parseo formato colombiano con soporte de expresiones: 1.295 + 29.013 → 30308
+        function parseCOP(str) {
+            if (typeof str === 'number') return isNaN(str) ? 0 : str;
+            const raw = String(str || '').trim();
+            if (!raw) return 0;
+            if (/[+\-*/]/.test(raw)) {
+                const expr = raw.replace(/[\d.,]+/g, token => _numCOP(token));
+                if (/^[\d\s+\-*/().]+$/.test(expr)) {
+                    try { return Function('"use strict"; return (' + expr + ')')() || 0; }
+                    catch(e) { return 0; }
+                }
+                return 0;
+            }
+            return parseFloat(_numCOP(raw)) || 0;
+        }
+
+        // Auto-resolver expresión al salir del campo o al presionar = / Enter
+        function autoResolver(el, recalcFn) {
+            if (!el || el.readOnly) return;
+            function resolver() {
+                if (el.value && /[+\-*/]/.test(el.value)) {
+                    const val = parseCOP(el.value);
+                    el.value = Number.isInteger(val) ? String(val) : val.toFixed(2);
+                    if (recalcFn) recalcFn();
+                }
+            }
+            el.addEventListener('blur', resolver);
+            el.addEventListener('keydown', function(e) {
+                if (e.key === '=' || e.key === 'Enter') { e.preventDefault(); resolver(); }
+            });
+        }
+
         ['valorBruto', 'aiu', 'iva', 'retencion'].forEach(id => {
             document.getElementById(id).addEventListener('input', calcularValorNeto);
         });
-        
+
         function calcularValorNeto() {
-            const bruto = parseFloat(document.getElementById('valorBruto').value) || 0;
-            const aiu = parseFloat(document.getElementById('aiu').value) || 0;
-            const iva = parseFloat(document.getElementById('iva').value) || 0;
-            const ret = parseFloat(document.getElementById('retencion').value) || 0;
-            
+            // No recalcular si hay una expresión incompleta en algún campo
+            for (const id of ['valorBruto','aiu','iva','retencion']) {
+                if (/[+\-*/]\s*$/.test(document.getElementById(id).value)) return;
+            }
+            const bruto = parseCOP(document.getElementById('valorBruto').value);
+            const aiu = parseCOP(document.getElementById('aiu').value);
+            const iva = parseCOP(document.getElementById('iva').value);
+            const ret = parseCOP(document.getElementById('retencion').value);
             const neto = bruto + aiu + iva - ret;
             document.getElementById('valorNeto').value = neto.toFixed(2);
         }
 
         // Calcular Resto a Pagar en formulario agregar
         function calcularRestoAPagar() {
-            const valorNeto = parseFloat(document.getElementById('valorNeto').value) || 0;
-            const anticipo = parseFloat(document.getElementById('anticipo').value) || 0;
-            const saldoPendAnterior = parseFloat(document.getElementById('saldoPendienteAnterior').value) || 0;
+            const valorNeto = parseCOP(document.getElementById('valorNeto').value);
+            const anticipo = parseCOP(document.getElementById('anticipo').value);
+            const saldoPendAnterior = parseCOP(document.getElementById('saldoPendienteAnterior').value);
             const resto = valorNeto + saldoPendAnterior - anticipo;
             document.getElementById('restoAPagar').value = resto.toFixed(2);
         }
 
         // Calcular Resto a Pagar en formulario editar
         function calcularRestoEditar() {
-            const valorNeto = parseFloat(document.getElementById('editarValorNeto').value) || 0;
-            const anticipo = parseFloat(document.getElementById('editarAnticipo').value) || 0;
-            const saldoPendAnterior = parseFloat(document.getElementById('editarSaldoPendienteAnterior').value) || 0;
+            const valorNeto = parseCOP(document.getElementById('editarValorNeto').value);
+            const anticipo = parseCOP(document.getElementById('editarAnticipo').value);
+            const saldoPendAnterior = parseCOP(document.getElementById('editarSaldoPendienteAnterior').value);
             const resto = valorNeto + saldoPendAnterior - anticipo;
             document.getElementById('editarRestoAPagar').value = resto.toFixed(2);
         }
-        
+
         // Recalcular también cuando cambia el valor neto
         function calcularValorNetoEditar() {
-            const bruto = parseFloat(document.getElementById('editarValorBruto').value) || 0;
-            const aiu = parseFloat(document.getElementById('editarAiu').value) || 0;
-            const iva = parseFloat(document.getElementById('editarIva').value) || 0;
-            const ret = parseFloat(document.getElementById('editarRetencion').value) || 0;
+            const bruto = parseCOP(document.getElementById('editarValorBruto').value);
+            const aiu = parseCOP(document.getElementById('editarAiu').value);
+            const iva = parseCOP(document.getElementById('editarIva').value);
+            const ret = parseCOP(document.getElementById('editarRetencion').value);
             const neto = bruto + aiu + iva - ret;
             document.getElementById('editarValorNeto').value = neto.toFixed(2);
             calcularRestoEditar(); // Recalcular resto
         }
+
+        // Aplicar auto-resolver a los campos de valor de ambos formularios
+        ['valorBruto','aiu','iva','retencion','saldoPendienteAnterior','anticipo'].forEach(id => {
+            autoResolver(document.getElementById(id), () => { calcularValorNeto(); calcularRestoAPagar(); });
+        });
+        autoResolver(document.getElementById('valorNeto'), calcularRestoAPagar);
+        ['editarValorBruto','editarAiu','editarIva','editarRetencion','editarSaldoPendienteAnterior','editarAnticipo'].forEach(id => {
+            autoResolver(document.getElementById(id), () => { calcularValorNetoEditar(); calcularRestoEditar(); });
+        });
         
         window.guardarCuentaManual = async function() {
             // Validar solo campos ESENCIALES
@@ -1818,15 +1903,15 @@
                 numeroCuenta: document.getElementById('numeroCuenta').value || '',
                 concepto: concepto,
                 facturaNo: document.getElementById('facturaNo').value || 'N/A',
-                valorBruto: parseFloat(valorBruto),
-                aiu: parseFloat(document.getElementById('aiu').value) || 0,
-                iva: parseFloat(document.getElementById('iva').value) || 0,
-                retencion: parseFloat(document.getElementById('retencion').value) || 0,
-                valorNeto: parseFloat(document.getElementById('valorNeto').value) || parseFloat(valorBruto) || 0,
-                saldoPendienteAnterior: parseFloat(document.getElementById('saldoPendienteAnterior').value) || 0,
-                anticipo: parseFloat(document.getElementById('anticipo').value) || 0,
+                valorBruto: parseCOP(valorBruto),
+                aiu: parseCOP(document.getElementById('aiu').value),
+                iva: parseCOP(document.getElementById('iva').value),
+                retencion: parseCOP(document.getElementById('retencion').value),
+                valorNeto: parseCOP(document.getElementById('valorNeto').value) || parseCOP(valorBruto),
+                saldoPendienteAnterior: parseCOP(document.getElementById('saldoPendienteAnterior').value),
+                anticipo: parseCOP(document.getElementById('anticipo').value),
                 fechaAnticipo: document.getElementById('fechaAnticipo').value || null,
-                restoAPagar: parseFloat(document.getElementById('restoAPagar').value) || parseFloat(document.getElementById('valorNeto').value) || parseFloat(valorBruto) || 0,
+                restoAPagar: parseCOP(document.getElementById('restoAPagar').value) || parseCOP(document.getElementById('valorNeto').value) || parseCOP(valorBruto),
                 fechaRecepcion: document.getElementById('fechaRecepcion').value || null,
                 fechaVencimiento: document.getElementById('fechaVencimiento').value || null,
                 fechaPago: null,
@@ -1951,11 +2036,14 @@
         // Calcular valor neto en edición
         ['editarValorBruto', 'editarAiu', 'editarIva', 'editarRetencion'].forEach(id => {
             document.getElementById(id).addEventListener('input', function() {
-                const bruto = parseFloat(document.getElementById('editarValorBruto').value) || 0;
-                const aiu = parseFloat(document.getElementById('editarAiu').value) || 0;
-                const iva = parseFloat(document.getElementById('editarIva').value) || 0;
-                const ret = parseFloat(document.getElementById('editarRetencion').value) || 0;
-                
+                // No recalcular si hay una expresión incompleta en algún campo
+                for (const cid of ['editarValorBruto','editarAiu','editarIva','editarRetencion']) {
+                    if (/[+\-*/]\s*$/.test(document.getElementById(cid).value)) return;
+                }
+                const bruto = parseCOP(document.getElementById('editarValorBruto').value);
+                const aiu = parseCOP(document.getElementById('editarAiu').value);
+                const iva = parseCOP(document.getElementById('editarIva').value);
+                const ret = parseCOP(document.getElementById('editarRetencion').value);
                 const neto = bruto + aiu + iva - ret;
                 document.getElementById('editarValorNeto').value = neto.toFixed(2);
             });
@@ -1988,15 +2076,15 @@
                     numeroCuenta: document.getElementById('editarNumeroCuenta').value || '',
                     concepto: concepto,
                     facturaNo: document.getElementById('editarFacturaNo').value || '',
-                    valorBruto: parseFloat(valorBruto),
-                    aiu: parseFloat(document.getElementById('editarAiu').value) || 0,
-                    iva: parseFloat(document.getElementById('editarIva').value) || 0,
-                    retencion: parseFloat(document.getElementById('editarRetencion').value) || 0,
-                    valorNeto: parseFloat(document.getElementById('editarValorNeto').value) || parseFloat(valorBruto),
-                    saldoPendienteAnterior: parseFloat(document.getElementById('editarSaldoPendienteAnterior').value) || 0,
-                    anticipo: parseFloat(document.getElementById('editarAnticipo').value) || 0,
+                    valorBruto: parseCOP(valorBruto),
+                    aiu: parseCOP(document.getElementById('editarAiu').value),
+                    iva: parseCOP(document.getElementById('editarIva').value),
+                    retencion: parseCOP(document.getElementById('editarRetencion').value),
+                    valorNeto: parseCOP(document.getElementById('editarValorNeto').value) || parseCOP(valorBruto),
+                    saldoPendienteAnterior: parseCOP(document.getElementById('editarSaldoPendienteAnterior').value),
+                    anticipo: parseCOP(document.getElementById('editarAnticipo').value),
                     fechaAnticipo: document.getElementById('editarFechaAnticipo').value || null,
-                    restoAPagar: parseFloat(document.getElementById('editarRestoAPagar').value) || parseFloat(document.getElementById('editarValorNeto').value),
+                    restoAPagar: parseCOP(document.getElementById('editarRestoAPagar').value) || parseCOP(document.getElementById('editarValorNeto').value),
                     fechaRecepcion: document.getElementById('editarFechaRecepcion').value || null,
                     fechaVencimiento: document.getElementById('editarFechaVencimiento').value || null,
                     estado: estadoFinal,
@@ -2422,7 +2510,7 @@
 
         window.guardarAbono = async function() {
             const id = document.getElementById('abonoIdCuenta').value;
-            const monto = parseFloat(document.getElementById('abonoMonto').value);
+            const monto = parseCOP(document.getElementById('abonoMonto').value);
             const fecha = document.getElementById('abonoFecha').value;
             const descripcion = document.getElementById('abonoDescripcion').value.trim();
 
@@ -2596,7 +2684,7 @@
 
         window.guardarAnticipo = async function() {
             const id = document.getElementById('anticipoIdCuenta').value;
-            const monto = parseFloat(document.getElementById('anticipoMonto').value);
+            const monto = parseCOP(document.getElementById('anticipoMonto').value);
             const fecha = document.getElementById('anticipoFecha').value;
             const descripcion = document.getElementById('anticipoDescripcion').value.trim();
 
