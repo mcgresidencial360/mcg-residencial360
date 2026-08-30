@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -414,6 +415,85 @@
         </div>
     </div>
 
+    <!-- MODAL COBRO PREJURÍDICO -->
+    <div class="modal" id="modalCobroPrejuridico">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="modal-header">
+                <h2>⚖️ Generar Cobro Prejurídico</h2>
+                <button class="btn-close" onclick="cerrarModal('modalCobroPrejuridico')">&times;</button>
+            </div>
+            <div id="cobroPreInfoApto" style="background:#fdf6e3; padding:15px; border-radius:10px; margin-bottom:20px;"></div>
+            <p style="font-size:12px;color:#666;margin-bottom:14px;">
+                Los datos de cuenta, firma y contacto quedan guardados por conjunto: los llenas una vez y se autocompletan la próxima vez.
+            </p>
+            <div class="edit-form" style="grid-template-columns:1fr 1fr;">
+                <div class="form-group">
+                    <label>📅 Fecha del documento *</label>
+                    <input type="date" id="cobroPreFecha">
+                </div>
+                <div class="form-group">
+                    <label>⏳ Plazo de pago (días hábiles) *</label>
+                    <input type="number" id="cobroPrePlazo" value="5" min="1">
+                </div>
+
+                <div class="full-width" style="border-top:1px solid #eee;padding-top:12px;font-weight:700;color:#8B6914;">💳 Forma de pago</div>
+                <div class="form-group">
+                    <label>Tipo de cuenta</label>
+                    <input type="text" id="cobroPreTipoCuenta" placeholder="Ej: de ahorros">
+                </div>
+                <div class="form-group">
+                    <label>Número de cuenta</label>
+                    <input type="text" id="cobroPreNumCuenta" placeholder="Ej: 123-456789-00">
+                </div>
+                <div class="form-group full-width">
+                    <label>Banco</label>
+                    <input type="text" id="cobroPreBanco" placeholder="Ej: Bancolombia">
+                </div>
+                <div class="form-group full-width">
+                    <label>Teléfono / correo de la administración</label>
+                    <input type="text" id="cobroPreContacto" placeholder="Ej: 601 234 5678 / admin@correo.com">
+                </div>
+
+                <div class="full-width" style="border-top:1px solid #eee;padding-top:12px;font-weight:700;color:#8B6914;">✍️ Firma</div>
+                <div class="form-group">
+                    <label>Nombre completo del administrador</label>
+                    <input type="text" id="cobroPreFirmaNombre" placeholder="Ej: Nombre Apellido">
+                </div>
+                <div class="form-group">
+                    <label>Cargo</label>
+                    <input type="text" id="cobroPreFirmaCargo" value="Administrador(a)">
+                </div>
+                <div class="form-group full-width">
+                    <label>C.C. del administrador</label>
+                    <input type="text" id="cobroPreCedula" placeholder="Ej: 1.020.304.050">
+                </div>
+
+                <div class="full-width" style="border-top:1px solid #eee;padding-top:12px;font-weight:700;color:#8B6914;">📬 Constancia de envío</div>
+                <div class="form-group">
+                    <label>Fecha de envío</label>
+                    <input type="date" id="cobroPreFechaEnvio">
+                </div>
+                <div class="form-group">
+                    <label>Medio de envío</label>
+                    <select id="cobroPreMedioEnvio">
+                        <option value="">-- Sin especificar --</option>
+                        <option value="correo certificado">Correo certificado</option>
+                        <option value="correo electrónico">Correo electrónico</option>
+                        <option value="entrega física con firma de recibido">Entrega física con firma de recibido</option>
+                    </select>
+                </div>
+
+                <input type="hidden" id="cobroPreKey">
+                <div class="full-width">
+                    <button type="button" class="btn" style="width:100%;background:#6a1b9a;color:white;" onclick="generarCobroPrejuridico()">⚖️ Generar PDF de Cobro Prejurídico</button>
+                </div>
+                <div class="full-width" style="font-size:11px;color:#888;text-align:center;">
+                    Formato interno de gestión de cartera. Se recomienda revisión de un abogado antes de un envío formal con efectos jurídicos.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -435,6 +515,8 @@
 
         let edificioActual = '';
         let carteraData = {};
+        let edificiosCache = {};   // por edificioId: { nombre, nit, direccion, logo }
+        let configPrejuridico = {}; // datos reutilizables del cobro prejurídico por conjunto
 
         // Helper slug (fallback si edificioId no está aún en Firebase)
         const _SLUGS_CONOCIDOS = {'Nepal 2':'nepal-2','Pinos del Country':'pinos-del-country','Convivienda I':'convivienda-1','Convivienda 1':'convivienda-1','Avalon':'avalon','Torres de Amin II':'torre-amin-2','Tores de Anim II':'torre-amin-2','Millenium 3':'millenium-3'};
@@ -451,14 +533,22 @@
             if (!sel) return;
             const v = sel.value;
             sel.innerHTML = '<option value="">Selecciona conjunto</option>';
+            edificiosCache = {};
             if (snap.exists()) snap.forEach(child => {
                 const ed = child.val();
                 const opt = document.createElement('option');
                 const _idFix = {'tores-de-anim-2':'torre-amin-2','torres-de-amin-2':'torre-amin-2'};
                 let _eid = ed.edificioId || slugEdificio(ed.nombre) || child.key;
-                opt.value = _idFix[_eid] || _eid;
+                const eid = _idFix[_eid] || _eid;
+                opt.value = eid;
                 opt.textContent = (ed.icono || '🏢') + ' ' + (ed.nombre || child.key);
                 sel.appendChild(opt);
+                edificiosCache[eid] = {
+                    nombre: ed.nombre || child.key,
+                    nit: ed.nit || ed.rut || '',
+                    direccion: ed.direccion || '',
+                    logo: ed.logo || ''
+                };
             });
             if (v) sel.value = v;
         });
@@ -476,7 +566,10 @@
             edificioActual = document.getElementById('edificioSelect').value;
             soloMorosos = false;
             document.getElementById('btnMorososTxt').textContent = 'Ver Solo Morosos';
-            if (!edificioActual) { carteraData = {}; renderTabla(); return; }
+            if (!edificioActual) { carteraData = {}; configPrejuridico = {}; renderTabla(); return; }
+            get(ref(db, `config_cobro_prejuridico/${edificioActual}`))
+                .then(s => { configPrejuridico = s.exists() ? s.val() : {}; })
+                .catch(() => { configPrejuridico = {}; });
             cargarDesdeFirebase();
         };
 
@@ -850,6 +943,7 @@
                         <button class="btn btn-sm" style="background:#1a237e;color:white;display:inline-flex;" onclick="verDetalle('${f._key}')">🔍</button>
                         <button class="btn btn-sm" style="background:#ff9800;color:white;display:inline-flex;" onclick="editarApto('${f._key}')">✏️</button>
                         ${esMoroso ? `<button class="btn-abono" onclick="abrirAbonoApto('${f._key}')">💳 Abonar</button>` : ''}
+                        ${esMoroso ? `<button class="btn btn-sm" style="background:#6a1b9a;color:white;display:inline-flex;" onclick="abrirCobroPrejuridico('${f._key}')" title="Cobro Prejurídico">⚖️</button>` : ''}
                         <button class="btn btn-sm" style="background:#e53935;color:white;display:inline-flex;" onclick="eliminarApto('${f._key}')">🗑️</button>
                     </td>
                 </tr>`;
@@ -876,6 +970,235 @@
             document.getElementById('rPagos').textContent = fmt(tPa);
             document.getElementById('contadorAptos').textContent = filas.length;
         }
+
+        // ═══════════════════════════════════════════════════════════════
+        // COBRO PREJURÍDICO
+        // ═══════════════════════════════════════════════════════════════
+        function calcularSaldoEfectivo(d) {
+            const abonosArr = d.abonos ? Object.values(d.abonos) : [];
+            const totalAbonosExtra = abonosArr.reduce((s, a) => s + (parseFloat(a.monto) || 0), 0);
+            const totalPagosEfectivo = (d.totalPagos || 0) + totalAbonosExtra;
+            const saldoFinalEfectivo = (d.saldoInicial || 0) + (d.totalCargos || 0) - totalPagosEfectivo;
+            return { totalPagosEfectivo, saldoFinalEfectivo };
+        }
+
+        window.abrirCobroPrejuridico = function(key) {
+            const d = carteraData[key];
+            if (!d) return;
+            const { totalPagosEfectivo, saldoFinalEfectivo } = calcularSaldoEfectivo(d);
+            if (saldoFinalEfectivo <= 0) { alert('❌ Este inmueble no tiene saldo pendiente'); return; }
+
+            document.getElementById('cobroPreKey').value = key;
+            document.getElementById('cobroPreFecha').valueAsDate = new Date();
+
+            // Autocompletar con la configuración guardada del conjunto
+            const c = configPrejuridico || {};
+            const setIfEmpty = (id, val) => {
+                const el = document.getElementById(id);
+                if (val && !el.value) el.value = val;
+            };
+            document.getElementById('cobroPrePlazo').value = c.plazoDias || 5;
+            setIfEmpty('cobroPreTipoCuenta', c.tipoCuenta);
+            setIfEmpty('cobroPreNumCuenta', c.numCuenta);
+            setIfEmpty('cobroPreBanco', c.banco);
+            setIfEmpty('cobroPreContacto', c.contacto);
+            setIfEmpty('cobroPreFirmaNombre', c.firmaNombre);
+            document.getElementById('cobroPreFirmaCargo').value = c.firmaCargo || document.getElementById('cobroPreFirmaCargo').value || 'Administrador(a)';
+            setIfEmpty('cobroPreCedula', c.cedula);
+            if (c.medioEnvio) document.getElementById('cobroPreMedioEnvio').value = c.medioEnvio;
+            if (!document.getElementById('cobroPreFechaEnvio').value) document.getElementById('cobroPreFechaEnvio').valueAsDate = new Date();
+
+            document.getElementById('cobroPreInfoApto').innerHTML = `
+                <div style="font-weight:700;font-size:1.1em;color:#8B6914;margin-bottom:10px;">${d.inmueble} — ${d.propietario}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+                    <div><span style="color:#666;">Total Cargos:</span> <strong>$${(d.totalCargos||0).toLocaleString('es-CO')}</strong></div>
+                    <div><span style="color:#2e7d32;">Ya pagado:</span> <strong style="color:#2e7d32;">$${totalPagosEfectivo.toLocaleString('es-CO')}</strong></div>
+                    <div style="grid-column:1/-1;background:white;padding:10px;border-radius:8px;text-align:center;margin-top:4px;">
+                        <div style="color:#666;font-size:11px;">SALDO A REQUERIR</div>
+                        <div style="color:#e53935;font-weight:700;font-size:1.5em;">$${saldoFinalEfectivo.toLocaleString('es-CO')}</div>
+                    </div>
+                </div>`;
+
+            document.getElementById('modalCobroPrejuridico').classList.add('active');
+        };
+
+        window.generarCobroPrejuridico = function() {
+            const key = document.getElementById('cobroPreKey').value;
+            const d = carteraData[key];
+            if (!d) { alert('❌ No encontrado'); return; }
+            if (!edificioActual) { alert('❌ Selecciona un conjunto'); return; }
+
+            const fechaStr = document.getElementById('cobroPreFecha').value;
+            const plazoDias = parseInt(document.getElementById('cobroPrePlazo').value) || 5;
+            const tipoCuenta = document.getElementById('cobroPreTipoCuenta').value.trim();
+            const numCuenta = document.getElementById('cobroPreNumCuenta').value.trim();
+            const banco = document.getElementById('cobroPreBanco').value.trim();
+            const contacto = document.getElementById('cobroPreContacto').value.trim();
+            const firmaNombre = document.getElementById('cobroPreFirmaNombre').value.trim();
+            const firmaCargo = document.getElementById('cobroPreFirmaCargo').value.trim() || 'Administrador(a)';
+            const cedula = document.getElementById('cobroPreCedula').value.trim();
+            const fechaEnvioStr = document.getElementById('cobroPreFechaEnvio').value;
+            const medioEnvio = document.getElementById('cobroPreMedioEnvio').value;
+
+            if (!fechaStr) { alert('❌ Ingresa la fecha del documento'); return; }
+
+            // Guardar la configuración reutilizable del conjunto (no bloquea la generación)
+            configPrejuridico = { plazoDias, tipoCuenta, numCuenta, banco, contacto, firmaNombre, firmaCargo, cedula, medioEnvio };
+            set(ref(db, `config_cobro_prejuridico/${edificioActual}`), configPrejuridico).catch(e => console.warn('No se pudo guardar la config del cobro prejurídico:', e));
+
+            const val = (v, ph) => v ? v : ph;
+            const ed = edificiosCache[edificioActual] || { nombre: edificioActual, nit: '', direccion: '', logo: '' };
+            const { totalPagosEfectivo, saldoFinalEfectivo } = calcularSaldoEfectivo(d);
+            const fecha = new Date(fechaStr + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+            const fmt = n => '$' + Math.round(n || 0).toLocaleString('es-CO');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.width;
+            const marginLeft = 20;
+            const marginRight = 20;
+            const maxWidth = pageWidth - marginLeft - marginRight;
+            let yPos = 20;
+
+            function checkNewPage(requiredSpace = 20) {
+                if (yPos + requiredSpace > 280) { doc.addPage(); yPos = 20; return true; }
+                return false;
+            }
+
+            // ── Encabezado ──
+            doc.setFillColor(106, 27, 154);
+            doc.rect(0, 0, pageWidth, 44, 'F');
+            doc.setFillColor(255, 255, 255);
+            doc.rect(10, 5, 38, 34, 'F');
+            const logoAUsar = ed.logo || '';
+            if (logoAUsar) {
+                try {
+                    const propsLogo = doc.getImageProperties(logoAUsar);
+                    const wMax = 36, hMax = 32;
+                    const ratio = Math.min(wMax / propsLogo.width, hMax / propsLogo.height);
+                    const w = propsLogo.width * ratio, h = propsLogo.height * ratio;
+                    doc.addImage(logoAUsar, propsLogo.fileType || 'PNG', 11 + (wMax - w) / 2, 6 + (hMax - h) / 2, w, h);
+                } catch (e) {
+                    try { doc.addImage(logoAUsar, 'PNG', 11, 6, 36, 32); } catch (e2) {}
+                }
+            } else {
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(139, 105, 20);
+                doc.text('MCG', 15, 20);
+                doc.setFontSize(8);
+                doc.text('RESIDENCIAL', 12, 27);
+                doc.text('360', 20, 33);
+            }
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(15);
+            doc.setFont(undefined, 'bold');
+            doc.text('REQUERIMIENTO DE PAGO — COBRO PREJURÍDICO', pageWidth / 2 + 15, 16, { align: 'center' });
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(ed.nombre + (ed.nit ? ' — NIT ' + ed.nit : ''), pageWidth / 2 + 15, 25, { align: 'center' });
+            doc.text(ed.direccion || '', pageWidth / 2 + 15, 32, { align: 'center' });
+            doc.text('Fecha: ' + fecha, pageWidth / 2 + 15, 39, { align: 'center' });
+
+            yPos = 56;
+            doc.setTextColor(0, 0, 0);
+
+            // ── Destinatario ──
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Señor(a) propietario(a): ' + (d.propietario || '-'), marginLeft, yPos);
+            yPos += 7;
+            doc.text('Inmueble: ' + (d.inmueble || '-') + ' — ' + ed.nombre, marginLeft, yPos);
+            yPos += 12;
+
+            doc.setFont(undefined, 'bold');
+            doc.text('Asunto: Requerimiento de pago por mora en expensas comunes', marginLeft, yPos);
+            yPos += 10;
+
+            // ── Cuerpo ──
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            const parrafo1 = 'Respetado(a) propietario(a):\n\nDe conformidad con el artículo 29 de la Ley 675 de 2001, los propietarios de bienes privados sometidos al régimen de propiedad horizontal están obligados a contribuir al pago de las expensas necesarias causadas por la administración y el mantenimiento de los bienes comunes.\n\nRevisado el estado de cuenta de su inmueble, se encuentra actualmente en mora, según el siguiente detalle:';
+            doc.splitTextToSize(parrafo1, maxWidth).forEach(line => { checkNewPage(); doc.text(line, marginLeft, yPos); yPos += 5.5; });
+
+            yPos += 6;
+            checkNewPage(45);
+            doc.setFillColor(245, 245, 250);
+            doc.rect(marginLeft, yPos - 6, maxWidth, 42, 'F');
+            const filasTabla = [
+                ['Saldo inicial', fmt(d.saldoInicial)],
+                ['Cuotas de administración', fmt(d.totalAdmon)],
+                ['Cuotas extraordinarias', fmt(d.totalExtras)],
+                ['Intereses de mora (ver liquidación anexa)', fmt(d.totalIntereses)],
+                ['Pagos / abonos recibidos', '-' + fmt(totalPagosEfectivo)]
+            ];
+            doc.setFontSize(9.5);
+            filasTabla.forEach(([label, v]) => {
+                doc.setFont(undefined, 'normal');
+                doc.text(label, marginLeft + 4, yPos);
+                doc.text(v, marginLeft + maxWidth - 4, yPos, { align: 'right' });
+                yPos += 6.5;
+            });
+            doc.setDrawColor(200, 200, 200);
+            doc.line(marginLeft + 4, yPos - 2, marginLeft + maxWidth - 4, yPos - 2);
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(229, 57, 53);
+            doc.text('SALDO TOTAL ADEUDADO', marginLeft + 4, yPos + 3);
+            doc.text(fmt(saldoFinalEfectivo), marginLeft + maxWidth - 4, yPos + 3, { align: 'right' });
+            doc.setTextColor(0, 0, 0);
+            yPos += 16;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            const cuentaTxt = `Cuenta ${val(tipoCuenta, '[tipo de cuenta]')} N.° ${val(numCuenta, '[número de cuenta]')} — Banco ${val(banco, '[nombre del banco]')} — a nombre de ${ed.nombre}${ed.nit ? ', NIT ' + ed.nit : ''}.`;
+            const contactoTxt = `También puede acercarse directamente a la administración en ${ed.direccion || 'la dirección de administración'}, en horario de atención, o comunicarse al ${val(contacto, '[teléfono/correo de la administración]')}.`;
+            const parrafo2 = `Sobre el saldo en mora se causan intereses moratorios equivalentes a una y media (1.5) veces el interés bancario corriente de la Superintendencia Financiera de Colombia, conforme al artículo 30 de la Ley 675 de 2001. La liquidación detallada de estos intereses (tasa aplicada, periodo de mora y fórmula de cálculo) se encuentra a disposición del propietario en la administración.\n\nPor lo anterior, se le requiere para que dentro de los ${plazoDias} días hábiles siguientes al recibo de esta comunicación cancele la totalidad de la suma adeudada, o se acerque a la administración para acordar un plan de pago.\n\nForma de pago:\n${cuentaTxt}\n${contactoTxt}\n\nDe no recibirse el pago o una respuesta dentro del plazo indicado, la copropiedad iniciará el cobro por la vía judicial. De acuerdo con el artículo 48 de la Ley 675 de 2001, el certificado de deuda expedido por el administrador presta mérito ejecutivo sin necesidad de requisito o trámite adicional, lo que dará lugar a un proceso ejecutivo con los intereses, costas procesales y honorarios de abogado que se causen a cargo del deudor.`;
+
+            parrafo2.split('\n').forEach(parrafo => {
+                if (parrafo === 'Forma de pago:') {
+                    checkNewPage(8);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(parrafo, marginLeft, yPos);
+                    doc.setFont(undefined, 'normal');
+                    yPos += 5.5;
+                    return;
+                }
+                if (parrafo === '') { yPos += 2.5; return; }
+                doc.splitTextToSize(parrafo, maxWidth).forEach(line => { checkNewPage(8); doc.text(line, marginLeft, yPos); yPos += 5.5; });
+            });
+
+            yPos += 15;
+            checkNewPage(45);
+            doc.text('Atentamente,', marginLeft, yPos);
+            yPos += 20;
+            doc.line(marginLeft, yPos, marginLeft + 70, yPos);
+            yPos += 6;
+            doc.setFont(undefined, 'bold');
+            doc.text(val(firmaNombre, '[Nombre completo del administrador]'), marginLeft, yPos);
+            yPos += 5.5;
+            doc.setFont(undefined, 'normal');
+            doc.text(`${firmaCargo} — ${ed.nombre}${ed.nit ? ', NIT ' + ed.nit : ''}`, marginLeft, yPos);
+            yPos += 5.5;
+            doc.text(`C.C. ${val(cedula, '[número de cédula]')}`, marginLeft, yPos);
+
+            yPos += 16;
+            checkNewPage(20);
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9.5);
+            doc.text('Constancia de envío:', marginLeft, yPos);
+            yPos += 5.5;
+            doc.setFont(undefined, 'italic');
+            const fechaEnvioTxt = fechaEnvioStr ? new Date(fechaEnvioStr + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }) : '[fecha]';
+            const medioTxt = medioEnvio || '[medio: correo certificado / correo electrónico / entrega física con firma de recibido]';
+            const constanciaTxt = `Enviado el ${fechaEnvioTxt} por ${medioTxt}. Copia archivada en el expediente del inmueble.`;
+            doc.splitTextToSize(constanciaTxt, maxWidth).forEach(line => { checkNewPage(); doc.text(line, marginLeft, yPos); yPos += 5; });
+            doc.setFont(undefined, 'normal');
+
+            const nombreArchivo = `Cobro-Prejuridico-${(d.inmueble||'apto').replace(/[^a-zA-Z0-9]/g,'')}-${fechaStr}.pdf`;
+            doc.save(nombreArchivo);
+            cerrarModal('modalCobroPrejuridico');
+        };
 
         // ═══════════════════════════════════════════════════════════════
         // VER DETALLE
