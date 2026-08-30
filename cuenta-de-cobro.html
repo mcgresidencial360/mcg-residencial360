@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B6914">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="MCG 360">
+    <link rel="apple-touch-icon" href="logo.png">
+    <title>Cuenta de Cobro - MCG Residencial 360</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; color: #222; }
+
+        .header { background: linear-gradient(135deg, #8B6914 0%, #C9A227 100%); color: white; padding: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+        .header-content { max-width: 1180px; margin: 0 auto; padding: 0 22px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header-logo img { width: 52px; height: 52px; object-fit: contain; background: white; border-radius: 10px; padding: 4px; }
+        .header-title h1 { font-size: 1.35em; }
+        .header-title p { font-size: 0.85em; opacity: 0.9; }
+        .btn-nav { background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: 600; }
+        .btn-nav:hover { background: rgba(255,255,255,0.3); }
+
+        .container { max-width: 1180px; margin: 26px auto; padding: 0 22px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-left: 4px solid #C9A227; }
+        .stat-card.verde { border-left-color: #2e7d32; }
+        .stat-card.naranja { border-left-color: #ef6c00; }
+        .stat-card.gris { border-left-color: #607d8b; }
+        .stat-label { font-size: 0.82em; color: #777; margin-bottom: 6px; }
+        .stat-value { font-size: 1.5em; font-weight: 800; color: #333; }
+
+        .acciones-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+        .acciones-bar h2 { font-size: 1.15em; color: #8B6914; }
+        .filtro-anio label { font-size: 0.85em; color: #666; margin-right: 6px; }
+        .filtro-anio select { padding: 8px 10px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        .btn-nueva { background: linear-gradient(135deg, #8B6914, #C9A227); color: white; border: none; padding: 12px 20px; border-radius: 9px; font-weight: 700; cursor: pointer; font-size: 0.95em; }
+        .btn-nueva:hover { opacity: 0.92; }
+
+        .tabla-container { background: white; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); overflow: hidden; }
+        .tabla-header { background: #faf5e6; padding: 14px 18px; font-weight: 700; color: #5f4a13; }
+        .tabla-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #fafafa; font-size: 0.82em; text-transform: uppercase; color: #888; letter-spacing: 0.5px; }
+        .empty-row td { text-align: center; color: #999; padding: 40px; }
+        .badge { padding: 3px 10px; border-radius: 12px; font-size: 0.78em; font-weight: 700; }
+        .badge.pendiente { background: #fff3e0; color: #e65100; }
+        .badge.cobrada { background: #e8f5e9; color: #2e7d32; }
+        .btn-tabla { border: none; padding: 6px 11px; border-radius: 6px; font-size: 0.82em; font-weight: 600; cursor: pointer; margin-right: 4px; }
+        .btn-ver { background: #8B6914; color: white; }
+        .btn-cobrada-accion { background: #2e7d32; color: white; }
+        .btn-eliminar { background: #e53935; color: white; }
+
+        /* MODALES */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; padding: 24px; overflow-y: auto; }
+        .modal.active { display: flex; align-items: flex-start; justify-content: center; }
+        .modal-content { background: white; padding: 26px; border-radius: 16px; max-width: 560px; width: 100%; margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal-preview { max-width: 720px; padding: 0; overflow: hidden; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 3px solid #C9A227; }
+        .modal-header h2 { color: #8B6914; font-size: 1.2em; }
+        .btn-close-modal { background: none; border: none; font-size: 1.7em; cursor: pointer; color: #aaa; line-height: 1; }
+        .btn-close-modal:hover { color: #e53935; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; color: #444; font-size: 0.88em; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95em; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #C9A227; }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-info { background: #faf6ec; padding: 11px 14px; border-radius: 8px; border-left: 4px solid #C9A227; margin-bottom: 16px; font-size: 0.85em; color: #444; line-height: 1.6; }
+        .form-info strong { color: #8B6914; }
+
+        .items-tabla { width: 100%; border-collapse: collapse; margin: 4px 0 8px; font-size: 0.9em; }
+        .items-tabla th { background: #faf5e6; color: #5f4a13; padding: 8px 10px; text-align: left; font-size: 0.82em; }
+        .items-tabla td { padding: 6px 6px; border-bottom: 1px solid #eee; }
+        .items-tabla input { width: 100%; padding: 8px 10px; border: 2px solid #e0e0e0; border-radius: 6px; }
+        .items-tabla input.valor { text-align: right; }
+        .btn-item-del { background: #e53935; color: white; border: none; border-radius: 6px; width: 30px; height: 34px; cursor: pointer; }
+        .btn-item-add { background: #efe6c8; color: #5f4a13; border: none; padding: 8px 14px; border-radius: 7px; font-weight: 700; cursor: pointer; font-size: 0.85em; }
+        .items-total { text-align: right; font-weight: 800; color: #8B6914; margin-top: 6px; font-size: 1.05em; }
+
+        .btn-generar { width: 100%; padding: 13px; background: linear-gradient(135deg, #8B6914, #C9A227); color: white; border: none; border-radius: 9px; font-size: 1em; font-weight: 700; cursor: pointer; margin-top: 6px; }
+        .btn-generar:hover { opacity: 0.92; }
+        .btn-guardar-cfg { width: 100%; padding: 10px; background: #f0f0f0; color: #555; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 4px; font-size: 0.85em; }
+
+        /* DOCUMENTO (lo que se convierte en PDF) */
+        .documento-cc { background: white; font-family: 'Times New Roman', Times, serif; font-size: 14px; line-height: 1.65; color: #111; }
+        .doc-cabecera { display: flex; justify-content: space-between; align-items: center; padding: 26px 40px 18px; border-bottom: 3px solid #8B6914; }
+        .doc-logo img { width: 150px; height: 150px; object-fit: contain; display: block; }
+        .doc-cabecera-info { text-align: right; font-size: 13px; line-height: 1.9; color: #333; }
+        .doc-num-label { font-size: 15px; font-weight: bold; color: #8B6914; margin-top: 4px; }
+        .doc-body { padding: 30px 40px 38px; }
+        .doc-edificio-bloque { text-align: center; margin-bottom: 22px; }
+        .doc-edificio-bloque .ed-nombre { font-size: 15.5px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; }
+        .doc-edificio-bloque .ed-nit { font-size: 13.5px; color: #444; }
+        .doc-debe { text-align: center; font-size: 14px; font-weight: bold; color: #555; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .doc-jefa-bloque { text-align: center; margin-bottom: 26px; }
+        .doc-jefa-bloque .jefa-nombre { font-size: 16.5px; font-weight: bold; color: #8B6914; margin-bottom: 2px; }
+        .doc-jefa-bloque .jefa-nit { font-size: 13.5px; color: #444; }
+        .doc-separador { border: none; border-top: 1px solid #e0e0e0; margin: 0 0 22px 0; }
+        .doc-linea { margin-bottom: 14px; font-size: 14px; text-align: justify; }
+        .doc-linea-valor { font-weight: bold; }
+        .doc-items { width: 100%; border-collapse: collapse; margin: 6px 0 20px; font-size: 13.5px; }
+        .doc-items th, .doc-items td { border: 1px solid #d8d8d8; padding: 9px 12px; }
+        .doc-items th { background: #faf5e6; text-align: left; color: #5f4a13; }
+        .doc-items td.val { text-align: right; }
+        .doc-items tr.total td { font-weight: bold; background: #f7f7f7; }
+        .doc-banco-bloque { background: #faf6ec; border-left: 4px solid #C9A227; padding: 12px 15px; border-radius: 0 6px 6px 0; margin: 18px 0 28px; font-size: 13px; color: #333; }
+        .doc-atentamente { font-size: 14px; margin-bottom: 8px; }
+        .doc-firma-img { width: 190px; display: block; mix-blend-mode: multiply; margin-bottom: 2px; }
+        .doc-firma-nombre { font-size: 13.5px; line-height: 1.6; }
+        .doc-pie-legal { margin-top: 30px; padding-top: 14px; border-top: 1px solid #c0c0c0; font-size: 11px; color: #444; line-height: 1.6; text-align: justify; }
+        .doc-pie-legal p { margin-bottom: 8px; }
+
+        .doc-acciones { display: flex; gap: 10px; padding: 18px 22px; background: #f8f9fa; border-top: 1px solid #e8e8e8; }
+        .btn-doc { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 0.9em; cursor: pointer; }
+        .btn-doc:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-doc-pdf { background: linear-gradient(135deg, #e53935, #c62828); color: white; }
+        .btn-doc-guardar { background: linear-gradient(135deg, #8B6914, #C9A227); color: white; }
+        .btn-doc-cerrar { background: #e0e0e0; color: #555; flex: 0.6; }
+
+        .toast { position: fixed; bottom: 26px; right: 26px; z-index: 9999; background: #333; color: white; padding: 13px 20px; border-radius: 10px; font-weight: 600; box-shadow: 0 8px 25px rgba(0,0,0,0.3); transform: translateY(90px); opacity: 0; transition: all 0.4s; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.exito { background: #2e7d32; }
+        .toast.error { background: #c62828; }
+
+        @media (max-width: 680px) { .form-grid-2 { grid-template-columns: 1fr; } .doc-cabecera { flex-direction: column; gap: 12px; } .doc-cabecera-info { text-align: left; } }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-logo"><img src="logo.png" alt="MCG Residencial 360"></div>
+                <div class="header-title">
+                    <h1>🧾 Cuenta de Cobro</h1>
+                    <p>Honorarios de administración — María Cristina González</p>
+                </div>
+            </div>
+            <div class="header-nav">
+                <button class="btn-nav" onclick="location.href='Dashboard.html'">🏠 Dashboard</button>
+                <button class="btn-nav" onclick="cerrarSesion()">🚪 Salir</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total emitidas <span id="statAnio"></span></div>
+                <div class="stat-value" id="statTotal">—</div>
+            </div>
+            <div class="stat-card verde">
+                <div class="stat-label">Total cobrado</div>
+                <div class="stat-value" id="statCobrado">—</div>
+            </div>
+            <div class="stat-card naranja">
+                <div class="stat-label">Pendiente de cobro</div>
+                <div class="stat-value" id="statPendiente">—</div>
+            </div>
+            <div class="stat-card gris">
+                <div class="stat-label">Próximo consecutivo</div>
+                <div class="stat-value" id="statConsecutivo">—</div>
+            </div>
+        </div>
+
+        <div class="acciones-bar">
+            <h2>📋 Historial de cuentas de cobro</h2>
+            <div class="filtro-anio">
+                <label>Año:</label>
+                <select id="filtroAnio" onchange="filtrarPorAnio()">
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+            <button class="btn-nueva" onclick="abrirModalNueva()">➕ Nueva cuenta de cobro</button>
+        </div>
+
+        <div class="tabla-container">
+            <div class="tabla-header">📄 Cuentas de cobro emitidas</div>
+            <div class="tabla-scroll">
+                <table>
+                    <thead>
+                        <tr><th>No.</th><th>Fecha</th><th>Cliente / Conjunto</th><th>Concepto</th><th>Valor</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="tablaCuerpo">
+                        <tr class="empty-row"><td colspan="7">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NUEVA CUENTA -->
+    <div class="modal" id="modalNueva">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Nueva cuenta de cobro</h2>
+                <button class="btn-close-modal" onclick="cerrarModal('modalNueva')">×</button>
+            </div>
+
+            <div class="form-info">
+                <strong>Acreedora:</strong> María Cristina González — C.C. 51.703.353<br>
+                <strong>Consecutivo:</strong> <span id="infoConsecutivo">cargando...</span>
+            </div>
+
+            <div class="form-group">
+                <label>🏢 Cliente / Conjunto *</label>
+                <select id="selectCliente" onchange="onClienteChange()">
+                    <option value="">— Seleccione —</option>
+                </select>
+            </div>
+
+            <div id="nuevoClienteBox" style="display:none;background:#faf6ec;padding:12px;border-radius:8px;margin-bottom:15px;">
+                <div class="form-grid-2">
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label>Nombre del cliente *</label>
+                        <input type="text" id="nuevoClienteNombre" placeholder="Ej: Conjunto Los Robles">
+                    </div>
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label>NIT</label>
+                        <input type="text" id="nuevoClienteNit" placeholder="Ej: 900.123.456-7">
+                    </div>
+                </div>
+                <button type="button" class="btn-item-add" onclick="guardarNuevoCliente()">💾 Guardar cliente</button>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Nombre en el documento</label>
+                    <input type="text" id="docClienteNombre" placeholder="Se autocompleta">
+                </div>
+                <div class="form-group">
+                    <label>NIT en el documento</label>
+                    <input type="text" id="docClienteNit" placeholder="Se autocompleta / editar">
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>📅 Mes *</label>
+                    <select id="mesCuenta">
+                        <option value="enero">Enero</option><option value="febrero">Febrero</option>
+                        <option value="marzo">Marzo</option><option value="abril">Abril</option>
+                        <option value="mayo">Mayo</option><option value="junio">Junio</option>
+                        <option value="julio">Julio</option><option value="agosto">Agosto</option>
+                        <option value="septiembre">Septiembre</option><option value="octubre">Octubre</option>
+                        <option value="noviembre">Noviembre</option><option value="diciembre">Diciembre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📆 Año *</label>
+                    <input type="number" id="anioCuenta" min="2024" max="2035">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>💰 Conceptos y valores *</label>
+                <table class="items-tabla">
+                    <thead><tr><th>Concepto</th><th style="width:150px;">Valor (COP)</th><th style="width:38px;"></th></tr></thead>
+                    <tbody id="itemsBody"></tbody>
+                </table>
+                <button type="button" class="btn-item-add" onclick="agregarItem()">➕ Agregar concepto</button>
+                <button type="button" class="btn-guardar-cfg" onclick="guardarDefaultsCliente()">📌 Guardar estos conceptos como predeterminados para este cliente</button>
+                <div class="items-total" id="itemsTotal">Total: $0</div>
+            </div>
+
+            <div class="form-info" style="margin-top:6px;">
+                <strong>💳 Datos de consignación</strong> (se guardan y se reusan en todas las cuentas)
+            </div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Banco</label>
+                    <input type="text" id="cfgBanco" placeholder="Ej: Bancolombia">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de cuenta</label>
+                    <input type="text" id="cfgTipoCuenta" placeholder="Ej: Ahorros">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Número de cuenta</label>
+                <input type="text" id="cfgNumeroCuenta" placeholder="Ej: 123-456789-00">
+            </div>
+
+            <button type="button" class="btn-generar" onclick="generarDocumento()">📄 Generar vista previa</button>
+        </div>
+    </div>
+
+    <!-- MODAL: VISTA PREVIA -->
+    <div class="modal" id="modalPreview">
+        <div class="modal-content modal-preview">
+            <div class="modal-header" style="padding:16px 22px 12px;margin:0;">
+                <h2>📄 Vista previa — Cuenta de cobro</h2>
+                <button class="btn-close-modal" onclick="cerrarModal('modalPreview')">×</button>
+            </div>
+
+            <div class="documento-cc" id="documentoCC">
+                <div class="doc-cabecera">
+                    <div class="doc-logo"><img src="logo.png" alt="MCG Residencial 360" crossorigin="anonymous"></div>
+                    <div class="doc-cabecera-info">
+                        <div id="docFecha"></div>
+                        <div class="doc-num-label" id="docNumero"></div>
+                    </div>
+                </div>
+                <div class="doc-body">
+                    <div class="doc-edificio-bloque">
+                        <div class="ed-nombre" id="docNombreEdificio"></div>
+                        <div class="ed-nit" id="docNitEdificio"></div>
+                    </div>
+                    <div class="doc-debe">DEBE A:</div>
+                    <div class="doc-jefa-bloque">
+                        <div class="jefa-nombre">MARIA CRISTINA GONZALEZ</div>
+                        <div class="jefa-nit">C.C. No. 51.703.353</div>
+                    </div>
+                    <hr class="doc-separador">
+                    <div class="doc-linea">La suma de: <span class="doc-linea-valor" id="docMonto"></span></div>
+                    <div class="doc-linea">Por concepto de: <span class="doc-linea-valor" id="docConcepto"></span></div>
+                    <table class="doc-items" id="docItems"></table>
+                    <div class="doc-banco-bloque" id="docBanco"></div>
+                    <div class="doc-atentamente">Atentamente,</div>
+                    <div class="doc-firma-bloque">
+                        <img class="doc-firma-img" src="firma-maria-cristina.png" alt="" crossorigin="anonymous" onerror="this.style.display='none'">
+                        <div class="doc-firma-nombre">María Cristina González<br>C.C. No. 51.703.353</div>
+                    </div>
+                    <div class="doc-pie-legal">
+                        <p>Con el fin de dar cumplimiento a las disposiciones establecidas en la Ley 1819 de 2016 y del parágrafo 2 del artículo 383 del Estatuto Tributario, manifiesto bajo gravedad de juramento que:</p>
+                        <p>Para efectos de la aplicación de la tabla de retención en la fuente establecida en el artículo 383 del Estatuto Tributario, la cual se aplica a los pagos o abonos en cuenta por concepto de ingresos por honorarios y por compensación por servicios personales, <em>"No he contratado o vinculado más de un trabajador asociado a mi actividad económica por al menos noventa (90) días continuos o discontinuos"</em>. (Parágrafo 2 art. 383 E.T.)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="doc-acciones">
+                <button class="btn-doc btn-doc-pdf" id="btnPDF" onclick="descargarPDF(this)">📥 Descargar PDF</button>
+                <button class="btn-doc btn-doc-guardar" id="btnGuardar" onclick="guardarEnFirebase(this)">☁️ Guardar en sistema</button>
+                <button class="btn-doc btn-doc-cerrar" onclick="cerrarModal('modalPreview')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { getDatabase, ref, onValue, get, push, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTPmreHwKVTyb97nbXplAqw-XMn7PkOdg",
+            authDomain: "mcg-residencial360.firebaseapp.com",
+            databaseURL: "https://mcg-residencial360-default-rtdb.firebaseio.com",
+            projectId: "mcg-residencial360",
+            storageBucket: "mcg-residencial360.firebasestorage.app",
+            messagingSenderId: "618173148696",
+            appId: "1:618173148696:web:74ae92ab9a4c5565165d6d"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // ── Constantes de la acreedora ──
+        const ACREEDORA = { nombre: 'María Cristina González', cc: '51.703.353' };
+        const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        const MESES_MAY = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+        let clientesApp = {};      // de nodo edificios  -> { 'ed:<key>': {nombre, nit} }
+        let clientesLocal = {};    // de nodo cuentas_cobro/clientes -> { 'cli:<key>': {nombre, nit} }
+        let defaults = {};         // cuentas_cobro/defaults -> { '<clienteKey>': {items:[...]} }
+        let configPago = {};       // cuentas_cobro/config -> { banco, tipoCuenta, numeroCuenta }
+        let consecutivoActual = 0; // cuentas_cobro/consecutivo
+        let historial = [];        // lista de cuentas
+        let datosPendientes = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.href = 'index.html'; return; }
+            document.getElementById('anioCuenta').value = new Date().getFullYear();
+            document.getElementById('statAnio').textContent = new Date().getFullYear();
+            escuchar();
+        });
+
+        function escuchar() {
+            onValue(ref(db, 'edificios'), (snap) => {
+                clientesApp = {};
+                if (snap.exists()) snap.forEach(ch => {
+                    const ed = ch.val();
+                    clientesApp['ed:' + ch.key] = { nombre: ed.nombre || ch.key, nit: ed.nit || ed.rut || '' };
+                });
+                poblarSelectCliente();
+            });
+            onValue(ref(db, 'cuentas_cobro/clientes'), (snap) => {
+                clientesLocal = {};
+                if (snap.exists()) snap.forEach(ch => {
+                    const c = ch.val();
+                    clientesLocal['cli:' + ch.key] = { nombre: c.nombre || ch.key, nit: c.nit || '' };
+                });
+                poblarSelectCliente();
+            });
+            onValue(ref(db, 'cuentas_cobro/defaults'), (snap) => { defaults = snap.exists() ? snap.val() : {}; });
+            onValue(ref(db, 'cuentas_cobro/config'), (snap) => {
+                configPago = snap.exists() ? snap.val() : {};
+                document.getElementById('cfgBanco').value = configPago.banco || '';
+                document.getElementById('cfgTipoCuenta').value = configPago.tipoCuenta || '';
+                document.getElementById('cfgNumeroCuenta').value = configPago.numeroCuenta || '';
+            });
+            onValue(ref(db, 'cuentas_cobro/consecutivo'), (snap) => {
+                consecutivoActual = snap.exists() ? snap.val() : 0;
+                document.getElementById('statConsecutivo').textContent = numeroConsec(consecutivoActual + 1);
+                document.getElementById('infoConsecutivo').textContent = numeroConsec(consecutivoActual + 1);
+            });
+            onValue(ref(db, 'cuentas_cobro/historial'), (snap) => {
+                historial = [];
+                if (snap.exists()) snap.forEach(ch => historial.push({ key: ch.key, ...ch.val() }));
+                historial.sort((a, b) => (b.consecutivo || 0) - (a.consecutivo || 0));
+                poblarFiltroAnios();
+                renderHistorial();
+                renderStats();
+            });
+        }
+
+        function numeroConsec(n) {
+            const aa = String(new Date().getFullYear()).slice(-2);
+            return String(n).padStart(3, '0') + '-' + aa;
+        }
+
+        function poblarSelectCliente() {
+            const sel = document.getElementById('selectCliente');
+            const actual = sel.value;
+            const todos = { ...clientesApp, ...clientesLocal };
+            sel.innerHTML = '<option value="">— Seleccione —</option>';
+            Object.entries(todos).forEach(([k, c]) => {
+                const o = document.createElement('option');
+                o.value = k;
+                o.textContent = c.nombre + (k.startsWith('cli:') ? ' (cliente)' : '');
+                sel.appendChild(o);
+            });
+            const oNuevo = document.createElement('option');
+            oNuevo.value = '__nuevo__';
+            oNuevo.textContent = '➕ Nuevo cliente…';
+            sel.appendChild(oNuevo);
+            if (actual) sel.value = actual;
+        }
+
+        window.onClienteChange = function() {
+            const v = document.getElementById('selectCliente').value;
+            document.getElementById('nuevoClienteBox').style.display = v === '__nuevo__' ? 'block' : 'none';
+            if (!v || v === '__nuevo__') {
+                document.getElementById('docClienteNombre').value = '';
+                document.getElementById('docClienteNit').value = '';
+                renderItems([]);
+                return;
+            }
+            const todos = { ...clientesApp, ...clientesLocal };
+            const c = todos[v] || {};
+            document.getElementById('docClienteNombre').value = c.nombre || '';
+            document.getElementById('docClienteNit').value = c.nit || '';
+
+            let items = (defaults[v] && Array.isArray(defaults[v].items)) ? defaults[v].items.slice() : null;
+            // Semilla para Alameda si aún no tiene predeterminados guardados
+            if (!items && /alameda/i.test(c.nombre || '')) {
+                items = [{ concepto: 'Servicio de administración', valor: 800000 }, { concepto: 'Transporte', valor: 250000 }];
+            }
+            renderItems(items || [{ concepto: '', valor: '' }]);
+        };
+
+        window.guardarNuevoCliente = async function() {
+            const nombre = document.getElementById('nuevoClienteNombre').value.trim();
+            const nit = document.getElementById('nuevoClienteNit').value.trim();
+            if (!nombre) { toast('Escribe el nombre del cliente', 'error'); return; }
+            try {
+                const nref = await push(ref(db, 'cuentas_cobro/clientes'), { nombre, nit });
+                toast('✅ Cliente guardado', 'exito');
+                document.getElementById('nuevoClienteNombre').value = '';
+                document.getElementById('nuevoClienteNit').value = '';
+                setTimeout(() => {
+                    document.getElementById('selectCliente').value = 'cli:' + nref.key;
+                    onClienteChange();
+                }, 300);
+            } catch (e) { toast('❌ ' + e.message, 'error'); }
+        };
+
+        // ── Ítems (conceptos + valores) ──
+        function parseVal(s) { return parseInt(String(s).replace(/[^\d]/g, '')) || 0; }
+        function fmtPesos(n) { return '$' + parseInt(n || 0).toLocaleString('es-CO'); }
+
+        function renderItems(items) {
+            const tb = document.getElementById('itemsBody');
+            tb.innerHTML = '';
+            (items.length ? items : [{ concepto: '', valor: '' }]).forEach(it => addItemRow(it.concepto, it.valor));
+            recalcTotal();
+        }
+        window.agregarItem = function() { addItemRow('', ''); };
+        function addItemRow(concepto, valor) {
+            const tb = document.getElementById('itemsBody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="it-concepto" value="${(concepto || '').replace(/"/g, '&quot;')}" placeholder="Ej: Servicio de administración"></td>
+                <td><input type="text" class="it-valor valor" inputmode="numeric" value="${valor !== '' && valor != null ? fmtPesos(valor).replace('$', '') : ''}" placeholder="0"></td>
+                <td><button type="button" class="btn-item-del">×</button></td>`;
+            tr.querySelector('.btn-item-del').onclick = () => { tr.remove(); recalcTotal(); };
+            tr.querySelector('.it-valor').addEventListener('input', recalcTotal);
+            tr.querySelector('.it-valor').addEventListener('blur', function() {
+                if (this.value.trim()) this.value = parseVal(this.value).toLocaleString('es-CO');
+            });
+            tb.appendChild(tr);
+        }
+        function leerItems() {
+            return Array.from(document.querySelectorAll('#itemsBody tr')).map(tr => ({
+                concepto: tr.querySelector('.it-concepto').value.trim(),
+                valor: parseVal(tr.querySelector('.it-valor').value)
+            })).filter(it => it.concepto || it.valor);
+        }
+        function recalcTotal() {
+            const t = leerItems().reduce((s, it) => s + it.valor, 0);
+            document.getElementById('itemsTotal').textContent = 'Total: ' + fmtPesos(t);
+        }
+
+        window.guardarDefaultsCliente = async function() {
+            const v = document.getElementById('selectCliente').value;
+            if (!v || v === '__nuevo__') { toast('Selecciona un cliente primero', 'error'); return; }
+            const items = leerItems();
+            if (!items.length) { toast('Agrega al menos un concepto', 'error'); return; }
+            try {
+                await update(ref(db, 'cuentas_cobro/defaults/' + v), { items });
+                toast('📌 Conceptos guardados como predeterminados', 'exito');
+            } catch (e) { toast('❌ ' + e.message, 'error'); }
+        };
+
+        // ── Config de pago ──
+        async function guardarConfigPago() {
+            configPago = {
+                banco: document.getElementById('cfgBanco').value.trim(),
+                tipoCuenta: document.getElementById('cfgTipoCuenta').value.trim(),
+                numeroCuenta: document.getElementById('cfgNumeroCuenta').value.trim()
+            };
+            try { await update(ref(db, 'cuentas_cobro/config'), configPago); } catch (e) { console.warn(e); }
+        }
+
+        // ── Generar documento (vista previa) ──
+        window.generarDocumento = async function() {
+            const cliNombre = document.getElementById('docClienteNombre').value.trim();
+            const cliNit = document.getElementById('docClienteNit').value.trim();
+            const mes = document.getElementById('mesCuenta').value;
+            const anio = parseInt(document.getElementById('anioCuenta').value);
+            const items = leerItems();
+
+            if (!cliNombre) { toast('Selecciona o escribe el cliente', 'error'); return; }
+            if (!anio) { toast('Indica el año', 'error'); return; }
+            if (!items.length) { toast('Agrega al menos un concepto con valor', 'error'); return; }
+
+            await guardarConfigPago();
+
+            const total = items.reduce((s, it) => s + it.valor, 0);
+            const hoy = new Date();
+            const numero = numeroConsec(consecutivoActual + 1);
+            const fechaDoc = hoy.getDate() + ' DE ' + MESES_MAY[hoy.getMonth()] + ' DE ' + hoy.getFullYear();
+            const conceptoTxt = (items.length === 1 ? items[0].concepto : items.map(i => i.concepto).join(' y ')) +
+                ' correspondiente al mes de ' + mes + ' de ' + anio;
+
+            document.getElementById('docFecha').textContent = fechaDoc;
+            document.getElementById('docNumero').textContent = 'CUENTA DE COBRO No. ' + numero;
+            document.getElementById('docNombreEdificio').textContent = cliNombre.toUpperCase();
+            document.getElementById('docNitEdificio').textContent = cliNit ? ('NIT. ' + cliNit) : '';
+            document.getElementById('docMonto').textContent = numeroALetras(total) + ' (' + fmtPesos(total) + ').';
+            document.getElementById('docConcepto').textContent = conceptoTxt + '.';
+
+            let itemsHtml = '<tr><th>Concepto</th><th style="text-align:right;">Valor</th></tr>';
+            items.forEach(it => { itemsHtml += `<tr><td>${it.concepto}</td><td class="val">${fmtPesos(it.valor)}</td></tr>`; });
+            itemsHtml += `<tr class="total"><td>TOTAL</td><td class="val">${fmtPesos(total)}</td></tr>`;
+            document.getElementById('docItems').innerHTML = itemsHtml;
+
+            const cta = [configPago.tipoCuenta, configPago.numeroCuenta].filter(Boolean).join(' No. ');
+            document.getElementById('docBanco').innerHTML = (configPago.banco || cta)
+                ? `Favor consignar en la Cuenta ${cta || '[número]'} del Banco <strong>${configPago.banco || '[banco]'}</strong>.`
+                : 'Favor consignar según los datos acordados con la administración.';
+
+            datosPendientes = {
+                numero, consecutivo: consecutivoActual + 1,
+                anio, mes, clienteNombre: cliNombre, clienteNit: cliNit,
+                items, total, concepto: conceptoTxt, fechaDoc,
+                banco: configPago.banco || '', tipoCuenta: configPago.tipoCuenta || '', numeroCuenta: configPago.numeroCuenta || '',
+                fechaCreacion: new Date().toISOString(), estado: 'pendiente'
+            };
+
+            document.getElementById('btnGuardar').disabled = false;
+            document.getElementById('btnGuardar').textContent = '☁️ Guardar en sistema';
+            cerrarModal('modalNueva');
+            document.getElementById('modalPreview').classList.add('active');
+        };
+
+        // ── Guardar en Firebase ──
+        window.guardarEnFirebase = async function(btn) {
+            if (!datosPendientes) return;
+            btn.disabled = true; btn.textContent = '⏳ Guardando...';
+            try {
+                const consSnap = await get(ref(db, 'cuentas_cobro/consecutivo'));
+                const consActual = consSnap.exists() ? consSnap.val() : 0;
+                const nuevo = consActual + 1;
+                datosPendientes.consecutivo = nuevo;
+                datosPendientes.numero = numeroConsec(nuevo);
+
+                const nref = push(ref(db, 'cuentas_cobro/historial'));
+                const updates = {};
+                updates['cuentas_cobro/consecutivo'] = nuevo;
+                updates['cuentas_cobro/historial/' + nref.key] = datosPendientes;
+                await update(ref(db), updates);
+
+                toast('✅ Cuenta de cobro guardada', 'exito');
+                document.getElementById('docNumero').textContent = 'CUENTA DE COBRO No. ' + datosPendientes.numero;
+                await descargarPDF(document.getElementById('btnPDF'));
+                datosPendientes = null;
+                document.getElementById('modalPreview').classList.remove('active');
+            } catch (e) {
+                btn.disabled = false; btn.textContent = '☁️ Guardar en sistema';
+                toast('❌ ' + e.message, 'error');
+            }
+        };
+
+        // ── Ver cuenta existente ──
+        window.verCuenta = function(key) {
+            const c = historial.find(x => x.key === key);
+            if (!c) return;
+            document.getElementById('docFecha').textContent = c.fechaDoc || '';
+            document.getElementById('docNumero').textContent = 'CUENTA DE COBRO No. ' + c.numero;
+            document.getElementById('docNombreEdificio').textContent = (c.clienteNombre || '').toUpperCase();
+            document.getElementById('docNitEdificio').textContent = c.clienteNit ? ('NIT. ' + c.clienteNit) : '';
+            document.getElementById('docMonto').textContent = numeroALetras(c.total) + ' (' + fmtPesos(c.total) + ').';
+            document.getElementById('docConcepto').textContent = (c.concepto || '') + '.';
+            let h = '<tr><th>Concepto</th><th style="text-align:right;">Valor</th></tr>';
+            (c.items || []).forEach(it => { h += `<tr><td>${it.concepto}</td><td class="val">${fmtPesos(it.valor)}</td></tr>`; });
+            h += `<tr class="total"><td>TOTAL</td><td class="val">${fmtPesos(c.total)}</td></tr>`;
+            document.getElementById('docItems').innerHTML = h;
+            const cta = [c.tipoCuenta, c.numeroCuenta].filter(Boolean).join(' No. ');
+            document.getElementById('docBanco').innerHTML = (c.banco || cta)
+                ? `Favor consignar en la Cuenta ${cta || '[número]'} del Banco <strong>${c.banco || '[banco]'}</strong>.`
+                : 'Favor consignar según los datos acordados con la administración.';
+            datosPendientes = null;
+            document.getElementById('btnGuardar').disabled = true;
+            document.getElementById('btnGuardar').textContent = '✅ Ya guardada';
+            document.getElementById('modalPreview').classList.add('active');
+        };
+
+        window.marcarCobrada = async function(key) {
+            if (!confirm('¿Marcar esta cuenta como cobrada?')) return;
+            await update(ref(db, 'cuentas_cobro/historial/' + key), { estado: 'cobrada' });
+            toast('✅ Marcada como cobrada', 'exito');
+        };
+        window.eliminarCuenta = async function(key, numero) {
+            if (!confirm('¿Eliminar la cuenta ' + (numero || '') + '? No se puede deshacer.')) return;
+            try { await remove(ref(db, 'cuentas_cobro/historial/' + key)); toast('🗑️ Eliminada', 'exito'); }
+            catch (e) { toast('❌ ' + e.message, 'error'); }
+        };
+
+        // ── PDF ──
+        window.descargarPDF = async function(btn) {
+            const orig = btn.textContent;
+            btn.textContent = 'Generando...'; btn.disabled = true;
+            try {
+                const node = document.getElementById('documentoCC');
+                const canvas = await html2canvas(node, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'letter');
+                const w = pdf.internal.pageSize.getWidth();
+                const h = (canvas.height * w) / canvas.width;
+                pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, w, h);
+                const num = document.getElementById('docNumero').textContent.replace('CUENTA DE COBRO No. ', '');
+                pdf.save('MCG-cuenta-cobro-' + num + '.pdf');
+            } catch (e) { toast('Error generando PDF', 'error'); console.error(e); }
+            btn.textContent = orig; btn.disabled = false;
+        };
+
+        // ── Tabla historial ──
+        function poblarFiltroAnios() {
+            const sel = document.getElementById('filtroAnio');
+            const actual = sel.value || 'todos';
+            const anios = [...new Set(historial.map(c => c.anio).filter(Boolean))].sort((a, b) => b - a);
+            sel.innerHTML = '<option value="todos">Todos</option>' + anios.map(a => `<option value="${a}">${a}</option>`).join('');
+            sel.value = actual;
+        }
+        window.filtrarPorAnio = renderHistorial;
+
+        function renderHistorial() {
+            const tb = document.getElementById('tablaCuerpo');
+            const filtro = document.getElementById('filtroAnio').value;
+            const lista = filtro === 'todos' ? historial : historial.filter(c => String(c.anio) === filtro);
+            if (!lista.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="7">No hay cuentas de cobro</td></tr>'; return; }
+            tb.innerHTML = lista.map(c => `
+                <tr>
+                    <td><strong>${c.numero || '—'}</strong></td>
+                    <td>${c.fechaDoc || '—'}</td>
+                    <td>${c.clienteNombre || '—'}</td>
+                    <td style="max-width:240px;">${(c.concepto || '—')}</td>
+                    <td>${fmtPesos(c.total)}</td>
+                    <td><span class="badge ${c.estado === 'cobrada' ? 'cobrada' : 'pendiente'}">${c.estado === 'cobrada' ? 'Cobrada' : 'Pendiente'}</span></td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn-tabla btn-ver" onclick="verCuenta('${c.key}')">👁️ Ver</button>
+                        ${c.estado !== 'cobrada' ? `<button class="btn-tabla btn-cobrada-accion" onclick="marcarCobrada('${c.key}')">✅</button>` : ''}
+                        <button class="btn-tabla btn-eliminar" onclick="eliminarCuenta('${c.key}','${c.numero || ''}')">🗑️</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function renderStats() {
+            const anioActual = new Date().getFullYear();
+            const delAnio = historial.filter(c => c.anio === anioActual);
+            const cobrado = historial.filter(c => c.estado === 'cobrada').reduce((s, c) => s + (c.total || 0), 0);
+            const pendiente = historial.filter(c => c.estado !== 'cobrada').reduce((s, c) => s + (c.total || 0), 0);
+            document.getElementById('statTotal').textContent = delAnio.length;
+            document.getElementById('statCobrado').textContent = fmtPesos(cobrado);
+            document.getElementById('statPendiente').textContent = fmtPesos(pendiente);
+        }
+
+        // ── Modales ──
+        window.abrirModalNueva = function() {
+            document.getElementById('selectCliente').value = '';
+            document.getElementById('nuevoClienteBox').style.display = 'none';
+            document.getElementById('docClienteNombre').value = '';
+            document.getElementById('docClienteNit').value = '';
+            document.getElementById('mesCuenta').value = MESES[new Date().getMonth()];
+            document.getElementById('anioCuenta').value = new Date().getFullYear();
+            renderItems([]);
+            document.getElementById('modalNueva').classList.add('active');
+        };
+        window.cerrarModal = function(id) {
+            document.getElementById(id).classList.remove('active');
+            if (id === 'modalPreview') {
+                datosPendientes = null;
+                document.getElementById('btnGuardar').disabled = false;
+                document.getElementById('btnGuardar').textContent = '☁️ Guardar en sistema';
+            }
+        };
+        window.addEventListener('click', (e) => {
+            ['modalNueva', 'modalPreview'].forEach(id => { if (e.target === document.getElementById(id)) cerrarModal(id); });
+        });
+
+        window.cerrarSesion = function() {
+            signOut(auth).then(() => { localStorage.removeItem('mcgUser'); window.location.href = 'index.html'; });
+        };
+
+        // ── Utilidades ──
+        function toast(msg, tipo = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show ' + tipo;
+            setTimeout(() => { t.className = 'toast'; }, 3500);
+        }
+
+        function numeroALetras(num) {
+            const UN = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE', 'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+            const DEC = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+            const CEN = ['', 'CIEN', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+            function menorMil(n) {
+                if (n === 0) return '';
+                if (n === 100) return 'CIEN';
+                let r = '', c = Math.floor(n / 100), resto = n % 100;
+                if (c > 0) r += CEN[c] + (resto > 0 ? ' ' : '');
+                if (resto > 0) {
+                    if (resto < 20) r += UN[resto];
+                    else {
+                        const d = Math.floor(resto / 10), u = resto % 10;
+                        if (u === 0) r += DEC[d];
+                        else if (d === 2) r += 'VEINTI' + UN[u];
+                        else r += DEC[d] + ' Y ' + UN[u];
+                    }
+                }
+                return r;
+            }
+            num = Math.floor(num);
+            if (num === 0) return 'CERO PESOS M/CTE';
+            const mill = Math.floor(num / 1000000);
+            const miles = Math.floor((num % 1000000) / 1000);
+            const resto = num % 1000;
+            let t = '';
+            if (mill > 0) t += (mill === 1 ? 'UN MILLON' : menorMil(mill) + ' MILLONES') + (miles > 0 || resto > 0 ? ' ' : '');
+            if (miles > 0) t += (miles === 1 ? 'MIL' : menorMil(miles) + ' MIL') + (resto > 0 ? ' ' : '');
+            if (resto > 0) t += menorMil(resto);
+            return t + ' PESOS M/CTE';
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js'); });
+        }
+    </script>
+</body>
+</html>
