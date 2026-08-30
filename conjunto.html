@@ -248,7 +248,7 @@
 
             <div class="form-group">
                 <label>Nombre del Edificio *</label>
-                <input type="text" id="fNombre" placeholder="Ej: Nepal 2">
+                <input type="text" id="fNombre" placeholder="Ej: Conjunto Residencial MCG">
             </div>
             <div class="form-group">
                 <label>Tipo</label>
@@ -273,6 +273,14 @@
             <div class="form-group">
                 <label>📍 Dirección</label>
                 <input type="text" id="fDireccion" placeholder="Ej: Calle 55 #4a-24">
+            </div>
+            <div class="form-group">
+                <label>🖼️ Logo del conjunto (para documentos/PDF)</label>
+                <input type="file" id="fLogoFile" accept="image/*" onchange="cargarLogoEdificio(event)">
+                <div id="fLogoPreviewWrap" style="margin-top:8px; display:none;">
+                    <img id="fLogoPreview" style="max-height:60px; max-width:160px; border:1px solid #ddd; border-radius:6px; padding:4px; background:white; display:block; margin-bottom:6px;">
+                    <button type="button" onclick="quitarLogoEdificio()" style="background:#e53935; color:white; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12px;">🗑️ Quitar logo</button>
+                </div>
             </div>
             <div class="form-group">
                 <label>📧 Email</label>
@@ -356,14 +364,14 @@
 
             <div class="form-group form-full">
                 <label>Cuentas Bancarias del Edificio</label>
-                <textarea id="fCuentasBancarias" rows="4" placeholder="Ej:&#10;Bancolombia - Ahorros - 123-456789-00 - Nepal 2 PH&#10;Davivienda - Corriente - 987-654321-00 - Nepal 2 PH"></textarea>
+                <textarea id="fCuentasBancarias" rows="4" placeholder="Ej:&#10;Bancolombia - Ahorros - 123-456789-00 - Conjunto MCG&#10;Davivienda - Corriente - 987-654321-00 - Conjunto MCG"></textarea>
             </div>
 
             <div class="section-divider divider-purple form-full">🔐 Datos Sensibles (acceso restringido)</div>
 
             <div class="form-group form-full">
                 <label>📷 Claves Cámaras / DVR / NVR</label>
-                <textarea id="fClavesCamaras" rows="4" placeholder="Ej:&#10;DVR Piso 1 - IP: 192.168.1.100 - User: admin - Pass: Nepal2025&#10;DVR Piso 5 - User: admin - Pass: Nepal2025B&#10;App móvil: XMEye - Usuario: nepal2 - Pass: ..."></textarea>
+                <textarea id="fClavesCamaras" rows="4" placeholder="Ej:&#10;DVR Piso 1 - IP: 192.168.1.100 - User: admin - Pass: ******&#10;DVR Piso 5 - User: admin - Pass: ******&#10;App móvil: XMEye - Usuario: ****** - Pass: ..."></textarea>
             </div>
             <div class="form-group form-full">
                 <label>🔒 Notas Sensibles / Privadas</label>
@@ -559,6 +567,7 @@
                 <div class="card-actions">
                     <button class="btn-card btn-edit" onclick="abrirEditar('${key}')">✏️ Editar</button>
                     <button class="btn-card" style="background:#7c3aed;color:white;" onclick="abrirDocumentos('${key}')">📄 Docs</button>
+                    <button class="btn-card" style="background:#25D366;color:white;" onclick="compartirEdificioWhatsApp('${(d.nombre||'').replace(/'/g,"\\'")}','${(d.rut||'').replace(/'/g,"\\'")}','${(d.direccion||'').replace(/'/g,"\\'")}')">📤 WhatsApp</button>
                     <button class="btn-card btn-del" onclick="eliminarEdificio('${key}','${(d.nombre||'').replace(/'/g,"\\'")}')">🗑️</button>
                 </div>
             </div>
@@ -588,6 +597,46 @@
     // ══════════════════════════════════════════════════
     // MODAL NUEVO
     // ══════════════════════════════════════════════════
+    let logoEdificioB64 = '';
+
+    window.cargarLogoEdificio = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const maxW = 400;
+                const scale = Math.min(1, maxW / img.width);
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                logoEdificioB64 = canvas.toDataURL('image/png');
+                document.getElementById('fLogoPreview').src = logoEdificioB64;
+                document.getElementById('fLogoPreviewWrap').style.display = 'block';
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.quitarLogoEdificio = function() {
+        logoEdificioB64 = '';
+        document.getElementById('fLogoFile').value = '';
+        document.getElementById('fLogoPreviewWrap').style.display = 'none';
+    };
+
+    window.compartirEdificioWhatsApp = function(nombre, rut, direccion) {
+        const mensaje =
+            `📋 *Datos para Cuenta de Cobro*\n\n` +
+            `🏢 Conjunto: ${nombre}\n` +
+            `🆔 NIT/RUT: ${rut || 'No registrado'}\n` +
+            `📍 Dirección: ${direccion || 'No registrada'}\n\n` +
+            `Por favor incluir estos datos en la cuenta de cobro.`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
+    };
+
     window.abrirModalNuevo = function() {
         document.getElementById('modalTitulo').textContent = '➕ Nuevo Conjunto';
         limpiarForm();
@@ -606,6 +655,14 @@
         document.getElementById('fTipo').value           = d.tipo || 'CONJUNTO';
         document.getElementById('fIcono').value          = d.icono || '🏢';
         document.getElementById('fDireccion').value      = d.direccion || '';
+        logoEdificioB64 = d.logo || '';
+        document.getElementById('fLogoFile').value = '';
+        if (logoEdificioB64) {
+            document.getElementById('fLogoPreview').src = logoEdificioB64;
+            document.getElementById('fLogoPreviewWrap').style.display = 'block';
+        } else {
+            document.getElementById('fLogoPreviewWrap').style.display = 'none';
+        }
         document.getElementById('fEmail').value          = d.email || '';
         document.getElementById('fPassword').value       = d.password || '';
         document.getElementById('fRut').value            = d.rut || '';
@@ -648,6 +705,7 @@
             tipo:            document.getElementById('fTipo').value,
             icono:           document.getElementById('fIcono').value,
             direccion:       document.getElementById('fDireccion').value.trim(),
+            logo:            logoEdificioB64 || '',
             email:           document.getElementById('fEmail').value.trim(),
             password:        document.getElementById('fPassword').value,
             rut:             document.getElementById('fRut').value.trim(),
@@ -714,6 +772,9 @@
         });
         document.getElementById('fTipo').value          = 'CONJUNTO';
         document.getElementById('fIcono').value         = '🏢';
+        logoEdificioB64 = '';
+        document.getElementById('fLogoFile').value = '';
+        document.getElementById('fLogoPreviewWrap').style.display = 'none';
         document.getElementById('fPolizaTipoPago').value = '';
         ['rowPolizaCuotas','rowPolizaCuotaValor','rowPolizaCuotasPagadas'].forEach(id => {
             document.getElementById(id).style.display = 'none';
