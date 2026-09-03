@@ -539,6 +539,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -925,8 +926,95 @@
         };
 
         // Exportar Excel
+        function _ordenarApto(entries) {
+            return entries.sort((a, b) => {
+                const na = parseInt(String(a[1].apto || '').replace(/\D/g, '')) || 999999;
+                const nb = parseInt(String(b[1].apto || '').replace(/\D/g, '')) || 999999;
+                return na - nb;
+            });
+        }
+
+        function _filaBase(p) {
+            return {
+                'Apartamento / Casa': p.apto || '',
+                'Nombre completo': p.nombre || '',
+                'Teléfono': p.telefono || '',
+                'Email': p.email || '',
+                'Documento': p.documento || '',
+                'N° Parqueadero': p.parqueadero || '',
+                'Matrícula catastral - Apto/Casa': p.matriculaApto || '',
+                'Matrícula catastral - Garaje': p.matriculaGaraje || '',
+                'Matrícula catastral - Depósito': p.matriculaDeposito || '',
+                'Observaciones': p.observaciones || '',
+                'Estado': (p.estado || 'activo') === 'activo' ? 'Activo' : 'Archivado'
+            };
+        }
+
         window.exportarExcel = function() {
-            alert('Función de exportar Excel - Por implementar');
+            if (!edificioActual || (!dataPropietarios[edificioActual] && !dataResidentes[edificioActual])) {
+                alert('⚠️ No hay datos para exportar. Selecciona un conjunto con registros.');
+                return;
+            }
+
+            const propietarios = _ordenarApto(Object.entries(dataPropietarios[edificioActual] || {})).map(([, p]) => {
+                const f = _filaBase(p);
+                return {
+                    'Apartamento / Casa': f['Apartamento / Casa'],
+                    'Nombre completo': f['Nombre completo'],
+                    'Teléfono': f['Teléfono'],
+                    'Email': f['Email'],
+                    'Documento': f['Documento'],
+                    'Coeficiente (%)': (p.coeficiente || p.coeficiente === 0) ? parseFloat(p.coeficiente) : '',
+                    'N° Parqueadero': f['N° Parqueadero'],
+                    'Matrícula catastral - Apto/Casa': f['Matrícula catastral - Apto/Casa'],
+                    'Matrícula catastral - Garaje': f['Matrícula catastral - Garaje'],
+                    'Matrícula catastral - Depósito': f['Matrícula catastral - Depósito'],
+                    'Observaciones': f['Observaciones'],
+                    'Estado': f['Estado']
+                };
+            });
+
+            const residentes = _ordenarApto(Object.entries(dataResidentes[edificioActual] || {})).map(([, p]) => _filaBase(p));
+
+            if (!propietarios.length && !residentes.length) {
+                alert('⚠️ No hay registros para exportar en este conjunto.');
+                return;
+            }
+
+            const nombreConj = (document.querySelector('#edificioSelect option:checked')?.textContent || 'Conjunto')
+                .replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '_') || 'Conjunto';
+            const fecha = new Date().toISOString().slice(0, 10);
+            const archivo = `Residentes_y_Propietarios_${nombreConj}_${fecha}`;
+
+            if (typeof XLSX !== 'undefined') {
+                const wb = XLSX.utils.book_new();
+                const wsP = XLSX.utils.json_to_sheet(propietarios.length ? propietarios : [{ 'Apartamento / Casa': '(sin registros)' }]);
+                const wsR = XLSX.utils.json_to_sheet(residentes.length ? residentes : [{ 'Apartamento / Casa': '(sin registros)' }]);
+                wsP['!cols'] = Object.keys(propietarios[0] || { a: 1 }).map(() => ({ wch: 24 }));
+                wsR['!cols'] = Object.keys(residentes[0] || { a: 1 }).map(() => ({ wch: 24 }));
+                XLSX.utils.book_append_sheet(wb, wsP, 'Propietarios');
+                XLSX.utils.book_append_sheet(wb, wsR, 'Residentes');
+                XLSX.writeFile(wb, archivo + '.xlsx');
+                return;
+            }
+
+            // Fallback: CSV (separador ; para Excel en español) si la librería no cargó
+            const aCSV = (filas) => {
+                if (!filas.length) return '';
+                const cols = Object.keys(filas[0]);
+                const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+                return [cols.join(';'), ...filas.map(f => cols.map(c => esc(f[c])).join(';'))].join('\r\n');
+            };
+            const contenido = 'PROPIETARIOS\r\n' + aCSV(propietarios) + '\r\n\r\nRESIDENTES\r\n' + aCSV(residentes);
+            const blob = new Blob(['﻿' + contenido], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = archivo + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
         };
     </script>
 <script>
