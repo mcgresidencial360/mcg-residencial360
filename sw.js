@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mcg-360-v2';
+const CACHE_NAME = 'mcg-360-v3';
 const ASSETS = [
   'index.html',
   'Dashboard.html',
@@ -13,6 +13,8 @@ const ASSETS = [
   'logo.png',
   'icon-192x192.png',
   'icon-512x512.png',
+  'icon-maskable-512x512.png',
+  'apple-touch-icon.png',
   'manifest.json'
 ];
 

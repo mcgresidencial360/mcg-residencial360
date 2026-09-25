@@ -4,7 +4,7 @@
   "description": "Sistema de gestión residencial MCG",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#0C0A06",
   "theme_color": "#8B6914",
   "orientation": "portrait-primary",
   "lang": "es",
@@ -17,6 +17,12 @@
     },
     {
       "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
